@@ -1,6 +1,6 @@
 package com.ch.cloud.sso.service.impl;
 
-import com.ch.cloud.sso.service.AdminClientService;
+import com.ch.cloud.sso.service.UpmsClientService;
 import com.ch.e.CoreError;
 import com.ch.result.Result;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
  * @date 2019/4/15 12:44 PM
  */
 @Service
-public class AdminClientServiceImpl implements AdminClientService {
+public class UpmsClientServiceImpl implements UpmsClientService {
 
     @Override
     public Result<?> findUserByUsername(String username) {

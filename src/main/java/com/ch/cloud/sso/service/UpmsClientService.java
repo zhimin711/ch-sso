@@ -1,6 +1,6 @@
 package com.ch.cloud.sso.service;
 
-import com.ch.cloud.sso.service.impl.AdminClientServiceImpl;
+import com.ch.cloud.sso.service.impl.UpmsClientServiceImpl;
 import com.ch.result.Result;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.PathVariable;
  * @date 2019/4/15 12:41 PM
  */
 
-@FeignClient(name = "ch-admin", fallback = AdminClientServiceImpl.class)
-public interface AdminClientService {
+@FeignClient(name = "ch-upms", fallback = UpmsClientServiceImpl.class)
+public interface UpmsClientService {
 
     @GetMapping("user/{username}/info")
     Result<?> findUserByUsername(@PathVariable("username") String username);

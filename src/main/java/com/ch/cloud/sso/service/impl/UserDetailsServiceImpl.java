@@ -1,7 +1,7 @@
 package com.ch.cloud.sso.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.ch.cloud.sso.service.AdminClientService;
+import com.ch.cloud.sso.service.UpmsClientService;
 import com.ch.result.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,12 +26,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 
     @Autowired
-    private AdminClientService adminClientService;
+    private UpmsClientService upmsClientService;
 
     @SuppressWarnings("unchecked")
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Result<?> res = adminClientService.findUserByUsername(username);
+        Result<?> res = upmsClientService.findUserByUsername(username);
         if (res.isEmpty()) {
             throw new UsernameNotFoundException(username);
         }
@@ -45,7 +45,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         String password = user.getString("password");
         Long id = user.getLong("id");
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        Result<?> res2 = adminClientService.findRoleByUserId(id);
+        Result<?> res2 = upmsClientService.findRoleByUserId(id);
         List<Map<String, String>> roles = (List<Map<String, String>>) res2.getRows();
         roles.forEach(r -> {
             authorities.add(new SimpleGrantedAuthority(r.get("code")));
