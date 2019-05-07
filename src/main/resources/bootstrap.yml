@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: ch-auth
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 10.202.10.66:8848
+      config:
+        server-addr: 10.202.10.66:8848
+        shared-dataids: ch-auth-${spring.profiles.active}.yml
+
