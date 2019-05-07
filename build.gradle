@@ -50,8 +50,8 @@ dependencies {
 //		implementation 'org.springframework.boot:spring-boot-starter-jetty'
     implementation("com.ch:ch-core:${chVersion}")
 
-    implementation 'org.springframework.cloud:spring-cloud-starter-alibaba-nacos-config:0.2.1.RELEASE'
-    implementation 'org.springframework.cloud:spring-cloud-starter-alibaba-nacos-discovery:0.2.1.RELEASE'
+    implementation "org.springframework.cloud:spring-cloud-starter-alibaba-nacos-config:${aliCloudVersion}"
+    implementation "org.springframework.cloud:spring-cloud-starter-alibaba-nacos-discovery:${aliCloudVersion}"
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -64,7 +64,7 @@ dependencies {
 
     implementation('org.springframework.boot:spring-boot-starter-thymeleaf')
 
-    implementation 'com.alibaba:druid:1.0.18'
+    implementation 'com.alibaba:druid:1.1.15'
     implementation "mysql:mysql-connector-java:5.1.30"
 }
 
