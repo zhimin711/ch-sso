@@ -1,7 +1,7 @@
 package com.ch.cloud.sso.service.impl;
 
 import com.ch.cloud.sso.service.UpmsClientService;
-import com.ch.e.CoreError;
+import com.ch.e.PubError;
 import com.ch.result.Result;
 import org.springframework.stereotype.Service;
 
@@ -16,16 +16,16 @@ public class UpmsClientServiceImpl implements UpmsClientService {
 
     @Override
     public Result<?> findUserByUsername(String username) {
-        return new Result<>(CoreError.CONNECT, "调用user接口失败!");
+        return Result.error(PubError.CONNECT, "调用user接口失败!");
     }
 
     @Override
     public Result<?> findRoleByUserId(Long id) {
-        return new Result<>(CoreError.CONNECT, "调用user接口失败!");
+        return Result.error(PubError.CONNECT, "调用user接口失败!");
     }
 
     @Override
     public Result<?> findPermissionByUserId(Long userId) {
-        return new Result<>(CoreError.CONNECT, "调用user接口失败!");
+        return Result.error(PubError.CONNECT, "调用user接口失败!");
     }
 }

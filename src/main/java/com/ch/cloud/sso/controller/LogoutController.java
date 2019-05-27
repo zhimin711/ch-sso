@@ -1,8 +1,7 @@
 package com.ch.cloud.sso.controller;
 
 import com.ch.Constants;
-import com.ch.Status;
-import com.ch.e.CoreError;
+import com.ch.e.PubError;
 import com.ch.result.Result;
 import com.ch.utils.CommonUtils;
 import org.slf4j.Logger;
@@ -42,14 +41,14 @@ public class LogoutController {
                                       @RequestHeader(Constants.TOKEN_HEADER) String token) {
         if (CommonUtils.isEmpty(token) || !token.startsWith("Bearer ")) {
             logger.error("error token: {}", token);
-            return new Result<>(CoreError.INVALID, "token invalid!");
+            return  Result.error(PubError.INVALID, "token invalid!");
         }
         String tokenId = token.substring("Bearer".length() + 1);
         if (consumerTokenServices.revokeToken(tokenId)) {
             new SecurityContextLogoutHandler().logout(request, null, null);
-            return new Result<>("注销成功");
+            return Result.success("注销成功");
         } else {
-            return new Result<>(Status.ERROR);
+            return Result.error(PubError.UNKNOWN);
         }
     }
 
