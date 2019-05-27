@@ -1,8 +1,8 @@
 # ch-sso
 ### 上传配置 
 ```
-scp -r ch-sso/src/main/docker/Dockerfile zhimin@192.168.1.100:/home/zhimin/docker/ch-sso
-scp -r ch-sso/build/libs/ch-auth-1.0.1-SNAPSHOT.jar zhimin@192.168.1.100:/home/zhimin/docker/ch-sso
+scp -r src/main/docker/Dockerfile zhimin@192.168.1.100:/home/zhimin/docker/ch-sso
+scp -r build/libs/ch-sso-1.0.0-SNAPSHOT.jar zhimin@192.168.1.100:/home/zhimin/docker/ch-sso
 ```
 ### 打包
 ```
