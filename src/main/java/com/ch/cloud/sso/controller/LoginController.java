@@ -1,19 +1,19 @@
 package com.ch.cloud.sso.controller;
 
 import com.alibaba.nacos.api.config.annotation.NacosValue;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
+import com.ch.cloud.client.dto.UserDto;
+import com.ch.cloud.sso.service.UpmsClientService;
+import com.ch.cloud.sso.utils.JwtUtils;
+import com.ch.e.PubError;
 import com.ch.result.Result;
 import com.ch.result.ResultUtils;
+import com.ch.utils.ExceptionUtils;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpEntity;
@@ -25,7 +25,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,6 +47,8 @@ public class LoginController {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private UpmsClientService upmsClientService;
 
     //
     @GetMapping("login")
@@ -93,19 +96,23 @@ public class LoginController {
     @PostMapping("login")
     public Result<String> login(@RequestParam String username,
                                 @RequestParam String password) {
-
         return ResultUtils.wrapList(() -> {
+
+            Result<UserDto> res = upmsClientService.findUserByUsername(username);
+            if (res.isEmpty()) {
+                throw ExceptionUtils.create(PubError.NOT_EXISTS);
+            }
             List<String> tokens = Lists.newArrayList();
             //生成JWT
-            String token = buildJWT(username);
+            String token = JwtUtils.createJWT(600000, res.get());
             //生成refreshToken
             String refreshToken = UUID.randomUUID().toString().replaceAll("-", "");
             //保存refreshToken至redis，使用hash结构保存使用中的token以及用户标识
-            String refreshTokenKey = String.format(jwtRefreshTokenKeyFormat, refreshToken);
-            stringRedisTemplate.opsForHash().put(refreshTokenKey, "token", token);
-            stringRedisTemplate.opsForHash().put(refreshTokenKey, "username", username);
+//            String refreshTokenKey = String.format(jwtRefreshTokenKeyFormat, refreshToken);
+//            stringRedisTemplate.opsForHash().put(refreshTokenKey, "token", token);
+//            stringRedisTemplate.opsForHash().put(refreshTokenKey, "username", username);
             //refreshToken设置过期时间
-            stringRedisTemplate.expire(refreshTokenKey, refreshTokenExpireTime, TimeUnit.MILLISECONDS);
+//            stringRedisTemplate.expire(refreshTokenKey, refreshTokenExpireTime, TimeUnit.MILLISECONDS);
 
             tokens.add(token);
             tokens.add(refreshToken);
@@ -114,21 +121,4 @@ public class LoginController {
         //账号密码校验
     }
 
-    private long tokenExpireTime = 300;
-    private long refreshTokenExpireTime = 300;
-    private String secretKey = "";
-    private String jwtRefreshTokenKeyFormat = "";
-
-    private String buildJWT(String username) {
-        //生成jwt
-        Date now = new Date();
-        Algorithm algo = Algorithm.HMAC256(secretKey);
-        String token = JWT.create()
-                .withIssuer("MING")
-                .withIssuedAt(now)
-                .withExpiresAt(new Date(now.getTime() + tokenExpireTime))
-                .withClaim("username", username)//保存身份标识
-                .sign(algo);
-        return token;
-    }
 }
