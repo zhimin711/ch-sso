@@ -72,8 +72,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    public void configure(WebSecurity web) throws Exception {
+    public void configure(WebSecurity web) {
         //解决静态资源被拦截的问题
-        web.ignoring().antMatchers("/assets/**", "/static/**", "/favicon.ico");
+        web.ignoring().antMatchers("/assets/**", "/static/**", "/favicon.ico", "/swagger-ui.html", "/v2/api-docs", "/webjars/**", "/swagger-resources/**");
     }
 }
