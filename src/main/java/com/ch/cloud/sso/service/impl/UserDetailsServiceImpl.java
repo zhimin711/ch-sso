@@ -1,6 +1,6 @@
 package com.ch.cloud.sso.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
+import com.ch.cloud.client.dto.UserDto;
 import com.ch.cloud.sso.service.UpmsClientService;
 import com.ch.result.Result;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * desc:
@@ -28,10 +27,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Resource
     private UpmsClientService upmsClientService;
 
-    @SuppressWarnings("unchecked")
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Result<?> res = upmsClientService.findUserByUsername(username);
+        Result<UserDto> res = upmsClientService.findUserByUsername(username);
         if (res.isEmpty()) {
             throw new UsernameNotFoundException(username);
         }
@@ -40,18 +38,18 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         boolean credentialsNonExpired = true; // 有效性 :true:凭证有效 false:凭证无效
         boolean accountNonLocked = true; // 锁定性 :true:未锁定 false:已锁定
 
-        JSONObject user = new JSONObject((Map<String, Object>) res.get());
-//        Map<String, Object> map = (Map<String, Object>) res.get();
-        String password = user.getString("password");
-        Long id = user.getLong("id");
+        UserDto user = res.get();
+        String password = user.getPassword();
+        Long id = user.getId();
+        Result<String> res2 = upmsClientService.findRoleByUserId(id);
+        List<String> roles = (List<String>) res2.getRows();
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        Result<?> res2 = upmsClientService.findRoleByUserId(id);
-        List<Map<String, String>> roles = (List<Map<String, String>>) res2.getRows();
-        roles.forEach(r -> {
-            authorities.add(new SimpleGrantedAuthority(r.get("code")));
-            //todo get role permissions
-        });
-
+        if (!res2.isEmpty()) {
+            roles.forEach(r -> {
+                authorities.add(new SimpleGrantedAuthority(r));
+                //todo get role permissions
+            });
+        }
         return new User(username, password, authorities);
     }
 }

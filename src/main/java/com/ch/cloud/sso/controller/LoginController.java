@@ -67,7 +67,7 @@ public class LoginController {
             @ApiImplicitParam(name = "username", required = true, value = "登录名", paramType = "form"),
             @ApiImplicitParam(name = "password", required = true, value = "登录密码", paramType = "form")
     })
-    @PostMapping("login/token/access")
+    @PostMapping(value = "login/token/access", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Result<Long> getLoginToken(@RequestParam String username, @RequestParam String password, @RequestHeader HttpHeaders headers) {
         // 使用oauth2密码模式登录.
         MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
@@ -103,7 +103,7 @@ public class LoginController {
             //保存refreshToken至redis，使用hash结构保存使用中的token以及用户标识
             String refreshTokenKey = String.format(jwtRefreshTokenKeyFormat, refreshToken);
             stringRedisTemplate.opsForHash().put(refreshTokenKey, "token", token);
-            stringRedisTemplate.opsForHash().put(refreshTokenKey, "userName", username);
+            stringRedisTemplate.opsForHash().put(refreshTokenKey, "username", username);
             //refreshToken设置过期时间
             stringRedisTemplate.expire(refreshTokenKey, refreshTokenExpireTime, TimeUnit.MILLISECONDS);
 
@@ -119,7 +119,7 @@ public class LoginController {
     private String secretKey = "";
     private String jwtRefreshTokenKeyFormat = "";
 
-    private String buildJWT(String userName) {
+    private String buildJWT(String username) {
         //生成jwt
         Date now = new Date();
         Algorithm algo = Algorithm.HMAC256(secretKey);
@@ -127,7 +127,7 @@ public class LoginController {
                 .withIssuer("MING")
                 .withIssuedAt(now)
                 .withExpiresAt(new Date(now.getTime() + tokenExpireTime))
-                .withClaim("userName", userName)//保存身份标识
+                .withClaim("username", username)//保存身份标识
                 .sign(algo);
         return token;
     }

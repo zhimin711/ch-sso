@@ -1,10 +1,7 @@
 package com.ch.cloud.sso.service;
 
-import com.ch.cloud.sso.service.impl.UpmsClientServiceImpl;
-import com.ch.result.Result;
+import com.ch.cloud.client.UpmsConstants;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  * desc:用户微服务
@@ -13,17 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
  * @date 2019/4/15 12:41 PM
  */
 
-@FeignClient(name = "ch-upms", fallback = UpmsClientServiceImpl.class)
-public interface UpmsClientService {
+@FeignClient(name = UpmsConstants.NAME)
+public interface UpmsClientService extends com.ch.cloud.client.UpmsClientService {
 
-    @GetMapping("user/{username}/info")
-    Result<?> findUserByUsername(@PathVariable("username") String username);
-
-
-    @GetMapping("user/{id}/role")
-    Result<?> findRoleByUserId(@PathVariable("id") Long userId);
-
-    @GetMapping("user/{id}/permission")
-    Result<?> findPermissionByUserId(@PathVariable("id") Long userId);
 }
 
