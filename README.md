@@ -35,3 +35,8 @@
 4. [GVP](https://gitee.com/gvp) 全称是码云最有价值开源项目，是码云综合评定出的优秀开源项目
 5. 码云官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
 6. 码云封面人物是一档用来展示码云会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+
+
+[Spring核心组件详解（Bean、Context、Core）](https://blog.csdn.net/zlfprogram/article/details/75937935)
+
+[CentOS7 安装 MariaDB10.3](https://blog.csdn.net/KradMe/article/details/80763718)
