@@ -2,7 +2,8 @@ package com.ch.cloud.sso.controller;
 
 import com.alibaba.nacos.api.config.annotation.NacosValue;
 import com.ch.cloud.client.dto.UserDto;
-import com.ch.cloud.sso.service.UpmsClientService;
+import com.ch.cloud.sso.cli.UpmsClientService;
+import com.ch.cloud.sso.service.IUserService;
 import com.ch.cloud.sso.utils.JwtUtils;
 import com.ch.e.PubError;
 import com.ch.result.Result;
@@ -14,6 +15,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpEntity;
@@ -26,8 +28,8 @@ import org.springframework.web.servlet.ModelAndView;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * desc:
@@ -119,6 +121,25 @@ public class LoginController {
             return tokens;
         });
         //账号密码校验
+    }
+
+    @Autowired
+    IUserService userService;
+
+
+    @PostMapping(value = "${jwt.route.login}")
+    public Result<String> login(@RequestBody Map<String, String> map) {
+        String username = map.get("username");
+        String password = map.get("password");
+        if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
+            return Result.error(PubError.USERNAME_OR_PASSWORD, "用户或者密码不能为空！");
+        }
+        return Result.success(userService.login(username, password));
+    }
+
+    @PostMapping(value = "${jwt.route.refresh}")
+    public Result<String> refresh(@RequestHeader("${jwt.header}") String token) {
+        return Result.success(userService.refreshToken(token));
     }
 
 }

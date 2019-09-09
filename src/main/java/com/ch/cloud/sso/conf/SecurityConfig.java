@@ -42,7 +42,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/oauth/authorize", "/oauth/token")
                 .and()
                 .authorizeRequests()
-                .anyRequest().authenticated()
+                .antMatchers("/user").authenticated()
+                .anyRequest().permitAll()
                 .and().formLogin().loginPage("/login").permitAll()   // 自定义登录页面，这里配置了 loginPage, 就会通过 LoginController 的 login 接口加载登录页面
 //                .and().logout().logoutUrl("/logout")
                 .and().csrf().disable();

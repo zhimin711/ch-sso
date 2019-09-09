@@ -1,4 +1,4 @@
-package com.ch.cloud.sso.service;
+package com.ch.cloud.sso.cli;
 
 import com.ch.cloud.client.UpmsConstants;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -13,5 +13,6 @@ import org.springframework.cloud.openfeign.FeignClient;
 @FeignClient(name = UpmsConstants.NAME)
 public interface UpmsClientService extends com.ch.cloud.client.UpmsClientService {
 
+    Object login(String username, String password);
 }
 
