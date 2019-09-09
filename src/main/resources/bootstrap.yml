@@ -2,14 +2,14 @@ spring:
   application:
     name: ch-sso
   profiles:
-    active: dev
+    active: local
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.1.7:8848
+        server-addr: 192.168.1.2:8848
         namespace: ${nacos.namespace:}
       config:
-        server-addr: 192.168.1.7:8848
+        server-addr: 192.168.1.2:8848
         shared-dataids: ch-sso.yml
         namespace: ${nacos.namespace:}
 

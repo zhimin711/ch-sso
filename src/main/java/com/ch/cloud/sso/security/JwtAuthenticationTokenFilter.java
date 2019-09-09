@@ -1,5 +1,6 @@
 package com.ch.cloud.sso.security;
 
+import com.ch.Constants;
 import com.ch.cloud.sso.tools.JwtTokenTool;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ import java.io.IOException;
  */
 @Component
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
+
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
@@ -39,7 +41,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         // 从这里开始获取 request 中的 jwt token
-        String authHeader = request.getHeader(jwtTokenTool.getHeader());
+        String authHeader = request.getHeader(Constants.TOKEN_HEADER);
         logger.info("authHeader：{}", authHeader);
         // 验证token是否存在
         if (StringUtils.isNotEmpty(authHeader)) {

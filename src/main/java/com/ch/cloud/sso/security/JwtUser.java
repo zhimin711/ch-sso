@@ -1,5 +1,6 @@
 package com.ch.cloud.sso.security;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,6 +27,7 @@ public class JwtUser implements UserDetails {
         return null;
     }
 
+    @JsonIgnore
     @Override
     public String getPassword() {
         return password;

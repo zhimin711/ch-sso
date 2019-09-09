@@ -30,8 +30,6 @@ public class JwtTokenTool implements Serializable {
 
     private Long expiration;
 
-    private String header;
-
 
     /**
      * 从数据声明生成令牌
