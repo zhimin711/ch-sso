@@ -29,6 +29,13 @@ public class JwtTokenTool implements Serializable {
 
     private Long expiration;
 
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    public void setExpiration(Long expiration) {
+        this.expiration = expiration;
+    }
 
     /**
      * 从数据声明生成令牌

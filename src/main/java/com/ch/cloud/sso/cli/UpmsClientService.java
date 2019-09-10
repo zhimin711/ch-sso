@@ -13,6 +13,5 @@ import org.springframework.cloud.openfeign.FeignClient;
 @FeignClient(name = UpmsConstants.NAME)
 public interface UpmsClientService extends com.ch.cloud.client.UpmsClientService {
 
-    Object login(String username, String password);
 }
 

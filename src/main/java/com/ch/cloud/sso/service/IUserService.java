@@ -1,6 +1,7 @@
 package com.ch.cloud.sso.service;
 
 import com.ch.cloud.client.dto.UserDto;
+import com.ch.cloud.sso.pojo.UserVo;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 /**
@@ -11,6 +12,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
  */
 public interface IUserService {
     UserDto findByUsername(String username) throws UsernameNotFoundException;
+
+    UserVo findUserInfo(String username);
 
     String login(String username, String password);
 

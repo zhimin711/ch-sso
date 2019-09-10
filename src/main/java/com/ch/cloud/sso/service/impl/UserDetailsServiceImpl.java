@@ -1,12 +1,19 @@
 package com.ch.cloud.sso.service.impl;
 
+import com.ch.cloud.client.dto.PermissionDto;
+import com.ch.cloud.client.dto.RoleDto;
 import com.ch.cloud.client.dto.UserDto;
 import com.ch.cloud.sso.cli.UpmsClientService;
+import com.ch.cloud.sso.pojo.BtnVo;
+import com.ch.cloud.sso.pojo.MenuVo;
+import com.ch.cloud.sso.pojo.RoleVo;
 import com.ch.cloud.sso.pojo.UserVo;
 import com.ch.cloud.sso.service.IUserService;
 import com.ch.cloud.sso.tools.JwtTokenTool;
 import com.ch.result.Result;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +30,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * desc:
@@ -51,7 +59,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         UserDto user = res.get();
         String password = user.getPassword();
         Long id = user.getId();
-        Result<String> res2 = upmsClientService.findRoleByUserId(id);
+        Result<String> res2 = upmsClientService.findRoleCodeByUserId(id);
         List<String> roles = (List<String>) res2.getRows();
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
         if (!res2.isEmpty()) {
@@ -76,19 +84,28 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         return res.get();
     }
 
-    //    @Override
+    @Override
     public UserVo findUserInfo(String username) {
-
-
         /**
          * 获取用户信息
          */
-        UserDto sysUser = findByUsername(username);
+        UserDto user = findByUsername(username);
         /**
          * 获取当前用户的所有角色
          */
-        Result<String> res2 = upmsClientService.findRoleByUserId(sysUser.getId());
+        Result<RoleDto> res2 = upmsClientService.findRoleByUserId(user.getId());
 
+        Set<RoleVo> roleVos = Sets.newHashSet();
+        if (!res2.isEmpty()) {
+            res2.getRows().forEach(role -> {
+//            log.info("role: {}", role.getDescribe());
+                roleVos.add(new RoleVo(role.getId(), role.getCode(), role.getName()));
+            });
+        }
+        /**
+         * 获取当前用户的所有权限
+         */
+        Result<PermissionDto> res3 = upmsClientService.findPermissionByUserId(user.getId());
         /**
          * 在这里我的想法是，构建一个按钮权限列表
          * 再构建一个菜单权限列表
@@ -96,37 +113,39 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
          * 因为权限表是一张表，在这里解析好了以后，
          * 相当前端少做一点工作，当然这也可以放到前端去解析权限列表
          */
-//        Set<ButtonVo> buttonVos = new HashSet<>();
-//        Set<MenuVo> menuVos = new HashSet<>();
+        Set<BtnVo> buttonVos = Sets.newHashSet();
+        Set<MenuVo> menuVos = Sets.newHashSet();
 
-//        sysRoles.forEach(role -> {
-////            log.info("role: {}", role.getDescribe());
-//            role.getPermissions().forEach(permission -> {
-//                if (permission.getType().toLowerCase().equals("button")) {
-//                    /*
-//                     * 如果权限是按钮，就添加到按钮里面
-//                     * */
-//                    buttonVos.add(new ButtonVo(permission.getPid(), permission.getResources(), permission.getTitle()));
-//                }
-//                if (permission.getType().toLowerCase().equals("menu")) {
-//                    /*
-//                     * 如果权限是菜单，就添加到菜单里面
-//                     * */
-//                    menuVos.add(new MenuVo(permission.getPid(), permission.getFather(), permission.getIcon(), permission.getResources(), permission.getTitle()));
-//                }
-//            });
-//        });
-
+        if (!res3.isEmpty()) {
+            res3.getRows().forEach(permission -> {
+                if (permission.getType().toLowerCase().equals("button")) {
+                    /*
+                     * 如果权限是按钮，就添加到按钮里面
+                     * */
+                    buttonVos.add(new BtnVo(permission.getPid(), permission.getCode(), permission.getName()));
+                } else if (permission.getType().toLowerCase().equals("menu")) {
+                    /*
+                     * 如果权限是菜单，就添加到菜单里面
+                     * */
+                    menuVos.add(new MenuVo(permission.getPid(), permission.getIcon(), permission.getCode(), permission.getName()));
+                }
+            });
+        }
         /**
          * 注意这个类 TreeBuilder。因为的vue router是以递归的形式呈现菜单
          * 所以我们需要把菜单跟vue router 的格式一一对应 而按钮是不需要的
+         * sysUser.getUid(), sysUser.getAvatar(),
+         * sysUser.getNickname(), sysUser.getUsername(),
+         * sysUser.getMail(), sysUser.getAddTime(),
+         * sysUser.getRoles(), buttonVos, TreeBuilder.findRoots(menuVos)
          */
-//        SysUserVo sysUserVo =
-//                new SysUserVo(sysUser.getUid(), sysUser.getAvatar(),
-//                        sysUser.getNickname(), sysUser.getUsername(),
-//                        sysUser.getMail(), sysUser.getAddTime(),
-//                        sysUser.getRoles(), buttonVos, TreeBuilder.findRoots(menuVos));
-        return new UserVo();
+        UserVo userVo = new UserVo();
+
+        BeanUtils.copyProperties(user, userVo);
+        userVo.setRoleList(roleVos);
+        userVo.setMenuList(menuVos);
+        userVo.setBtnList(buttonVos);
+        return userVo;
     }
 
     // 如果在WebSecurityConfigurerAdapter中，没有重新，这里就会报注入失败的异常
@@ -162,7 +181,6 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
 
     @Override
     public String validate(String token) {
-
         String username = jwtTokenTool.getUsernameFromToken(token);
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // 通过用户名 获取用户的信息
