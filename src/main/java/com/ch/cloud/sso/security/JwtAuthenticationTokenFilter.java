@@ -26,7 +26,7 @@ import java.io.IOException;
  * @author 01370603
  * @date 2019/8/31
  */
-@Component
+//@Component
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
