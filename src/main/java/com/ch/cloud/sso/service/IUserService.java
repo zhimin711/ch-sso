@@ -15,4 +15,12 @@ public interface IUserService {
     String login(String username, String password);
 
     String refreshToken(String token);
+
+    /**
+     * 校验TOKEN返回用户名
+     *
+     * @param token TOKEN
+     * @return 用户名
+     */
+    String validate(String token);
 }

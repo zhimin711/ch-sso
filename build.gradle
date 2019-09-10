@@ -48,11 +48,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-hystrix'
-
-    implementation("org.springframework.security.oauth:spring-security-oauth2:${springOauth2Version}")
 
     implementation('org.springframework.boot:spring-boot-starter-thymeleaf')
 

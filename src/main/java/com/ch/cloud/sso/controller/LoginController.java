@@ -1,9 +1,11 @@
 package com.ch.cloud.sso.controller;
 
 import com.alibaba.nacos.api.config.annotation.NacosValue;
+import com.ch.Constants;
 import com.ch.cloud.client.dto.UserDto;
 import com.ch.cloud.sso.cli.UpmsClientService;
 import com.ch.cloud.sso.service.IUserService;
+import com.ch.cloud.sso.tools.JwtTokenTool;
 import com.ch.cloud.sso.utils.JwtUtils;
 import com.ch.e.PubError;
 import com.ch.result.Result;
@@ -42,15 +44,14 @@ import java.util.UUID;
 @Api("用户登录")
 public class LoginController {
 
-    @NacosValue(value = "${security.oauth2.client.client-id}", autoRefreshed = true)
-    private String clientId;
-    @NacosValue(value = "${security.oauth2.client.client-id}", autoRefreshed = true)
     private String clientSecret;
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private UpmsClientService upmsClientService;
+    @Autowired
+    private JwtTokenTool jwtTokenTool;
 
     //
     @GetMapping("login")
@@ -75,17 +76,6 @@ public class LoginController {
     @PostMapping(value = "login/token/access", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Result<Long> getLoginToken(@RequestParam String username, @RequestParam String password, @RequestHeader HttpHeaders headers) {
         // 使用oauth2密码模式登录.
-        MultiValueMap<String, Object> postParameters = new LinkedMultiValueMap<>();
-        postParameters.add("username", username);
-        postParameters.add("password", password);
-        postParameters.add("client_id", clientId);
-        postParameters.add("client_secret", clientSecret);
-        postParameters.add("grant_type", "password");
-        // 使用客户端的请求头,发起请求
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        // 强制移除 原来的请求头,防止token失效
-        headers.remove(HttpHeaders.AUTHORIZATION);
-        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(postParameters, headers);
         return ResultUtils.wrap(() -> 1L);
     }
 
@@ -127,7 +117,7 @@ public class LoginController {
     IUserService userService;
 
 
-    @PostMapping(value = "${jwt.route.login}")
+    @PostMapping(value = "login/token")
     public Result<String> login(@RequestBody Map<String, String> map) {
         String username = map.get("username");
         String password = map.get("password");
@@ -137,9 +127,14 @@ public class LoginController {
         return Result.success(userService.login(username, password));
     }
 
-    @PostMapping(value = "${jwt.route.refresh}")
-    public Result<String> refresh(@RequestHeader("${jwt.header}") String token) {
+    @PostMapping(value = "login/token/refresh")
+    public Result<String> refresh(@RequestHeader(Constants.TOKEN_HEADER) String token) {
         return Result.success(userService.refreshToken(token));
+    }
+
+    @PostMapping(value = "login/token/validate")
+    public Result<String> validate( String token) {
+        return Result.success(userService.validate(token));
     }
 
 }

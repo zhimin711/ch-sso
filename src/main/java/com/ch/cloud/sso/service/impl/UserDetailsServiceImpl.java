@@ -6,7 +6,6 @@ import com.ch.cloud.sso.pojo.UserVo;
 import com.ch.cloud.sso.service.IUserService;
 import com.ch.cloud.sso.tools.JwtTokenTool;
 import com.ch.result.Result;
-import com.sun.deploy.panel.TreeBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,9 +22,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * desc:
@@ -79,7 +76,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         return res.get();
     }
 
-//    @Override
+    //    @Override
     public UserVo findUserInfo(String username) {
 
 
@@ -161,6 +158,19 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
             return jwtTokenTool.refreshToken(oldToken);
         }
         return "error";
+    }
+
+    @Override
+    public String validate(String token) {
+
+        String username = jwtTokenTool.getUsernameFromToken(token);
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            // 通过用户名 获取用户的信息
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            // 验证token和用户是否匹配
+            if (jwtTokenTool.validateToken(token, userDetails)) return username;
+        }
+        return null;
     }
 
 }
