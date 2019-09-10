@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.Data;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ import java.util.Map;
  * @date 2019/8/31
  */
 @Data
+@Log4j2
 @ConfigurationProperties(prefix = "jwt")
 @Component
 public class JwtTokenTool implements Serializable {
@@ -59,6 +61,7 @@ public class JwtTokenTool implements Serializable {
         try {
             claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
         } catch (Exception e) {
+            log.error("token is invalid!" + token, e);
             claims = null;
         }
         return claims;
@@ -88,6 +91,7 @@ public class JwtTokenTool implements Serializable {
         try {
             Claims claims = getClaimsFromToken(token);
             username = claims.getSubject();
+
         } catch (Exception e) {
             username = null;
         }

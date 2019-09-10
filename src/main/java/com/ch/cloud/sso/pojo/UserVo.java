@@ -1,6 +1,9 @@
 package com.ch.cloud.sso.pojo;
 
 import com.ch.cloud.client.dto.UserDto;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -14,9 +17,14 @@ import java.util.Collection;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
+@ApiModel(value = "用户对象", description = "")
+@JsonIgnoreProperties({"password"})
 public class UserVo extends UserDto {
 
     private String avatar;
+
+    @ApiModelProperty(hidden = true)
+    private String password;
 
     private Collection<RoleVo> roleList;
     private Collection<MenuVo> menuList;

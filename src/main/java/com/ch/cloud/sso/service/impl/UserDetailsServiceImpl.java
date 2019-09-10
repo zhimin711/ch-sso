@@ -10,14 +10,18 @@ import com.ch.cloud.sso.pojo.RoleVo;
 import com.ch.cloud.sso.pojo.UserVo;
 import com.ch.cloud.sso.service.IUserService;
 import com.ch.cloud.sso.tools.JwtTokenTool;
+import com.ch.e.PubError;
 import com.ch.result.Result;
+import com.ch.utils.ExceptionUtils;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -49,7 +53,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Result<UserDto> res = upmsClientService.findUserByUsername(username);
         if (res.isEmpty()) {
-            throw new UsernameNotFoundException(username);
+            throw ExceptionUtils.create(PubError.USERNAME, username);
         }
         boolean enabled = true; // 可用性 :true:可用 false:不可用
         boolean accountNonExpired = true; // 过期性 :true:没过期 false:过期
@@ -158,13 +162,19 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
     @Autowired
     private JwtTokenTool jwtTokenTool;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Override
     public String login(String username, String password) {
         UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(username, password);
-        Authentication authentication = authenticationManager.authenticate(upToken);
+        Authentication authentication = null;
+        try {
+            authentication = authenticationManager.authenticate(upToken);
+        } catch (BadCredentialsException e) {
+            throw ExceptionUtils.create(PubError.USERNAME_OR_PASSWORD, e);
+        }
+        if (authentication == null) {
+            throw ExceptionUtils.create(PubError.NOT_AUTH, "登录失败！");
+        }
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         return jwtTokenTool.generateToken(userDetails);

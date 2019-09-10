@@ -10,10 +10,7 @@ import com.ch.e.PubError;
 import com.ch.result.Result;
 import com.ch.result.ResultUtils;
 import com.ch.utils.CommonUtils;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,28 +55,32 @@ public class LoginController {
     /**
      * 获取用户访问令牌
      * 密码模式登录
+     * <p>
+     * //     * @param username
+     * //     * @param password
      *
-     * @param username
-     * @param password
      * @return access_token
      */
     @ApiOperation(value = "获取用户访问令牌", notes = "基于密码模式登录,无需签名,返回access_token")
-    @ApiImplicitParams({
+//    @ApiImplicitParams({
 //            @ApiImplicitParam(name = "username", required = true, value = "登录名", paramType = "form"),
 //            @ApiImplicitParam(name = "password", required = true, value = "登录密码", paramType = "form")
-//            @ApiImplicitParam(name = "record", required = true, value = "登录密码", paramType = "form")
-    })
+//    })
     @PostMapping(value = "login/token/access", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Result<String> getLoginToken(@RequestBody UserDto record) {
+    public Result<String> getLoginToken(@RequestBody UserDto user) {
 
-        if (StringUtils.isEmpty(record.getUsername()) || StringUtils.isEmpty(record.getPassword())) {
+        if (StringUtils.isEmpty(user.getUsername()) || StringUtils.isEmpty(user.getPassword())) {
             return Result.error(PubError.USERNAME_OR_PASSWORD, "用户或者密码不能为空！");
         }
-        return ResultUtils.wrap(() -> userService.login(record.getUsername(), record.getPassword()));
+        return ResultUtils.wrap(() -> userService.login(user.getUsername(), user.getPassword()));
     }
 
-    @PostMapping(value = "login/token")
-    public Result<UserVo> login(String token) {
+    @ApiOperation(value = "访问令牌获取用户授权", notes = "访问令牌获取,返回用户授权信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "token", required = true, value = "访问令牌", paramType = "query")
+    })
+    @GetMapping("login/token")
+    public Result<UserVo> login(@RequestParam String token) {
         String username = userService.validate(token);
         if (CommonUtils.isNotEmpty(username)) {
             return Result.success(userService.findUserInfo(username));
