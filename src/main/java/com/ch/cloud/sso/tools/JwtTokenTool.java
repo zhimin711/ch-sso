@@ -1,6 +1,5 @@
 package com.ch.cloud.sso.tools;
 
-import com.ch.cloud.sso.security.JwtUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -130,9 +129,8 @@ public class JwtTokenTool implements Serializable {
      * @return 是否有效
      */
     public Boolean validateToken(String token, UserDetails userDetails) {
-        JwtUser user = (JwtUser) userDetails;
         String username = getUsernameFromToken(token);
-        return (username.equals(user.getUsername()) && !isTokenExpired(token));
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
 }
