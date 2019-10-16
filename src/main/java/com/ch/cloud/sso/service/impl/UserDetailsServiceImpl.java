@@ -21,14 +21,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -53,7 +51,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Result<UserDto> res = upmsClientService.findUserByUsername(username);
         if (res.isEmpty()) {
-            throw ExceptionUtils.create(PubError.USERNAME, username);
+            throw new UsernameNotFoundException(username);
         }
         boolean enabled = true; // 可用性 :true:可用 false:不可用
         boolean accountNonExpired = true; // 过期性 :true:没过期 false:过期

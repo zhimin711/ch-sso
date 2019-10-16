@@ -17,7 +17,7 @@ import java.util.Collection;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-@ApiModel(value = "用户对象", description = "")
+@ApiModel(value = "用户及权限信息", description = "")
 @JsonIgnoreProperties({"password"})
 public class UserVo extends UserDto {
 

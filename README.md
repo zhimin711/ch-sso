@@ -15,7 +15,9 @@
 
 #### 使用说明
 
-1. xxxx
+
+1. swagger 
+http://localhost:7000/auth/swagger-ui.html
 2. xxxx
 3. xxxx
 
