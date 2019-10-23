@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -26,9 +27,9 @@ public class UserVo extends UserDto {
     @ApiModelProperty(hidden = true)
     private String password;
 
-    private Collection<RoleVo> roleList;
-    private Collection<MenuVo> menuList;
-    private Collection<BtnVo> btnList;
+    private Collection<RoleVo> roleList = new ArrayList<>();
+    private Collection<MenuVo> menuList = new ArrayList<>();
+    private Collection<BtnVo> btnList = new ArrayList<>();
 
     public Collection<RoleVo> getRoleList() {
         return roleList;

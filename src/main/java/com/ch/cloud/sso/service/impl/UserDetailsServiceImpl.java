@@ -30,9 +30,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * desc:
@@ -92,45 +91,63 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
          * 获取用户信息
          */
         UserDto user = findByUsername(username);
+
+        UserVo userVo = new UserVo();
+        BeanUtils.copyProperties(user, userVo);
         /**
          * 获取当前用户的所有角色
          */
         Result<RoleDto> res2 = upmsClientService.findRoleByUserId(user.getId());
 
+        if (res2.isEmpty()) {
+            return userVo;
+        }
         Set<RoleVo> roleVos = Sets.newHashSet();
-        if (!res2.isEmpty()) {
-            res2.getRows().forEach(role -> {
+        res2.getRows().forEach(role -> {
 //            log.info("role: {}", role.getDescribe());
-                roleVos.add(new RoleVo(role.getId(), role.getCode(), role.getName()));
-            });
+            roleVos.add(new RoleVo(role.getId(), role.getCode(), role.getName()));
+        });
+        userVo.setRoleList(roleVos);
+
+        /**
+         * 获取当前用户的角色菜单
+         */
+        Result<PermissionDto> res3 = upmsClientService.findMenuByRoleId(0L);
+        if (res3.isEmpty()) {
+            return userVo;
         }
         /**
-         * 获取当前用户的所有权限
-         */
-        Result<PermissionDto> res3 = upmsClientService.findPermissionByUserId(user.getId());
-        /**
-         * 在这里我的想法是，构建一个按钮权限列表
-         * 再构建一个菜单权限列表
+         * 构建一个菜单权限列表
          * 这样的我们在前端的写的时候，就不用解析的很麻烦了
-         * 因为权限表是一张表，在这里解析好了以后，
-         * 相当前端少做一点工作，当然这也可以放到前端去解析权限列表
+         */
+        Set<MenuVo> menuVos = Sets.newHashSet();
+        if (!res3.isEmpty()) {
+            Map<String, List<PermissionDto>> pidMap = res3.getRows().stream().collect(Collectors.groupingBy(PermissionDto::getPid));
+            List<PermissionDto> topList = pidMap.get("0");
+            topList.sort(Comparator.comparing(PermissionDto::getSort));
+            topList.forEach(r -> {
+                MenuVo menuVo = assemblyMenu(r, pidMap);
+                menuVos.add(menuVo);
+            });
+//            menuVos.add(new MenuVo(permission.getPid(), permission.getIcon(), permission.getCode(), permission.getName()));
+        }
+        /**
+         * 获取当前用户的权限
+         */
+        Result<PermissionDto> res4 = upmsClientService.findPermissionByUserId(res2.get().getId());
+        /**
+         * 构建一个按钮权限列表
          */
         Set<BtnVo> buttonVos = Sets.newHashSet();
-        Set<MenuVo> menuVos = Sets.newHashSet();
-
-        if (!res3.isEmpty()) {
-            res3.getRows().forEach(permission -> {
-                if (permission.getType().toLowerCase().equals("button")) {
-                    /*
-                     * 如果权限是按钮，就添加到按钮里面
-                     * */
-                    buttonVos.add(new BtnVo(permission.getPid(), permission.getCode(), permission.getName()));
-                } else if (permission.getType().toLowerCase().equals("menu")) {
-                    /*
-                     * 如果权限是菜单，就添加到菜单里面
-                     * */
-                    menuVos.add(new MenuVo(permission.getPid(), permission.getIcon(), permission.getCode(), permission.getName()));
-                }
+        if (!res4.isEmpty()) {
+            res4.getRows().forEach(permission -> {
+                /*
+                 * 如果权限是菜单，就添加到菜单里面
+                 * */
+                /*
+                 * 如果权限是按钮，就添加到按钮里面
+                 * */
+                buttonVos.add(new BtnVo(permission.getPid(), permission.getCode(), permission.getName()));
             });
         }
         /**
@@ -141,13 +158,20 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
          * sysUser.getMail(), sysUser.getAddTime(),
          * sysUser.getRoles(), buttonVos, TreeBuilder.findRoots(menuVos)
          */
-        UserVo userVo = new UserVo();
-
-        BeanUtils.copyProperties(user, userVo);
-        userVo.setRoleList(roleVos);
         userVo.setMenuList(menuVos);
         userVo.setBtnList(buttonVos);
         return userVo;
+    }
+
+    private MenuVo assemblyMenu(PermissionDto permission, Map<String, List<PermissionDto>> pidMap) {
+        MenuVo vo = new MenuVo(permission.getPid(), permission.getIcon(), permission.getCode(), permission.getName());
+        vo.setType(permission.getType());
+        vo.setUrl(permission.getUrl());
+        if ("1".equals(permission.getType()) && pidMap.get(permission.getId().toString()) != null) {
+            List<MenuVo> menuVos = pidMap.get(permission.getId().toString()).stream().map(e -> assemblyMenu(e, pidMap)).collect(Collectors.toList());
+            vo.setChildren(menuVos);
+        }
+        return vo;
     }
 
     // 如果在WebSecurityConfigurerAdapter中，没有重新，这里就会报注入失败的异常

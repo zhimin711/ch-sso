@@ -3,6 +3,8 @@ package com.ch.cloud.sso.pojo;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 /**
  * decs:
  *
@@ -13,10 +15,15 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class MenuVo extends BtnVo {
 
+
+    private String type;
     private String icon;
+    private String url;
 
     public MenuVo(String pid, String icon, String code, String name) {
         super(pid, code, name);
         this.icon = icon;
     }
+
+    private List<MenuVo> children;
 }
