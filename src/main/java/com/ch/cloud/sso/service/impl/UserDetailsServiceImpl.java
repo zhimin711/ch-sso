@@ -102,11 +102,8 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         if (res2.isEmpty()) {
             return userVo;
         }
-        Set<RoleVo> roleVos = Sets.newHashSet();
-        res2.getRows().forEach(role -> {
-//            log.info("role: {}", role.getDescribe());
-            roleVos.add(new RoleVo(role.getId(), role.getCode(), role.getName()));
-        });
+        List<RoleVo> roleVos = res2.getRows().stream().map(role -> new RoleVo(role.getId(), role.getCode(), role.getName())).collect(Collectors.toList());
+
         userVo.setRoleList(roleVos);
 
         /**
