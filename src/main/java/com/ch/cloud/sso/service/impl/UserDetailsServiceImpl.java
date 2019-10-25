@@ -12,7 +12,9 @@ import com.ch.cloud.sso.service.IUserService;
 import com.ch.cloud.sso.tools.JwtTokenTool;
 import com.ch.e.PubError;
 import com.ch.result.Result;
+import com.ch.utils.CommonUtils;
 import com.ch.utils.ExceptionUtils;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -86,7 +88,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
     }
 
     @Override
-    public UserVo findUserInfo(String username) {
+    public UserVo findUserInfo(String username, Long roleId) {
         /**
          * 获取用户信息
          */
@@ -102,14 +104,39 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         if (res2.isEmpty()) {
             return userVo;
         }
-        List<RoleVo> roleVos = res2.getRows().stream().map(role -> new RoleVo(role.getId(), role.getCode(), role.getName())).collect(Collectors.toList());
+
+        List<Long> roleIds = Lists.newArrayList();
+        List<RoleDto> roleList = Lists.newArrayList();
+        List<RoleVo> roleVos = res2.getRows().stream().map(role -> {
+            roleIds.add(role.getId());
+            if (CommonUtils.isEquals(roleId, role.getId())) {
+                roleList.add(role);
+            }
+            return new RoleVo(role.getId(), role.getCode(), role.getName());
+        }).collect(Collectors.toList());
+
+
+        if (roleId != null && roleId > 0 && !roleIds.contains(roleId)) {
+            throw ExceptionUtils.create(PubError.NOT_EXISTS, "用户角色无效失败！");
+        }
 
         userVo.setRoleList(roleVos);
 
         /**
-         * 获取当前用户的角色菜单
+         * 获取当前用户的角色菜单\权限
          */
-        Result<PermissionDto> res3 = upmsClientService.findMenuByRoleId(0L);
+        Result<PermissionDto> res3;
+        Result<PermissionDto> res4;
+        if ((roleList.isEmpty() && "SUPER_ADMIN".equals(res2.get().getCode())) || (!roleList.isEmpty() && "SUPER_ADMIN".equals(roleList.get(0).getCode()))) {
+            res3 = upmsClientService.findMenuByRoleId(0L);
+            res4 = upmsClientService.findPermissionByRoleId(0L);
+        } else if (roleId != null && roleId > 0) {
+            res3 = upmsClientService.findMenuByRoleId(roleId);
+            res4 = upmsClientService.findPermissionByRoleId(roleId);
+        } else {
+            res3 = upmsClientService.findMenuByRoleId(roleVos.get(0).getId());
+            res4 = upmsClientService.findPermissionByRoleId(roleVos.get(0).getId());
+        }
         if (res3.isEmpty()) {
             return userVo;
         }
@@ -126,12 +153,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
                 MenuVo menuVo = assemblyMenu(r, pidMap);
                 menuVos.add(menuVo);
             });
-//            menuVos.add(new MenuVo(permission.getPid(), permission.getIcon(), permission.getCode(), permission.getName()));
         }
-        /**
-         * 获取当前用户的权限
-         */
-        Result<PermissionDto> res4 = upmsClientService.findPermissionByUserId(res2.get().getId());
         /**
          * 构建一个按钮权限列表
          */
@@ -185,7 +207,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
     @Override
     public String login(String username, String password) {
         UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(username, password);
-        Authentication authentication = null;
+        Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(upToken);
         } catch (BadCredentialsException e) {
@@ -210,6 +232,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
 
     @Override
     public String validate(String token) {
+        if (CommonUtils.isEmpty(token)) return null;
         String username = jwtTokenTool.getUsernameFromToken(token);
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // 通过用户名 获取用户的信息

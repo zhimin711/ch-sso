@@ -80,10 +80,10 @@ public class LoginController {
             @ApiImplicitParam(name = "token", required = true, value = "访问令牌", paramType = "query")
     })
     @GetMapping("login/token")
-    public Result<UserVo> login(@RequestParam String token) {
+    public Result<UserVo> login(@RequestParam String token, @RequestParam Long role) {
         String username = userService.validate(token);
         if (CommonUtils.isNotEmpty(username)) {
-            return Result.success(userService.findUserInfo(username));
+            return Result.success(userService.findUserInfo(username, role));
         }
         return Result.error(PubError.INVALID, "Token 失效!");
     }
