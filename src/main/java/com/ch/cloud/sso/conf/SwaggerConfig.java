@@ -30,8 +30,8 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("ch-sso接口文档")
-                .description("ch-sso相关接口的文档")
+                .title("朝华Oauth2 接口文档")
+                .description("sso相关接口的文档")
                 .termsOfServiceUrl("http://www.ch-sso.com")
                 .version("1.0.0")
                 .build();

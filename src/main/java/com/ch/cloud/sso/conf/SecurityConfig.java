@@ -40,10 +40,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .requestMatchers()
                 .antMatchers("/login") //, "/login", "/logout"
                 .antMatchers("/oauth/authorize", "/oauth/token")
+                .antMatchers("/user", "/user/*")
                 .and()
                 .authorizeRequests()
-                .antMatchers("/user").authenticated()
-                .anyRequest().permitAll()
+                .anyRequest().authenticated()
+//                .antMatchers("/user").authenticated()
                 .and().formLogin().loginPage("/login").permitAll()   // 自定义登录页面，这里配置了 loginPage, 就会通过 LoginController 的 login 接口加载登录页面
 //                .and().logout().logoutUrl("/logout")
                 .and().csrf().disable();
