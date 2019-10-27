@@ -252,4 +252,10 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         return null;
     }
 
+    @Override
+    public UserInfo extractToken(String token) {
+
+        return jwtTokenTool.getUserInfoFromToken(token);
+    }
+
 }

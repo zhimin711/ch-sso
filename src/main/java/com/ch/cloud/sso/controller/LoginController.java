@@ -3,6 +3,7 @@ package com.ch.cloud.sso.controller;
 import com.ch.Constants;
 import com.ch.cloud.client.dto.UserDto;
 import com.ch.cloud.sso.cli.UpmsClientService;
+import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.pojo.UserVo;
 import com.ch.cloud.sso.service.IUserService;
 import com.ch.cloud.sso.tools.JwtTokenTool;
@@ -93,9 +94,14 @@ public class LoginController {
         return Result.success(userService.refreshToken(token));
     }
 
-    @PostMapping(value = "login/token/validate")
-    public Result<String> validate(String token) {
+    @GetMapping(value = "login/token/validate")
+    public Result<String> validate(@RequestParam String token) {
         return Result.success(userService.validate(token));
+    }
+
+    @GetMapping(value = "login/token/info")
+    public Result<UserInfo> info(@RequestParam String token) {
+        return ResultUtils.wrapFail(()->userService.extractToken(token));
     }
 
 }

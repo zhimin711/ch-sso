@@ -2,6 +2,8 @@ package com.ch.cloud.sso.tools;
 
 import com.ch.cloud.sso.pojo.RoleVo;
 import com.ch.cloud.sso.pojo.UserInfo;
+import com.ch.e.PubError;
+import com.ch.utils.ExceptionUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -94,7 +96,6 @@ public class JwtTokenTool implements Serializable {
         try {
             Claims claims = getClaimsFromToken(token);
             username = claims.getSubject();
-
         } catch (Exception e) {
             username = null;
         }
@@ -154,5 +155,23 @@ public class JwtTokenTool implements Serializable {
         claims.put("roleId", info.getRoleId());
         claims.put("created", new Date());
         return generateToken(claims);
+    }
+
+    public UserInfo getUserInfoFromToken(String token) {
+        Claims claims = getClaimsFromToken(token);
+        if (claims == null) {
+            throw ExceptionUtils.create(PubError.INVALID);
+        }
+        if(isTokenExpired(token)){
+            throw ExceptionUtils.create(PubError.INVALID);
+        }
+        String username = claims.getSubject();
+        Long userId = (Long) claims.get("userId");
+        Long roleId = (Long) claims.get("roleId");
+        UserInfo info = new UserInfo();
+        info.setUsername(username);
+        info.setUserId(userId);
+        info.setUserId(roleId);
+        return info;
     }
 }
