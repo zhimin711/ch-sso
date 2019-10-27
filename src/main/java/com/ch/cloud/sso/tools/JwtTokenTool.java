@@ -162,16 +162,16 @@ public class JwtTokenTool implements Serializable {
         if (claims == null) {
             throw ExceptionUtils.create(PubError.INVALID);
         }
-        if(isTokenExpired(token)){
+        if (isTokenExpired(token)) {
             throw ExceptionUtils.create(PubError.INVALID);
         }
         String username = claims.getSubject();
-        Long userId = (Long) claims.get("userId");
-        Long roleId = (Long) claims.get("roleId");
+        Long userId = claims.get("userId", Long.class);
+        Long roleId = claims.get("roleId", Long.class);
         UserInfo info = new UserInfo();
         info.setUsername(username);
         info.setUserId(userId);
-        info.setUserId(roleId);
+        info.setRoleId(roleId);
         return info;
     }
 }

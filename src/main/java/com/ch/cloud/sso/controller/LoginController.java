@@ -101,7 +101,7 @@ public class LoginController {
 
     @GetMapping(value = "login/token/info")
     public Result<UserInfo> info(@RequestParam String token) {
-        return ResultUtils.wrapFail(()->userService.extractToken(token));
+        return ResultUtils.wrapFail(() -> userService.extractToken(token));
     }
 
 }
