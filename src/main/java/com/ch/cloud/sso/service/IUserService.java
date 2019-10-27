@@ -2,6 +2,7 @@ package com.ch.cloud.sso.service;
 
 import com.ch.cloud.client.dto.PermissionDto;
 import com.ch.cloud.client.dto.UserDto;
+import com.ch.cloud.sso.pojo.RoleVo;
 import com.ch.cloud.sso.pojo.UserVo;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
@@ -29,4 +30,5 @@ public interface IUserService {
      * @return 用户名
      */
     String validate(String token);
+
 }

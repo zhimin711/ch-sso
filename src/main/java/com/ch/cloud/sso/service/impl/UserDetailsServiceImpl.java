@@ -4,10 +4,7 @@ import com.ch.cloud.client.dto.PermissionDto;
 import com.ch.cloud.client.dto.RoleDto;
 import com.ch.cloud.client.dto.UserDto;
 import com.ch.cloud.sso.cli.UpmsClientService;
-import com.ch.cloud.sso.pojo.BtnVo;
-import com.ch.cloud.sso.pojo.MenuVo;
-import com.ch.cloud.sso.pojo.RoleVo;
-import com.ch.cloud.sso.pojo.UserVo;
+import com.ch.cloud.sso.pojo.*;
 import com.ch.cloud.sso.service.IUserService;
 import com.ch.cloud.sso.tools.JwtTokenTool;
 import com.ch.e.PubError;
@@ -54,20 +51,20 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         if (res.isEmpty()) {
             throw new UsernameNotFoundException(username);
         }
-        boolean enabled = true; // 可用性 :true:可用 false:不可用
-        boolean accountNonExpired = true; // 过期性 :true:没过期 false:过期
-        boolean credentialsNonExpired = true; // 有效性 :true:凭证有效 false:凭证无效
-        boolean accountNonLocked = true; // 锁定性 :true:未锁定 false:已锁定
+//        boolean enabled = true; // 可用性 :true:可用 false:不可用
+//        boolean accountNonExpired = true; // 过期性 :true:没过期 false:过期
+//        boolean credentialsNonExpired = true; // 有效性 :true:凭证有效 false:凭证无效
+//        boolean accountNonLocked = true; // 锁定性 :true:未锁定 false:已锁定
 
         UserDto user = res.get();
         String password = user.getPassword();
         Long id = user.getId();
-        Result<String> res2 = upmsClientService.findRoleCodeByUserId(id);
-        List<String> roles = (List<String>) res2.getRows();
+
+        Result<RoleDto> res2 = upmsClientService.findRolesByUserId(id);
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
         if (!res2.isEmpty()) {
-            roles.forEach(r -> {
-                authorities.add(new SimpleGrantedAuthority(r));
+            res2.getRows().forEach(r -> {
+                authorities.add(new SimpleGrantedAuthority(r.getCode()));
                 //todo get role permissions
             });
         }
@@ -99,7 +96,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         /**
          * 获取当前用户的所有角色
          */
-        Result<RoleDto> res2 = upmsClientService.findRoleByUserId(user.getId());
+        Result<RoleDto> res2 = upmsClientService.findRolesByUserId(user.getId());
 
         if (res2.isEmpty()) {
             return userVo;
@@ -128,14 +125,14 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         Result<PermissionDto> res3;
         Result<PermissionDto> res4;
         if ((roleList.isEmpty() && "SUPER_ADMIN".equals(res2.get().getCode())) || (!roleList.isEmpty() && "SUPER_ADMIN".equals(roleList.get(0).getCode()))) {
-            res3 = upmsClientService.findMenuByRoleId(0L);
-            res4 = upmsClientService.findPermissionByRoleId(0L);
+            res3 = upmsClientService.findMenusByRoleId(0L);
+            res4 = upmsClientService.findPermissionsByRoleId(0L);
         } else if (roleId != null && roleId > 0) {
-            res3 = upmsClientService.findMenuByRoleId(roleId);
-            res4 = upmsClientService.findPermissionByRoleId(roleId);
+            res3 = upmsClientService.findMenusByRoleId(roleId);
+            res4 = upmsClientService.findPermissionsByRoleId(roleId);
         } else {
-            res3 = upmsClientService.findMenuByRoleId(roleVos.get(0).getId());
-            res4 = upmsClientService.findPermissionByRoleId(roleVos.get(0).getId());
+            res3 = upmsClientService.findMenusByRoleId(roleVos.get(0).getId());
+            res4 = upmsClientService.findPermissionsByRoleId(roleVos.get(0).getId());
         }
         if (res3.isEmpty()) {
             return userVo;
@@ -146,7 +143,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
          */
         Set<MenuVo> menuVos = Sets.newHashSet();
         if (!res3.isEmpty()) {
-            Map<String, List<PermissionDto>> pidMap = res3.getRows().stream().collect(Collectors.groupingBy(PermissionDto::getPid));
+            Map<String, List<PermissionDto>> pidMap = res3.getRows().stream().collect(Collectors.groupingBy(PermissionDto::getParentId));
             List<PermissionDto> topList = pidMap.get("0");
             topList.sort(Comparator.comparing(PermissionDto::getSort));
             topList.forEach(r -> {
@@ -166,7 +163,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
                 /*
                  * 如果权限是按钮，就添加到按钮里面
                  * */
-                buttonVos.add(new BtnVo(permission.getPid(), permission.getCode(), permission.getName()));
+                buttonVos.add(new BtnVo(permission.getParentId(), permission.getCode(), permission.getName()));
             });
         }
         /**
@@ -183,7 +180,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
     }
 
     private MenuVo assemblyMenu(PermissionDto permission, Map<String, List<PermissionDto>> pidMap) {
-        MenuVo vo = new MenuVo(permission.getPid(), permission.getIcon(), permission.getCode(), permission.getName());
+        MenuVo vo = new MenuVo(permission.getParentId(), permission.getIcon(), permission.getCode(), permission.getName());
         vo.setType(permission.getType());
         vo.setUrl(permission.getUrl());
         if ("1".equals(permission.getType()) && pidMap.get(permission.getId().toString()) != null) {
@@ -196,9 +193,6 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
     // 如果在WebSecurityConfigurerAdapter中，没有重新，这里就会报注入失败的异常
     @Autowired
     private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
 
     @Autowired
     private JwtTokenTool jwtTokenTool;
@@ -217,8 +211,23 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
             throw ExceptionUtils.create(PubError.NOT_AUTH, "登录失败！");
         }
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        return jwtTokenTool.generateToken(userDetails);
+//        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUsername(username);
+        RoleVo roleVo = findRoleByUsername(username);
+        if (roleVo != null) {
+            userInfo.setRoleId(roleVo.getId());
+        }
+        return jwtTokenTool.generateToken(userInfo);
+    }
+
+    private RoleVo findRoleByUsername(String username) {
+        Result<RoleDto> res = upmsClientService.findRoleByUsername(username);
+        if (res.isEmpty()) {
+            return null;
+        }
+        RoleDto dto = res.get();
+        return new RoleVo(dto.getId(), dto.getCode(), dto.getName());
     }
 
 
@@ -236,7 +245,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         String username = jwtTokenTool.getUsernameFromToken(token);
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // 通过用户名 获取用户的信息
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            UserDetails userDetails = loadUserByUsername(username);
             // 验证token和用户是否匹配
             if (jwtTokenTool.validateToken(token, userDetails)) return username;
         }

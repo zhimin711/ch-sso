@@ -1,5 +1,7 @@
 package com.ch.cloud.sso.tools;
 
+import com.ch.cloud.sso.pojo.RoleVo;
+import com.ch.cloud.sso.pojo.UserInfo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -76,6 +78,7 @@ public class JwtTokenTool implements Serializable {
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>(2);
         claims.put("sub", userDetails.getUsername());
+
         claims.put("created", new Date());
         return generateToken(claims);
     }
@@ -144,4 +147,12 @@ public class JwtTokenTool implements Serializable {
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
+    public String generateToken(UserInfo info) {
+        Map<String, Object> claims = new HashMap<>(4);
+        claims.put("sub", info.getUsername());
+        claims.put("userId", info.getUserId());
+        claims.put("roleId", info.getRoleId());
+        claims.put("created", new Date());
+        return generateToken(claims);
+    }
 }
