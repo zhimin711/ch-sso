@@ -216,7 +216,11 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         userInfo.setUsername(username);
         RoleVo roleVo = findRoleByUsername(username);
         if (roleVo != null) {
-            userInfo.setRoleId(roleVo.getId());
+            if ("SUPER_ADMIN".equals(roleVo.getCode())) {
+                userInfo.setRoleId(0L);
+            } else {
+                userInfo.setRoleId(roleVo.getId());
+            }
         }
         return jwtTokenTool.generateToken(userInfo);
     }
