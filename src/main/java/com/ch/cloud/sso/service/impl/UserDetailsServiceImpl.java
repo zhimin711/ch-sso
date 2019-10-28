@@ -141,7 +141,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
          * 构建一个菜单权限列表
          * 这样的我们在前端的写的时候，就不用解析的很麻烦了
          */
-        Set<MenuVo> menuVos = Sets.newHashSet();
+        List<MenuVo> menuVos = Lists.newArrayList();
         if (!res3.isEmpty()) {
             Map<String, List<PermissionDto>> pidMap = res3.getRows().stream().collect(Collectors.groupingBy(PermissionDto::getParentId));
             List<PermissionDto> topList = pidMap.get("0");
