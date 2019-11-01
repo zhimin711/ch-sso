@@ -4,7 +4,6 @@ import com.alibaba.nacos.api.annotation.NacosInjected;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.pojo.Instance;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -19,7 +18,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
  * @author zhimin
  * @date 2019/4/14 2:08 PM
  */
-@Controller
+//@Controller
 @RequestMapping("discovery")
 public class DiscoveryController {
 
