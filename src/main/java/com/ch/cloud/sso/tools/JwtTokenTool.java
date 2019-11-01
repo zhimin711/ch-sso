@@ -160,10 +160,10 @@ public class JwtTokenTool implements Serializable {
     public UserInfo getUserInfoFromToken(String token) {
         Claims claims = getClaimsFromToken(token);
         if (claims == null) {
-            throw ExceptionUtils.create(PubError.INVALID);
+            throw ExceptionUtils.create(PubError.INVALID, "TOKEN 无效");
         }
         if (isTokenExpired(token)) {
-            throw ExceptionUtils.create(PubError.INVALID);
+            throw ExceptionUtils.create(PubError.EXPIRED, "TOKEN 已过期");
         }
         String username = claims.getSubject();
         Long userId = claims.get("userId", Long.class);
