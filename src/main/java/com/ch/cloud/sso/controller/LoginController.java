@@ -78,7 +78,8 @@ public class LoginController {
 
     @ApiOperation(value = "访问令牌获取用户授权", notes = "访问令牌获取,返回用户授权信息")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "token", required = true, value = "访问令牌", paramType = "query")
+            @ApiImplicitParam(name = "token", required = true, value = "访问令牌", paramType = "query"),
+            @ApiImplicitParam(name = "role", required = true, value = "访问角色", paramType = "query")
     })
     @GetMapping("login/token")
     public Result<UserVo> login(@RequestParam String token, @RequestParam Long role) {
