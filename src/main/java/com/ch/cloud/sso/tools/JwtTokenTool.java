@@ -5,6 +5,7 @@ import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.e.PubError;
 import com.ch.utils.ExceptionUtils;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.Data;
@@ -72,6 +73,28 @@ public class JwtTokenTool implements Serializable {
         return claims;
     }
 
+
+    /**
+     * 从令牌中获取数据声明
+     *
+     * @param token 令牌
+     * @return 数据声明
+     */
+    private Claims getClaimsWithExpired(String token) {
+        Claims claims;
+        try {
+            claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+        } catch (ExpiredJwtException e) {
+            log.warn("TOKEN is expired!" + token, e);
+            claims = e.getClaims();
+        } catch (Exception e) {
+            log.error("TOKEN is invalid!" + token, e);
+            claims = null;
+        }
+        return claims;
+    }
+
+
     /**
      * 从令牌中获取用户名
      *
@@ -114,9 +137,8 @@ public class JwtTokenTool implements Serializable {
     public String refreshToken(String token) {
         String refreshedToken;
         try {
-            Claims claims = getClaimsFromToken(token);
+            Claims claims = getClaimsWithExpired(token);
             claims.put("created", new Date());
-
             Date date = new Date(System.currentTimeMillis() + expired);
             refreshedToken = generateToken(claims, date);
         } catch (Exception e) {
