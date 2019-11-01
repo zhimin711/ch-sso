@@ -33,14 +33,16 @@ public class JwtTokenTool implements Serializable {
 
     private String secret;
 
-    private Long expiration;
+    private Long expired;
+
+    private Long refreshExpired = (long) 1000 * 3600 * 24;
 
     public void setSecret(String secret) {
         this.secret = secret;
     }
 
-    public void setExpiration(Long expiration) {
-        this.expiration = expiration;
+    public void setExpired(Long expired) {
+        this.expired = expired;
     }
 
     /**
@@ -49,9 +51,8 @@ public class JwtTokenTool implements Serializable {
      * @param claims 数据声明
      * @return 令牌
      */
-    private String generateToken(Map<String, Object> claims) {
-        Date expirationDate = new Date(System.currentTimeMillis() + expiration);
-        return Jwts.builder().setClaims(claims).setExpiration(expirationDate).signWith(SignatureAlgorithm.HS512, secret).compact();
+    private String generateToken(Map<String, Object> claims, Date expired) {
+        return Jwts.builder().setClaims(claims).setExpiration(expired).signWith(SignatureAlgorithm.HS512, secret).compact();
     }
 
     /**
@@ -65,24 +66,10 @@ public class JwtTokenTool implements Serializable {
         try {
             claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
         } catch (Exception e) {
-            log.error("token is invalid!" + token, e);
+            log.error("TOKEN is invalid!" + token, e);
             claims = null;
         }
         return claims;
-    }
-
-    /**
-     * 生成令牌
-     *
-     * @param userDetails 用户
-     * @return 令牌
-     */
-    public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>(2);
-        claims.put("sub", userDetails.getUsername());
-
-        claims.put("created", new Date());
-        return generateToken(claims);
     }
 
     /**
@@ -129,7 +116,9 @@ public class JwtTokenTool implements Serializable {
         try {
             Claims claims = getClaimsFromToken(token);
             claims.put("created", new Date());
-            refreshedToken = generateToken(claims);
+
+            Date date = new Date(System.currentTimeMillis() + expired);
+            refreshedToken = generateToken(claims, date);
         } catch (Exception e) {
             refreshedToken = null;
         }
@@ -154,7 +143,16 @@ public class JwtTokenTool implements Serializable {
         claims.put("userId", info.getUserId());
         claims.put("roleId", info.getRoleId());
         claims.put("created", new Date());
-        return generateToken(claims);
+        Date date = new Date(System.currentTimeMillis() + expired);
+        return generateToken(claims, date);
+    }
+
+    public String generateRefreshToken(UserInfo info) {
+        Map<String, Object> claims = new HashMap<>(2);
+        claims.put("sub", info.getUsername());
+        claims.put("created", new Date());
+        Date date = new Date(System.currentTimeMillis() + refreshExpired);
+        return generateToken(claims, date);
     }
 
     public UserInfo getUserInfoFromToken(String token) {

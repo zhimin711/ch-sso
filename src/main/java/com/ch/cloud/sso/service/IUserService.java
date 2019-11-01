@@ -1,13 +1,10 @@
 package com.ch.cloud.sso.service;
 
-import com.ch.cloud.client.dto.PermissionDto;
 import com.ch.cloud.client.dto.UserDto;
-import com.ch.cloud.sso.pojo.RoleVo;
+import com.ch.cloud.sso.pojo.TokenVo;
 import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.pojo.UserVo;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
-import java.util.List;
 
 /**
  * decs:
@@ -20,7 +17,7 @@ public interface IUserService {
 
     UserVo findUserInfo(String username, Long roleId);
 
-    String login(String username, String password);
+    TokenVo login(String username, String password);
 
     String refreshToken(String token);
 

@@ -199,7 +199,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
 
 
     @Override
-    public String login(String username, String password) {
+    public TokenVo login(String username, String password) {
         UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(username, password);
         Authentication authentication;
         try {
@@ -222,7 +222,10 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
                 userInfo.setRoleId(roleVo.getId());
             }
         }
-        return jwtTokenTool.generateToken(userInfo);
+        String token = jwtTokenTool.generateToken(userInfo);
+        String refreshToken = jwtTokenTool.generateRefreshToken(userInfo);
+
+        return new TokenVo(token, refreshToken);
     }
 
     private RoleVo findRoleByUsername(String username) {

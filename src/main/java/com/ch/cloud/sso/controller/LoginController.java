@@ -3,6 +3,7 @@ package com.ch.cloud.sso.controller;
 import com.ch.Constants;
 import com.ch.cloud.client.dto.UserDto;
 import com.ch.cloud.sso.cli.UpmsClientService;
+import com.ch.cloud.sso.pojo.TokenVo;
 import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.pojo.UserVo;
 import com.ch.cloud.sso.service.IUserService;
@@ -11,6 +12,7 @@ import com.ch.e.PubError;
 import com.ch.result.Result;
 import com.ch.result.ResultUtils;
 import com.ch.utils.CommonUtils;
+import com.ch.utils.ExceptionUtils;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -68,7 +70,7 @@ public class LoginController {
 //            @ApiImplicitParam(name = "password", required = true, value = "登录密码", paramType = "form")
 //    })
     @PostMapping(value = "login/token/access", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Result<String> getLoginToken(@RequestBody UserDto user) {
+    public Result<TokenVo> getLoginToken(@RequestBody UserDto user) {
 
         if (StringUtils.isEmpty(user.getUsername()) || StringUtils.isEmpty(user.getPassword())) {
             return Result.error(PubError.USERNAME_OR_PASSWORD, "用户或者密码不能为空！");
@@ -90,9 +92,14 @@ public class LoginController {
         return Result.error(PubError.INVALID, "Token 失效!");
     }
 
-    @PostMapping(value = "login/token/refresh")
-    public Result<String> refresh(@RequestHeader(Constants.TOKEN_HEADER) String token) {
-        return Result.success(userService.refreshToken(token));
+    @GetMapping(value = "login/token/refresh")
+    public Result<String> refresh(@RequestParam String token, @RequestParam String refreshToken) {
+        return ResultUtils.wrapFail(() -> {
+            if(jwtTokenTool.isTokenExpired(refreshToken)){
+                throw ExceptionUtils.create(PubError.INVALID, "Token 失效!");
+            }
+            return userService.refreshToken(token);
+        });
     }
 
     @GetMapping(value = "login/token/validate")
