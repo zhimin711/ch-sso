@@ -1,5 +1,6 @@
 package com.ch.cloud.sso.service.impl;
 
+import com.ch.NumS;
 import com.ch.cloud.client.dto.PermissionDto;
 import com.ch.cloud.client.dto.RoleDto;
 import com.ch.cloud.client.dto.UserDto;
@@ -11,6 +12,7 @@ import com.ch.e.PubError;
 import com.ch.result.Result;
 import com.ch.utils.CommonUtils;
 import com.ch.utils.ExceptionUtils;
+import com.ch.utils.StringExtUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -183,8 +185,9 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         MenuVo vo = new MenuVo(permission.getParentId(), permission.getIcon(), permission.getCode(), permission.getName());
         vo.setType(permission.getType());
         vo.setUrl(permission.getUrl());
-        if ("1".equals(permission.getType()) && pidMap.get(permission.getId().toString()) != null) {
-            List<MenuVo> menuVos = pidMap.get(permission.getId().toString()).stream().map(e -> assemblyMenu(e, pidMap)).collect(Collectors.toList());
+        String pid = CommonUtils.isEquals(NumS._0, permission.getParentId()) ? permission.getId().toString() : StringExtUtils.linkStr(",", permission.getParentId(), permission.getId().toString());
+        if ("1".equals(permission.getType()) && pidMap.get(pid) != null) {
+            List<MenuVo> menuVos = pidMap.get(pid).stream().map(e -> assemblyMenu(e, pidMap)).collect(Collectors.toList());
             vo.setChildren(menuVos);
         }
         return vo;
