@@ -183,8 +183,10 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         MenuVo vo = new MenuVo(permission.getParentId(), permission.getIcon(), permission.getCode(), permission.getName());
         vo.setType(permission.getType());
         vo.setUrl(permission.getUrl());
+        vo.setSort(permission.getSort());
         if ("1".equals(permission.getType()) && pidMap.get(permission.getId().toString()) != null) {
-            List<MenuVo> menuVos = pidMap.get(permission.getId().toString()).stream().map(e -> assemblyMenu(e, pidMap)).collect(Collectors.toList());
+            List<MenuVo> menuVos = pidMap.get(permission.getId().toString()).stream().map(e -> assemblyMenu(e, pidMap))
+                    .sorted(Comparator.comparing(MenuVo::getSort)).collect(Collectors.toList());
             vo.setChildren(menuVos);
         }
         return vo;
