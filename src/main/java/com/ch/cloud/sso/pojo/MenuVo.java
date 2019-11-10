@@ -18,6 +18,7 @@ public class MenuVo extends BtnVo {
     private String type;
     private String icon;
     private String url;
+    private String redirect;
     private Integer sort;
 
     public MenuVo(String pid, String icon, String code, String name) {
