@@ -13,7 +13,10 @@ import com.ch.result.Result;
 import com.ch.result.ResultUtils;
 import com.ch.utils.CommonUtils;
 import com.ch.utils.ExceptionUtils;
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +25,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import springfox.documentation.annotations.ApiIgnore;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * desc:
@@ -78,20 +79,8 @@ public class LoginController {
         return ResultUtils.wrap(() -> userService.login(user.getUsername(), user.getPassword()));
     }
 
-    @ApiOperation(value = "访问令牌获取用户授权", notes = "访问令牌获取,返回用户授权信息")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "token", required = true, value = "访问令牌", paramType = "query"),
-            @ApiImplicitParam(name = "role", required = true, value = "访问角色", paramType = "query")
-    })
-    @GetMapping("login/token")
-    public Result<UserVo> login(@RequestParam String token, @RequestParam Long role) {
-        String username = userService.validate(token);
-        if (CommonUtils.isNotEmpty(username)) {
-            return Result.success(userService.findUserInfo(username, role));
-        }
-        return Result.error(PubError.INVALID, "Token 失效!");
-    }
 
+    @ApiOperation(value = "刷新访问令牌", notes = "刷新访问令牌")
     @GetMapping(value = "login/token/refresh")
     public Result<String> refresh(@RequestParam String token, @RequestParam String refreshToken) {
         return ResultUtils.wrapFail(() -> {
@@ -107,8 +96,22 @@ public class LoginController {
         return Result.success(userService.validate(token));
     }
 
+    @ApiOperation(value = "访问令牌获取用户授权", notes = "访问令牌获取,返回用户授权信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "token", required = true, value = "访问令牌", paramType = "query"),
+            @ApiImplicitParam(name = "role", required = true, value = "访问角色", paramType = "query")
+    })
+    @GetMapping("login/token/user")
+    public Result<UserVo> login(@RequestHeader(Constants.TOKEN_HEADER2) String token, @RequestParam Long role) {
+        String username = userService.validate(token);
+        if (CommonUtils.isNotEmpty(username)) {
+            return Result.success(userService.findUserInfo(username, role));
+        }
+        return Result.error(PubError.INVALID, "Token 失效!");
+    }
+
     @GetMapping(value = "login/token/info")
-    public Result<UserInfo> info(@RequestParam String token) {
+    public Result<UserInfo> info(@RequestHeader(Constants.TOKEN_HEADER2) String token) {
         return ResultUtils.wrapFail(() -> userService.extractToken(token));
     }
 

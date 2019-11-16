@@ -186,7 +186,8 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         vo.setType(permission.getType());
         vo.setUrl(permission.getUrl());
         vo.setRedirect(permission.getRedirect());
-        vo.setSort(permission.getSort()); String pid = CommonUtils.isEquals(NumS._0, permission.getParentId()) ? permission.getId().toString() : StringExtUtils.linkStr(",", permission.getParentId(), permission.getId().toString());
+        vo.setSort(permission.getSort());
+        String pid = CommonUtils.isEquals(NumS._0, permission.getParentId()) ? permission.getId().toString() : StringExtUtils.linkStr(",", permission.getParentId(), permission.getId().toString());
         if ("1".equals(permission.getType()) && pidMap.get(pid) != null) {
             List<MenuVo> menuVos = pidMap.get(pid).stream().map(e -> assemblyMenu(e, pidMap))
                     .sorted(Comparator.comparing(MenuVo::getSort)).collect(Collectors.toList());
