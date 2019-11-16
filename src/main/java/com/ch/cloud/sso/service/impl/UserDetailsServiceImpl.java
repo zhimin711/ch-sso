@@ -116,7 +116,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
 
 
         if (roleId != null && roleId > 0 && !roleIds.contains(roleId)) {
-            throw ExceptionUtils.create(PubError.NOT_EXISTS, "用户角色无效！");
+            ExceptionUtils._throw(PubError.NOT_EXISTS, "用户角色无效！");
         }
 
         userVo.setRoleList(roleVos);
