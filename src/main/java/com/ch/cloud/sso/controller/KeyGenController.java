@@ -37,4 +37,9 @@ public class KeyGenController {
     public Result<String> encrypt(@RequestParam String str) {
         return ResultUtils.wrapFail(() -> passwordEncoder.encode(str));
     }
+
+    @PostMapping("matchEncrypt")
+    public Result<Boolean> matchEncrypt(@RequestParam String str, @RequestParam String encodedStr) {
+        return ResultUtils.wrapFail(() -> passwordEncoder.matches(str, encodedStr));
+    }
 }
