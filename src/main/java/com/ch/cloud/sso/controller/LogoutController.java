@@ -47,6 +47,7 @@ public class LogoutController {
     @PostMapping("logout/token")
     public Result<String> revokeToken2(@RequestHeader(Constants.TOKEN_HEADER2) String token,
                                        @RequestParam("refreshToken") String refreshToken) {
+        //todo revoke token and refresh token
         /*if (CommonUtils.isEmpty(token) || !token.startsWith("Bearer ")) {
             logger.error("error token: {}", token);
             return  Result.error(PubError.INVALID, "token invalid!");

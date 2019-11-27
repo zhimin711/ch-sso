@@ -4,7 +4,7 @@ import com.ch.NumS;
 import com.ch.cloud.client.dto.PermissionDto;
 import com.ch.cloud.client.dto.RoleDto;
 import com.ch.cloud.client.dto.UserDto;
-import com.ch.cloud.sso.cli.UpmsClientService;
+import com.ch.cloud.sso.fclient.UpmsClientService;
 import com.ch.cloud.sso.pojo.*;
 import com.ch.cloud.sso.service.IUserService;
 import com.ch.cloud.sso.tools.JwtTokenTool;

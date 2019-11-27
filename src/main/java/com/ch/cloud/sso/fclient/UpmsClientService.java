@@ -1,4 +1,4 @@
-package com.ch.cloud.sso.cli;
+package com.ch.cloud.sso.fclient;
 
 import com.ch.cloud.client.UpmsConstants;
 import org.springframework.cloud.openfeign.FeignClient;

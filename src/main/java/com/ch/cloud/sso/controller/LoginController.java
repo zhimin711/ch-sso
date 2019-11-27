@@ -2,7 +2,7 @@ package com.ch.cloud.sso.controller;
 
 import com.ch.Constants;
 import com.ch.cloud.client.dto.UserDto;
-import com.ch.cloud.sso.cli.UpmsClientService;
+import com.ch.cloud.sso.fclient.UpmsClientService;
 import com.ch.cloud.sso.pojo.TokenVo;
 import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.pojo.UserVo;
