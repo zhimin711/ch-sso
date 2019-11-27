@@ -121,9 +121,11 @@ public class JwtTokenTool implements Serializable {
     public Boolean isTokenExpired(String token) {
         try {
             Claims claims = getClaimsFromToken(token);
+            if (claims == null) return true;
             Date expiration = claims.getExpiration();
             return expiration.before(new Date());
         } catch (Exception e) {
+            log.error("token error: " + token, e);
             return false;
         }
     }
