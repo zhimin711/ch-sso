@@ -85,7 +85,7 @@ public class LoginController {
     public Result<String> refresh(@RequestParam String token, @RequestParam String refreshToken) {
         return ResultUtils.wrapFail(() -> {
             if(jwtTokenTool.isTokenExpired(refreshToken)){
-                throw ExceptionUtils.create(PubError.INVALID, "Token 失效!");
+                ExceptionUtils._throw(PubError.INVALID, "Token 失效!");
             }
             return userService.refreshToken(token);
         });

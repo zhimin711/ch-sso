@@ -246,10 +246,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
 
     @Override
     public String refreshToken(String oldToken) {
-        if (!jwtTokenTool.isTokenExpired(oldToken)) {
-            return jwtTokenTool.refreshToken(oldToken);
-        }
-        return "error";
+        return jwtTokenTool.refreshToken(oldToken);
     }
 
     @Override
