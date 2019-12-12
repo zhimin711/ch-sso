@@ -3,4 +3,4 @@ jwt:
   secret: eyJleHAiOjE1NDMyMDUyODUsInN1YiI6ImFkbWluIiwiY3Jl
   #jwt token有效时间（分钟）
   tokenExpired: 30m
-  refreshTokenExpired: 7d
+  refreshTokenExpired: 1d
