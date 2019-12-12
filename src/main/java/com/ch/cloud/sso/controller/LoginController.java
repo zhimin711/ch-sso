@@ -85,7 +85,7 @@ public class LoginController {
     public Result<String> refresh(@RequestParam String token, @RequestParam String refreshToken) {
         return ResultUtils.wrapFail(() -> {
             if(jwtTokenTool.isTokenExpired(refreshToken)){
-                ExceptionUtils._throw(PubError.INVALID, "Token 失效!");
+                ExceptionUtils._throw(PubError.INVALID, "刷新令牌已失效!");
             }
             return userService.refreshToken(token);
         });
@@ -107,7 +107,7 @@ public class LoginController {
         if (CommonUtils.isNotEmpty(username)) {
             return Result.success(userService.findUserInfo(username, role));
         }
-        return Result.error(PubError.INVALID, "Token 失效!");
+        return Result.error(PubError.INVALID, "访问令牌已失效!");
     }
 
     @GetMapping(value = "login/token/info")
