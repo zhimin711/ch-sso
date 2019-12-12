@@ -17,9 +17,9 @@ public class ClientTests {
 
     @Test
     public void token() {
-        String s = "eyJhbGciOiJIUzUxMiJ9.eyJleHAiOjE1NzQ4MjI4OTYsInN1YiI6ImFkbWluIiwiY3JlYXRlZCI6MTU3NDczNjQ5NjE5Nn0.BJecFfjp2xG9Ds8C9myPuIeWL8BzP0YM3Pe_sLiRqMKYu-R-b5HteFGI312gPEx-IZfoBmFKb8b7pQ1tg0FBnA";
+        String s = "eyJhbGciOiJIUzUxMiJ9.eyJleHAiOjE1NzUwMTgwOTEsInN1YiI6InRlc3QiLCJjcmVhdGVkIjoxNTc0OTMxNjkxNzEyfQ.YtN34sHM3AZ0vlZRGYa7wsU6pUTEEKTbLTDAZHS20bIAdPI8MZh16DdugBpBRj7TGETNvfWZ2ZF_QnNn-vqAZA";
         JwtTokenTool tokenTool = new JwtTokenTool();
-        tokenTool.setSecret("eyJleHAiOjE1NDMyMDUyODUsInN1YiI6ImFkbWluIiwiY3Jl");
-        System.out.println( tokenTool.isTokenExpired(s));
+//        tokenTool.setSecret("eyJleHAiOjE1NDMyMDUyODUsInN1YiI6ImFkbWluIiwiY3Jl");
+        System.out.println(tokenTool.isTokenExpired(s));
     }
 }

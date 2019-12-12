@@ -1,20 +1,18 @@
 package com.ch.cloud.sso.tools;
 
-import com.ch.cloud.sso.pojo.RoleVo;
 import com.ch.cloud.sso.pojo.UserInfo;
+import com.ch.cloud.sso.props.JwtProperties;
 import com.ch.e.PubError;
 import com.ch.utils.ExceptionUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import lombok.Data;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,26 +23,12 @@ import java.util.Map;
  * @author 01370603
  * @date 2019/8/31
  */
-@Data
 @Log4j2
-@ConfigurationProperties(prefix = "jwt")
 @Component
-public class JwtTokenTool implements Serializable {
+public class JwtTokenTool {
 
-
-    private String secret;
-
-    private Long expired;
-
-    private Long refreshExpired = (long) 1000 * 3600 * 24;
-
-    public void setSecret(String secret) {
-        this.secret = secret;
-    }
-
-    public void setExpired(Long expired) {
-        this.expired = expired;
-    }
+    @Autowired
+    private JwtProperties jwtProperties;
 
     /**
      * 从数据声明生成令牌
@@ -53,7 +37,7 @@ public class JwtTokenTool implements Serializable {
      * @return 令牌
      */
     private String generateToken(Map<String, Object> claims, Date expired) {
-        return Jwts.builder().setClaims(claims).setExpiration(expired).signWith(SignatureAlgorithm.HS512, secret).compact();
+        return Jwts.builder().setClaims(claims).setExpiration(expired).signWith(SignatureAlgorithm.HS512, jwtProperties.getSecret()).compact();
     }
 
     /**
@@ -65,7 +49,7 @@ public class JwtTokenTool implements Serializable {
     private Claims getClaimsFromToken(String token) {
         Claims claims;
         try {
-            claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+            claims = Jwts.parser().setSigningKey(jwtProperties.getSecret()).parseClaimsJws(token).getBody();
         } catch (Exception e) {
             log.error("TOKEN is invalid!" + token, e);
             claims = null;
@@ -83,7 +67,7 @@ public class JwtTokenTool implements Serializable {
     private Claims getClaimsWithExpired(String token) {
         Claims claims;
         try {
-            claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+            claims = Jwts.parser().setSigningKey(jwtProperties.getSecret()).parseClaimsJws(token).getBody();
         } catch (ExpiredJwtException e) {
             log.warn("TOKEN is expired!" + token, e);
             claims = e.getClaims();
@@ -141,7 +125,7 @@ public class JwtTokenTool implements Serializable {
         try {
             Claims claims = getClaimsWithExpired(token);
             claims.put("created", new Date());
-            Date date = new Date(System.currentTimeMillis() + expired);
+            Date date = new Date(System.currentTimeMillis() + jwtProperties.getRefreshTokenExpired().toMillis());
             refreshedToken = generateToken(claims, date);
         } catch (Exception e) {
             refreshedToken = null;
@@ -167,7 +151,7 @@ public class JwtTokenTool implements Serializable {
         claims.put("userId", info.getUserId());
         claims.put("roleId", info.getRoleId());
         claims.put("created", new Date());
-        Date date = new Date(System.currentTimeMillis() + expired);
+        Date date = new Date(System.currentTimeMillis() + jwtProperties.getTokenExpired().toMillis());
         return generateToken(claims, date);
     }
 
@@ -175,7 +159,7 @@ public class JwtTokenTool implements Serializable {
         Map<String, Object> claims = new HashMap<>(2);
         claims.put("sub", info.getUsername());
         claims.put("created", new Date());
-        Date date = new Date(System.currentTimeMillis() + refreshExpired);
+        Date date = new Date(System.currentTimeMillis() + jwtProperties.getRefreshTokenExpired().toMillis());
         return generateToken(claims, date);
     }
 
