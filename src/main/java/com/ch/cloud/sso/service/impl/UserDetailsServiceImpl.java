@@ -1,6 +1,7 @@
 package com.ch.cloud.sso.service.impl;
 
 import com.ch.NumS;
+import com.ch.StatusS;
 import com.ch.cloud.client.dto.PermissionDto;
 import com.ch.cloud.client.dto.RoleDto;
 import com.ch.cloud.client.dto.UserDto;
@@ -187,7 +188,8 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         vo.setUrl(permission.getUrl());
         vo.setRedirect(permission.getRedirect());
         vo.setSort(permission.getSort());
-        vo.setHidden(permission.isHidden());
+//        vo.setHidden(permission.isHidden());
+        vo.setHidden(CommonUtils.isEquals(permission.getIsShow(), StatusS.DISABLED));
         String pid = CommonUtils.isEquals(NumS._0, permission.getParentId()) ? permission.getId().toString() : StringExtUtils.linkStr(",", permission.getParentId(), permission.getId().toString());
         if ("1".equals(permission.getType()) && pidMap.get(pid) != null) {
             List<MenuVo> menuVos = pidMap.get(pid).stream().map(e -> assemblyMenu(e, pidMap))
