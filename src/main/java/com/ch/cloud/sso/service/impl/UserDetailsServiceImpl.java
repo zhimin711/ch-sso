@@ -191,7 +191,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
 //        vo.setHidden(permission.isHidden());
         vo.setHidden(CommonUtils.isEquals(permission.getIsShow(), StatusS.DISABLED));
         String pid = CommonUtils.isEquals(NumS._0, permission.getParentId()) ? permission.getId().toString() : StringExtUtils.linkStr(",", permission.getParentId(), permission.getId().toString());
-        if ("1".equals(permission.getType()) && pidMap.get(pid) != null) {
+        if (/*"1".equals(permission.getType()) && */pidMap.get(pid) != null) {
             List<MenuVo> menuVos = pidMap.get(pid).stream().map(e -> assemblyMenu(e, pidMap))
                     .sorted(Comparator.comparing(MenuVo::getSort)).collect(Collectors.toList());
             vo.setChildren(menuVos);
