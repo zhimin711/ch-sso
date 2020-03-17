@@ -82,12 +82,16 @@ public class LoginController {
 
     @ApiOperation(value = "刷新访问令牌", notes = "刷新访问令牌")
     @GetMapping(value = "login/token/refresh")
-    public Result<String> refresh(@RequestParam String token, @RequestParam String refreshToken) {
+    public Result<TokenVo> refresh(@RequestParam String token, @RequestParam String refreshToken) {
         return ResultUtils.wrapFail(() -> {
-            if(jwtTokenTool.isTokenExpired(refreshToken)){
+            TokenVo tokenVo = new TokenVo();
+            tokenVo.setToken(token);
+            tokenVo.setRefreshToken(refreshToken);
+            if(jwtTokenTool.isTokenExpired(tokenVo.getRefreshToken())){
                 ExceptionUtils._throw(PubError.EXPIRED, "刷新令牌已失效!");
             }
-            return userService.refreshToken(token);
+            userService.refreshToken(tokenVo);
+            return tokenVo;
         });
     }
 

@@ -1,5 +1,6 @@
 package com.ch.cloud.sso.tools;
 
+import com.ch.cloud.sso.pojo.TokenVo;
 import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.props.JwtProperties;
 import com.ch.e.PubError;
@@ -117,20 +118,21 @@ public class JwtTokenTool {
     /**
      * 刷新令牌
      *
-     * @param token 原令牌
+     * @param tokenVo 原令牌
      * @return 新令牌
      */
-    public String refreshToken(String token) {
-        String refreshedToken;
+    public void refreshToken(TokenVo tokenVo) {
         try {
-            Claims claims = getClaimsWithExpired(token);
+            Claims claims = getClaimsWithExpired(tokenVo.getToken());
             claims.put("created", new Date());
             Date date = new Date(System.currentTimeMillis() + jwtProperties.getRefreshTokenExpired().toMillis());
-            refreshedToken = generateToken(claims, date);
+            String refreshedToken = generateToken(claims, date);
+            tokenVo.setToken(refreshedToken);
+            tokenVo.setExpireAt(date.getTime());
         } catch (Exception e) {
-            refreshedToken = null;
+            log.error("refresh token error!", e);
+            throw ExceptionUtils.create(PubError.INVALID, "TOKEN " + tokenVo.getToken() + " 无效");
         }
-        return refreshedToken;
     }
 
     /**
@@ -152,6 +154,7 @@ public class JwtTokenTool {
         claims.put("roleId", info.getRoleId());
         claims.put("created", new Date());
         Date date = new Date(System.currentTimeMillis() + jwtProperties.getTokenExpired().toMillis());
+        info.setExpireAt(date.getTime());
         return generateToken(claims, date);
     }
 
@@ -174,10 +177,12 @@ public class JwtTokenTool {
         String username = claims.getSubject();
         Long userId = claims.get("userId", Long.class);
         Long roleId = claims.get("roleId", Long.class);
+
         UserInfo info = new UserInfo();
         info.setUsername(username);
         info.setUserId(userId);
         info.setRoleId(roleId);
+        info.setExpireAt(claims.getExpiration().getTime());
         return info;
     }
 }

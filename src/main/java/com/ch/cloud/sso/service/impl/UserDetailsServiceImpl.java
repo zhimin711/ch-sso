@@ -234,7 +234,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         String token = jwtTokenTool.generateToken(userInfo);
         String refreshToken = jwtTokenTool.generateRefreshToken(userInfo);
 
-        return new TokenVo(token, refreshToken);
+        return new TokenVo(token, refreshToken, userInfo.getExpireAt());
     }
 
     private RoleVo findRoleByUsername(String username) {
@@ -248,8 +248,8 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
 
 
     @Override
-    public String refreshToken(String oldToken) {
-        return jwtTokenTool.refreshToken(oldToken);
+    public void refreshToken(TokenVo tokenVo) {
+        jwtTokenTool.refreshToken(tokenVo);
     }
 
     @Override
@@ -267,7 +267,6 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
 
     @Override
     public UserInfo extractToken(String token) {
-
         return jwtTokenTool.getUserInfoFromToken(token);
     }
 

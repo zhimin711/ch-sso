@@ -22,8 +22,11 @@ public class TokenVo {
      */
     private String refreshToken;
 
-    public TokenVo(String token, String refreshToken) {
+    private Long expireAt;
+
+    public TokenVo(String token, String refreshToken, Long expireAt) {
         this.token = token;
         this.refreshToken = refreshToken;
+        this.expireAt = expireAt;
     }
 }

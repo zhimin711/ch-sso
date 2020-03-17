@@ -19,7 +19,7 @@ public interface IUserService {
 
     TokenVo login(String username, String password);
 
-    String refreshToken(String token);
+    void refreshToken(TokenVo tokenVo);
 
     /**
      * 校验TOKEN返回用户名
