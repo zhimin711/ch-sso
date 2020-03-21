@@ -2,7 +2,6 @@ package com.ch.cloud.sso.controller;
 
 import com.ch.Constants;
 import com.ch.cloud.client.dto.UserDto;
-import com.ch.cloud.sso.fclient.UpmsClientService;
 import com.ch.cloud.sso.pojo.TokenVo;
 import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.pojo.UserVo;
@@ -20,7 +19,6 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -38,10 +36,6 @@ import springfox.documentation.annotations.ApiIgnore;
 public class LoginController {
 
 
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
-    @Autowired
-    private UpmsClientService upmsClientService;
     @Autowired
     private JwtTokenTool jwtTokenTool;
 

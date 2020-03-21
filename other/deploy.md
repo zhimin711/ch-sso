@@ -17,6 +17,13 @@ sudo docker run --name ch-sso \
  -m 512M --memory-swap -1 \
 -d ch-sso:v1 ;
 ```
+```
+docker run --name ch-sso \
+-p 7000:7000 \
+ -v /home/zhimin/share/logs:/mnt/share/logs  \
+ -m 512M --memory-swap -1 \
+-d ch-sso:v1 ;
+```
 ### 重启 停止 删除
 ```
 sudo docker restart ch-sso;
