@@ -60,10 +60,6 @@ public class LoginController {
      * @return access_token
      */
     @ApiOperation(value = "获取用户访问令牌", notes = "基于密码模式登录,无需签名,返回access_token")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "username", required = true, value = "登录名", paramType = "form"),
-//            @ApiImplicitParam(name = "password", required = true, value = "登录密码", paramType = "form")
-//    })
     @PostMapping(value = "login/token/access", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Result<TokenVo> getLoginToken(@RequestBody UserDto user) {
 

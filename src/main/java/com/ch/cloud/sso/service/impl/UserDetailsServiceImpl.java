@@ -148,11 +148,13 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         if (!res3.isEmpty()) {
             Map<String, List<PermissionDto>> pidMap = res3.getRows().stream().collect(Collectors.groupingBy(PermissionDto::getParentId));
             List<PermissionDto> topList = pidMap.get("0");
-            topList.sort(Comparator.comparing(PermissionDto::getSort));
-            topList.forEach(r -> {
-                MenuVo menuVo = assemblyMenu(r, pidMap);
-                menuVos.add(menuVo);
-            });
+            if (topList != null && !topList.isEmpty()) {
+                topList.sort(Comparator.comparing(PermissionDto::getSort));
+                topList.forEach(r -> {
+                    MenuVo menuVo = assemblyMenu(r, pidMap);
+                    menuVos.add(menuVo);
+                });
+            }
         }
         /**
          * 构建一个按钮权限列表
