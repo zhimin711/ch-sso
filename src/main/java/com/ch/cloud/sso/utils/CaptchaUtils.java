@@ -14,7 +14,6 @@ public class CaptchaUtils {
         graphics.setColor(Color.WHITE);//设置画笔颜色-验证码背景色
 
         graphics.fillRect(0, 0, width, height);//填充背景
-
         graphics.setFont(new Font("微软雅黑", Font.BOLD, 40));
 
         //数字和字母的组合

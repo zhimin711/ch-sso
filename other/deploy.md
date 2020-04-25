@@ -27,9 +27,11 @@ docker run --name ch-sso \
 ### 重启 停止 删除
 ```
 docker restart ch-sso;
+
 docker stop ch-sso;
 docker rm ch-sso;
 docker rmi ch-sso:v1;
+
 ```
 
 ### 分配网络

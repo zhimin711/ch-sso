@@ -77,7 +77,7 @@ public class LoginController {
             return Result.error(PubError.USERNAME_OR_PASSWORD, "用户或者密码不能为空！");
         }
         String verifyCode = (String) request.getSession().getAttribute("verifyCode");
-        if (StringUtils.isEmpty(user.getCaptchaCode()) || StringUtils.isEmpty(verifyCode) || !CommonUtils.isEquals(verifyCode, user.getCaptchaCode())) {
+        if (StringUtils.isEmpty(user.getCaptchaCode()) || StringUtils.isEmpty(verifyCode) || !verifyCode.equalsIgnoreCase(user.getCaptchaCode())) {
             return Result.error(PubError.NOT_, "验证码错误或已过期！");
         }
         return ResultUtils.wrap(() -> userService.login(user.getUsername(), user.getPassword()));
