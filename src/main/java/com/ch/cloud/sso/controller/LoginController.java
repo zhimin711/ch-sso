@@ -117,8 +117,9 @@ public class LoginController {
             userVo.setPassword(null);
             UserInfo user = userService.extractToken(token);
             if (!CommonUtils.isEquals(role, user.getRoleId())) {
+                user.setRoleId(role);
                 String newToken = jwtTokenTool.generateToken(user);
-                userVo.setPassword(newToken);
+                userVo.setToken(newToken);
             }
             return Result.success(userVo);
         }

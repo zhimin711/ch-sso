@@ -26,6 +26,8 @@ public class UserVo extends UserDto {
 
     @ApiModelProperty(hidden = true)
     private String password;
+    @ApiModelProperty(hidden = true)
+    private String token;
 
     private Collection<RoleVo> roleList = new ArrayList<>();
     private Collection<MenuVo> menuList = new ArrayList<>();
