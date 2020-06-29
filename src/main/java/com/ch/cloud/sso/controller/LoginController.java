@@ -113,9 +113,12 @@ public class LoginController {
     public Result<UserVo> login(@RequestHeader(Constants.TOKEN_HEADER2) String token, @RequestParam Long role) {
         String username = userService.validate(token);
         if (CommonUtils.isNotEmpty(username)) {
+            UserInfo user = userService.extractToken(token);
+            if (role == 0 && user.getRoleId() > 0) {
+                role = user.getRoleId();
+            }
             UserVo userVo = userService.findUserInfo(username, role);
             userVo.setPassword(null);
-            UserInfo user = userService.extractToken(token);
             if (!CommonUtils.isEquals(role, user.getRoleId())) {
                 user.setRoleId(role);
                 String newToken = jwtTokenTool.generateToken(user);

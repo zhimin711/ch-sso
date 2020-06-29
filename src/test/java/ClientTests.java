@@ -8,6 +8,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
  */
 public class ClientTests {
 
+    Object o;
+
     @Test
     public void test() {
         String str = new BCryptPasswordEncoder().encode("secret");
@@ -17,9 +19,10 @@ public class ClientTests {
 
     @Test
     public void token() {
-        String s = "eyJhbGciOiJIUzUxMiJ9.eyJleHAiOjE1NzUwMTgwOTEsInN1YiI6InRlc3QiLCJjcmVhdGVkIjoxNTc0OTMxNjkxNzEyfQ.YtN34sHM3AZ0vlZRGYa7wsU6pUTEEKTbLTDAZHS20bIAdPI8MZh16DdugBpBRj7TGETNvfWZ2ZF_QnNn-vqAZA";
+        String s = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0MDEiLCJleHAiOjE1OTM0NDcwOTQsInVzZXJJZCI6bnVsbCwicm9sZUlkIjowLCJjcmVhdGVkIjoxNTkzNDQ1Mjk0NzE4fQ.82dR0S5zdM8uOI1elHWtTGhBwV0Ac8vuP09OI2I_DjSFIqIRKk1NHgZkYXGtQ4eDCyRLvugFd7RgGEzSyjUYIw";
         JwtTokenTool tokenTool = new JwtTokenTool();
 //        tokenTool.setSecret("eyJleHAiOjE1NDMyMDUyODUsInN1YiI6ImFkbWluIiwiY3Jl");
+        o = tokenTool.getUserInfoFromToken(s);
         System.out.println(tokenTool.isTokenExpired(s));
     }
 }
