@@ -127,10 +127,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
          */
         Result<PermissionDto> res3;
         Result<PermissionDto> res4;
-        if ((roleList.isEmpty() && "SUPER_ADMIN".equals(res2.get().getCode())) || (!roleList.isEmpty() && "SUPER_ADMIN".equals(roleList.get(0).getCode()))) {
-            res3 = upmsClientService.findMenusByRoleId(0L);
-            res4 = upmsClientService.findPermissionsByRoleId(0L);
-        } else if (roleId != null && roleId > 0) {
+        if (roleId != null && roleId > 0) {
             res3 = upmsClientService.findMenusByRoleId(roleId);
             res4 = upmsClientService.findPermissionsByRoleId(roleId);
         } else {
@@ -227,11 +224,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         userInfo.setUsername(username);
         RoleVo roleVo = findRoleByUsername(username);
         if (roleVo != null) {
-            if ("SUPER_ADMIN".equals(roleVo.getCode())) {
-                userInfo.setRoleId(0L);
-            } else {
-                userInfo.setRoleId(roleVo.getId());
-            }
+            userInfo.setRoleId(roleVo.getId());
         }
         String token = jwtTokenTool.generateToken(userInfo);
         String refreshToken = jwtTokenTool.generateRefreshToken(userInfo);
