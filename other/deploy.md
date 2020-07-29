@@ -12,14 +12,12 @@ docker build -t ch-sso:v1 /home/zhimin/docker/ch-sso
 ### 启动
 ```
 docker run --name ch-sso \
---net=none \
- -v /home/zhimin/share/logs:/mnt/share/logs  \
- -m 512M --memory-swap -1 \
+-p 7000:7000 \
 -d ch-sso:v1 ;
 ```
 ```
 docker run --name ch-sso \
--p 7000:7000 \
+--net=none \
  -v /home/zhimin/share/logs:/mnt/share/logs  \
  -m 512M --memory-swap -1 \
 -d ch-sso:v1 ;
