@@ -167,6 +167,12 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
                  * */
                 buttonVos.add(new BtnVo(permission.getParentId(), permission.getCode(), permission.getName()));
             });
+            res3.getRows().forEach(permission -> {
+                //hidden menu add to btn permission
+                if (CommonUtils.isEquals(permission.getType(), NumS._4)) {
+                    buttonVos.add(new BtnVo(permission.getParentId(), permission.getCode(), permission.getName()));
+                }
+            });
         }
         /**
          * 注意这个类 TreeBuilder。因为的vue router是以递归的形式呈现菜单
