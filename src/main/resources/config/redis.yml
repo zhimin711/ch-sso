@@ -1,0 +1,7 @@
+spring:
+  redis:
+    database: 6
+    sentinel:
+      master: SHIVA_TRTMS_GROUND_REDIS
+      nodes: 10.202.107.128:8002,10.202.107.128:8003,10.202.107.128:8004
+    password: admin.123
