@@ -2,7 +2,7 @@
 
 #### 介绍
 单点登录（SingleSignOn,SSO）是保障各业务系统的用户资源的安全 。  
-各个业务系统获得的信息是，这个用户能不能访问我的资源。  
+各个业务系统获得的信息是私有的，用户能不能访问资源由SSO提供。  
 
 单点登录，资源都在各个业务系统这边，不在SSO那一方。 用户在给SSO服务器提供了用户名密码后，作为业务系统并不知道这件事。 SSO随便给业务系统一个ST，那么业务系统是不能确定这个ST是用户伪造的，还是真的有效，所以要拿着这个ST去SSO服务器再问一下，这个用户给我的ST是否有效，是有效的我才能让这个用户访问
 
@@ -11,6 +11,7 @@
 * 使用Jwt生成、刷新与验证token
 * 使用Awt Image生成验证码
 * 使用Redis 缓存Token与验证码
+* 已集群Oauth2（默认未配置）
 
 #### 软件架构
 请参见Wiki文档 [传送门](https://gitee.com/ch-cloud/wiki)
@@ -89,10 +90,7 @@ gradle bootJar
 #### 使用说明
 
 
-1. swagger 
-http://localhost:7000/auth/swagger-ui.html
-2. xxxx
-3. xxxx
+1. 请参见Wiki文档 [传送门](https://gitee.com/ch-cloud/wiki)
 
 #### 参与贡献
 
@@ -100,20 +98,3 @@ http://localhost:7000/auth/swagger-ui.html
 2. 新建 Feat_xxx 分支
 3. 提交代码
 4. 新建 Pull Request
-
-
-#### 码云特技
-
-1. 使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2. 码云官方博客 [blog.gitee.com](https://blog.gitee.com)
-3. 你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解码云上的优秀开源项目
-4. [GVP](https://gitee.com/gvp) 全称是码云最有价值开源项目，是码云综合评定出的优秀开源项目
-5. 码云官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6. 码云封面人物是一档用来展示码云会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
-
-
-[Spring核心组件详解（Bean、Context、Core）](https://blog.csdn.net/zlfprogram/article/details/75937935)
-[Dubbo 问题](https://blog.csdn.net/Y0Q2T57s/article/details/83005376)
-[Redis 问题](https://www.jianshu.com/p/36a646cef11a)
-[Java NIO系列教程（一） Java NIO 概述](http://ifeve.com/overview/)  
-[CentOS7 安装 MariaDB10.3](https://blog.csdn.net/KradMe/article/details/80763718)
