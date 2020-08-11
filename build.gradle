@@ -8,9 +8,6 @@ apply plugin: 'io.spring.dependency-management'
 group = 'com.ch.cloud'
 version = '1.0.0-SNAPSHOT'
 
-sourceCompatibility = 1.8
-
-//mainClassName = 'com.ch.cloud.eureka.EurekaServerApplication'
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -18,7 +15,9 @@ configurations {
 }
 repositories {
     mavenLocal()
-    jcenter()
+    maven {
+        url 'https://maven.aliyun.com/repository/public/'
+    }
     mavenCentral()
     maven { url 'https://repo.spring.io/milestone' }
 }
@@ -37,7 +36,7 @@ dependencies {
 
 //    implementation("com.ch:ch-core:${chVersion}")
 //    implementation("com.ch:ch-upms-api:${chUpmsApiVersion}")
-    implementation(fileTree("${rootDir}/libs/zhaohua"))
+    implementation(fileTree("${rootDir}/other/libs/zhaohua"))
 
     implementation "org.springframework.cloud:spring-cloud-starter-alibaba-nacos-config:${aliCloudVersion}"
     implementation "org.springframework.cloud:spring-cloud-starter-alibaba-nacos-discovery:${aliCloudVersion}"
