@@ -34,9 +34,9 @@ ext {
 
 dependencies {
 
-//    implementation("com.ch:ch-core:${chVersion}")
-//    implementation("com.ch:ch-upms-api:${chUpmsApiVersion}")
-    implementation(fileTree("${rootDir}/other/libs/zhaohua"))
+    implementation("com.ch:ch-core:${chVersion}")
+    implementation("com.ch:ch-upms-api:${chUpmsApiVersion}")
+//    implementation(fileTree("${rootDir}/other/libs/zhaohua"))
 
     implementation "org.springframework.cloud:spring-cloud-starter-alibaba-nacos-config:${aliCloudVersion}"
     implementation "org.springframework.cloud:spring-cloud-starter-alibaba-nacos-discovery:${aliCloudVersion}"
