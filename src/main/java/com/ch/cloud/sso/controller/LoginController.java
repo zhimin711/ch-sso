@@ -111,22 +111,25 @@ public class LoginController {
     })
     @GetMapping("login/token/user")
     public Result<UserVo> login(@RequestHeader(Constants.TOKEN_HEADER2) String token, @RequestParam Long role) {
-        String username = userService.validate(token);
-        if (CommonUtils.isNotEmpty(username)) {
-            UserInfo user = userService.extractToken(token);
-            if (role == 0 && user.getRoleId() > 0) {
-                role = user.getRoleId();
+        return ResultUtils.wrapFail(() -> {
+            Long r = role;
+            String username = userService.validate(token);
+            if (CommonUtils.isEmpty(username)) {
+                ExceptionUtils._throw(PubError.INVALID, "访问令牌已失效!");
             }
-            UserVo userVo = userService.findUserInfo(username, role);
+            UserInfo user = userService.extractToken(token);
+            if (r == 0 && user.getRoleId() > 0) {
+                r = user.getRoleId();
+            }
+            UserVo userVo = userService.findUserInfo(username, r);
             userVo.setPassword(null);
-            if (!CommonUtils.isEquals(role, user.getRoleId())) {
-                user.setRoleId(role);
+            if (!CommonUtils.isEquals(r, user.getRoleId())) {
+                user.setRoleId(r);
                 String newToken = jwtTokenTool.generateToken(user);
                 userVo.setToken(newToken);
             }
-            return Result.success(userVo);
-        }
-        return Result.error(PubError.INVALID, "访问令牌已失效!");
+            return userVo;
+        });
     }
 
     @GetMapping(value = "login/token/info")
