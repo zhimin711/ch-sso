@@ -1,5 +1,8 @@
+import com.alibaba.fastjson.JSON;
 import com.ch.cloud.sso.tools.JwtTokenTool;
+import com.ch.cloud.sso.utils.CaptchaUtils;
 import com.ch.cloud.sso.utils.JwtUtils;
+import com.ch.cloud.sso.utils.SlideCaptchaUtil;
 import org.junit.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -24,5 +27,12 @@ public class ClientTests {
 //        tokenTool.setSecret("eyJleHAiOjE1NDMyMDUyODUsInN1YiI6ImFkbWluIiwiY3Jl");
         o = tokenTool.getUserInfoFromToken(s);
         System.out.println(tokenTool.isTokenExpired(s));
+    }
+
+    @Test
+    public void captcha() {
+//        CaptchaUtils.selectSlideVerificationCode();
+        o = SlideCaptchaUtil.build();
+        System.out.println(JSON.toJSONString(o));
     }
 }

@@ -1,8 +1,20 @@
 package com.ch.cloud.sso.utils;
 
+import com.ch.cloud.sso.pojo.SlideCaptcha;
+import com.ch.e.PubError;
+import com.ch.utils.ExceptionUtils;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public class CaptchaUtils {
 
@@ -76,9 +88,100 @@ public class CaptchaUtils {
     private static Color getRandomColor() {
         Random ran = new Random();
 
-        Color color = new Color(ran.nextInt(256), ran.nextInt(256), ran.nextInt(256));
-
-        return color;
+        return new Color(ran.nextInt(256), ran.nextInt(256), ran.nextInt(256));
 
     }
+
+    //  默认图片宽度
+    private static final int DEFAULT_IMAGE_WIDTH = 280;
+
+    //  默认图片高度
+    private static final int DEFAULT_IMAGE_HEIGHT = 171;
+
+    private static final List<String> verifyImages = Lists.newArrayList();
+
+    /**
+     * 获取滑动验证码
+     * //     * @param imageVerificationDto 验证码参数
+     *
+     * @return 滑动验证码
+     */
+    public static SlideCaptcha selectSlideVerificationCode() {
+
+        SlideCaptcha slideCaptcha ;
+        try {
+//            //  原图路径，这种方式不推荐。当运行jar文件的时候，路径是找不到的，我的路径是写到配置文件中的。
+//            String verifyImagePath = URLDecoder.decode(this.getClass().getResource("/").getPath() + "static/targets", "UTF-8");
+
+//            获取模板文件，。推荐文件通过流读取， 因为文件在开发中的路径和打成jar中的路径是不一致的
+//            InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream("static/template/1.png");
+            if (verifyImages.isEmpty()) {
+                synchronized (verifyImages) {
+                    initCaptcha();
+                }
+            }
+
+            Random random = new Random(System.currentTimeMillis());
+            //  随机取得原图文件夹中一张图片
+            String origImageFilePath = verifyImages.get(random.nextInt(verifyImages.size()));
+            File originImageFile = new File(origImageFilePath);
+
+            String path = CaptchaUtils.class.getResource("/static/images/captcha").getPath();
+            //  获取模板图片文件
+            File templateImageFile = new File(path + "/template.png");
+
+            //  获取描边图片文件
+            File borderImageFile = new File(path + "/border.png");
+            //  获取描边图片类型
+            String borderImageFileType = borderImageFile.getName().substring(borderImageFile.getName().lastIndexOf(".") + 1);
+
+            //  获取原图文件类型
+            String originImageFileType = originImageFile.getName().substring(originImageFile.getName().lastIndexOf(".") + 1);
+            //  获取模板图文件类型
+            String templateImageFileType = templateImageFile.getName().substring(templateImageFile.getName().lastIndexOf(".") + 1);
+
+            //  读取原图
+            BufferedImage verificationImage = ImageIO.read(originImageFile);
+            //  读取模板图
+            BufferedImage readTemplateImage = ImageIO.read(templateImageFile);
+
+            //  读取描边图片
+            BufferedImage borderImage = ImageIO.read(borderImageFile);
+
+
+            //  获取原图感兴趣区域坐标
+            slideCaptcha = ImageVerifyUtil.generateCutoutCoordinates(verificationImage, readTemplateImage);
+
+            int Y = slideCaptcha.getY();
+            //  在分布式应用中，可将session改为redis存储
+//            getRequest().getSession().setAttribute("imageVerificationVo", imageVerificationVo);
+
+            //  根据原图生成遮罩图和切块图
+            slideCaptcha = ImageVerifyUtil.pictureTemplateCutout(originImageFile, originImageFileType, templateImageFile, templateImageFileType, slideCaptcha.getX(), slideCaptcha.getY());
+
+            //   剪切图描边
+            slideCaptcha = ImageVerifyUtil.cutoutImageEdge(slideCaptcha, borderImage, borderImageFileType);
+            slideCaptcha.setY(Y);
+
+            return slideCaptcha;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+
+        }
+        return  null;
+    }
+
+    private static void initCaptcha() {
+        String path = CaptchaUtils.class.getResource("/static/images/captcha/orig").getPath();
+        File verifyImageDir = new File(path);
+        File[] verifyImageFiles = verifyImageDir.listFiles();
+        if (verifyImageFiles == null || verifyImageFiles.length == 0) {
+            ExceptionUtils._throw(PubError.NOT_EXISTS, "验证码图片文件不存在！");
+        }
+        for (File f : verifyImageFiles) {
+            verifyImages.add(f.getPath());
+        }
+    }
+
 }

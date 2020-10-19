@@ -9,6 +9,7 @@ import com.ch.cloud.sso.pojo.UserVo;
 import com.ch.cloud.sso.service.IUserService;
 import com.ch.cloud.sso.tools.JwtTokenTool;
 import com.ch.cloud.sso.utils.CaptchaUtils;
+import com.ch.cloud.sso.utils.SlideCaptchaUtil;
 import com.ch.e.PubError;
 import com.ch.result.Result;
 import com.ch.result.ResultUtils;
@@ -165,4 +166,10 @@ public class LoginController {
         return null;
     }
 
+    @GetMapping("login/slideCaptcha")
+    public Result<?> getSlideCaptcha(HttpServletRequest request, HttpServletResponse response) {
+
+//        return ResultUtils.wrapFail(SlideCaptchaUtil::build);
+        return ResultUtils.wrapFail(CaptchaUtils::selectSlideVerificationCode);
+    }
 }
