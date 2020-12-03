@@ -31,8 +31,8 @@ public class ClientTests {
 
     @Test
     public void captcha() {
-//        CaptchaUtils.selectSlideVerificationCode();
-        o = SlideCaptchaUtil.build();
+       o =  CaptchaUtils.selectSlideVerificationCode();
+//        o = SlideCaptchaUtil.build();
         System.out.println(JSON.toJSONString(o));
     }
 }
