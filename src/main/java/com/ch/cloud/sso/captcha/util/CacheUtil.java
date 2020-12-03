@@ -1,6 +1,7 @@
 
 package com.ch.cloud.sso.captcha.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,10 +16,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author zhimin.ma
  * @date 2021/1/1
  */
+@Slf4j
 public final class CacheUtil {
-    private static final Logger logger = LoggerFactory.getLogger(CacheUtil.class);
 
-    private static final Map<String, Object> CACHE_MAP = new ConcurrentHashMap<String, Object>();
+    private static final Map<String, Object> CACHE_MAP = new ConcurrentHashMap<>();
 
     /**
      * 缓存最大个数
@@ -49,7 +50,7 @@ public final class CacheUtil {
      * 缓存刷新,清除过期数据
      */
     public static void refresh() {
-        logger.info("local缓存刷新,清除过期数据");
+        log.info("local缓存刷新,清除过期数据");
         for (String key : CACHE_MAP.keySet()) {
             exists(key);
         }
@@ -59,7 +60,7 @@ public final class CacheUtil {
     public static void set(String key, String value, long expiresInSeconds) {
         //设置阈值，达到即clear缓存
         if (CACHE_MAP.size() > CACHE_MAX_NUMBER * 2) {
-            logger.info("CACHE_MAP达到阈值，clear map");
+            log.info("CACHE_MAP达到阈值，clear map");
             clear();
         }
         CACHE_MAP.put(key, value);
@@ -95,7 +96,7 @@ public final class CacheUtil {
      * 删除所有缓存
      */
     public static void clear() {
-        logger.info("have clean all key !");
+        log.info("have clean all key !");
         CACHE_MAP.clear();
     }
 }

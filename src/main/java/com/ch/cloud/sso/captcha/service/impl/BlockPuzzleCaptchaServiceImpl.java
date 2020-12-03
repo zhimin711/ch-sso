@@ -3,7 +3,6 @@ package com.ch.cloud.sso.captcha.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.ch.cloud.sso.captcha.model.common.CaptchaTypeEnum;
 import com.ch.cloud.sso.captcha.model.common.RepCodeEnum;
-import com.ch.cloud.sso.captcha.model.common.ResponseModel;
 import com.ch.cloud.sso.captcha.model.vo.CaptchaVO;
 import com.ch.cloud.sso.captcha.model.vo.PointVO;
 import com.ch.cloud.sso.captcha.util.AESUtil;
@@ -118,7 +117,7 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
         }
         String secondKey = String.format(REDIS_SECOND_CAPTCHA_KEY, value);
         CaptchaServiceFactory.getCache(cacheType).set(secondKey, captchaVO.getToken(), EXPIRESIN_THREE);
-        captchaVO.setResult(true);
+//        captchaVO.setResult(true);
         return captchaVO;
     }
 

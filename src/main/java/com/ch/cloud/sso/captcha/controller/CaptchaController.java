@@ -1,6 +1,5 @@
 package com.ch.cloud.sso.captcha.controller;
 
-import com.ch.cloud.sso.captcha.model.common.ResponseModel;
 import com.ch.cloud.sso.captcha.model.vo.CaptchaVO;
 import com.ch.cloud.sso.captcha.service.CaptchaService;
 import com.ch.result.Result;

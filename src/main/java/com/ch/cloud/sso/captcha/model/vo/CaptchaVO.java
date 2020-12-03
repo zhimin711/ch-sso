@@ -28,11 +28,11 @@ public class CaptchaVO implements Serializable {
      */
     private String captchaType;
 
-    private String captchaOriginalPath;
+//    private String captchaOriginalPath;
 
-    private String captchaFontType;
+//    private String captchaFontType;
 
-    private Integer captchaFontSize;
+//    private Integer captchaFontSize;
 
     private String secretKey;
 
@@ -76,7 +76,7 @@ public class CaptchaVO implements Serializable {
     /**
      * 校验结果
      */
-    private Boolean result = false;
+//    private Boolean result = false;
 
     /**
      * 后台二次校验参数

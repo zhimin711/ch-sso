@@ -52,18 +52,5 @@ public enum RepCodeEnum {
         return this.name();
     }
 
-    /** 将入参fieldNames与this.desc组合成错误信息
-     *  {fieldName}不能为空
-     * @param fieldNames
-     * @return
-     */
-    public ResponseModel parseError(Object... fieldNames) {
-        ResponseModel errorMessage=new ResponseModel();
-        String newDesc = MessageFormat.format(this.desc, fieldNames);
-
-        errorMessage.setRepCode(this.code);
-        errorMessage.setRepMsg(newDesc);
-        return errorMessage;
-    }
 
 }
