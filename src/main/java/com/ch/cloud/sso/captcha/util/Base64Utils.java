@@ -1,14 +1,15 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
-
 package com.ch.cloud.sso.captcha.util;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+/**
+ * decs:Base64 工具类
+ *
+ * @author zhimin.ma
+ * @date 2021/1/1
+ */
 public abstract class Base64Utils {
     private static final Charset DEFAULT_CHARSET;
 

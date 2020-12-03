@@ -2,7 +2,7 @@ package com.ch.cloud.sso.captcha.config;
 
 
 import com.ch.cloud.sso.captcha.model.common.Const;
-import com.ch.cloud.sso.captcha.properties.AjCaptchaProperties;
+import com.ch.cloud.sso.captcha.properties.CaptchaProperties;
 import com.ch.cloud.sso.captcha.service.CaptchaService;
 import com.ch.cloud.sso.captcha.service.impl.CaptchaServiceFactory;
 import com.ch.cloud.sso.captcha.util.ImageUtils;
@@ -22,14 +22,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * decs:验证码服务初始化
+ *
+ * @author zhimin.ma
+ * @date 2021/1/1
+ */
 @Configuration
-public class AjCaptchaServiceAutoConfiguration {
+public class CaptchaServiceAutoConfiguration {
 
-    private static Logger logger = LoggerFactory.getLogger(AjCaptchaServiceAutoConfiguration.class);
+    private static Logger logger = LoggerFactory.getLogger(CaptchaServiceAutoConfiguration.class);
 
     @Bean
     @ConditionalOnMissingBean
-    public CaptchaService captchaService(AjCaptchaProperties prop) {
+    public CaptchaService captchaService(CaptchaProperties prop) {
         logger.info("自定义配置项：{}", prop.toString());
         Properties config = new Properties();
         config.put(Const.CAPTCHA_CACHETYPE, prop.getCacheType().name());

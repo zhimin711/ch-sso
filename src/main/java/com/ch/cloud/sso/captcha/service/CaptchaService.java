@@ -1,11 +1,4 @@
-/*
- *Copyright © 2018 anji-plus
- *安吉加加信息技术有限公司
- *http://www.anji-plus.com
- *All rights reserved.
- */
 package com.ch.cloud.sso.captcha.service;
-
 
 import com.ch.cloud.sso.captcha.model.common.ResponseModel;
 import com.ch.cloud.sso.captcha.model.vo.CaptchaVO;
@@ -13,19 +6,21 @@ import com.ch.cloud.sso.captcha.model.vo.CaptchaVO;
 import java.util.Properties;
 
 /**
- * 验证码服务接口
- * @author lide1202@hotmail.com
- * @date 2020-05-12
+ * decs:验证码服务接口
+ *
+ * @author zhimin.ma
+ * @date 2021/1/1
  */
 public interface CaptchaService {
     /**
      * 配置初始化
-     * @throws Exception
+     *
      */
     void init(Properties config);
 
     /**
      * 获取验证码
+     *
      * @param captchaVO
      * @return
      */
@@ -33,6 +28,7 @@ public interface CaptchaService {
 
     /**
      * 核对验证码(前端)
+     *
      * @param captchaVO
      * @return
      */
@@ -40,6 +36,7 @@ public interface CaptchaService {
 
     /**
      * 二次校验验证码(后端)
+     *
      * @param captchaVO
      * @return
      */

@@ -1,9 +1,3 @@
-/*
- *Copyright © 2018 anji-plus
- *安吉加加信息技术有限公司
- *http://www.anji-plus.com
- *All rights reserved.
- */
 package com.ch.cloud.sso.captcha.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
@@ -26,9 +20,10 @@ import java.util.List;
 import java.util.*;
 
 /**
- * 点选文字验证码
- * <p>
- * Created by raodeming on 2019/12/25.
+ * decs:点选文字验证码.
+ *
+ * @author zhimin.ma
+ * @date 2021/1/1
  */
 public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
     private static Logger logger = LoggerFactory.getLogger(ClickWordCaptchaServiceImpl.class);
@@ -52,8 +47,7 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
             return ResponseModel.errorMsg(RepCodeEnum.API_CAPTCHA_BASEMAP_NULL);
         }
         CaptchaVO imageData = getImageData(bufferedImage);
-        if (imageData == null
-                || StringUtils.isBlank(imageData.getOriginalImageBase64())) {
+        if (StringUtils.isBlank(imageData.getOriginalImageBase64())) {
             return ResponseModel.errorMsg(RepCodeEnum.API_CAPTCHA_ERROR);
         }
         return ResponseModel.successData(imageData);

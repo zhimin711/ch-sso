@@ -1,9 +1,3 @@
-/*
- *Copyright © 2018 anji-plus
- *安吉加加信息技术有限公司
- *http://www.anji-plus.com
- *All rights reserved.
- */
 package com.ch.cloud.sso.captcha.service.impl;
 
 import com.ch.cloud.sso.captcha.model.common.RepCodeEnum;
@@ -17,7 +11,10 @@ import org.slf4j.LoggerFactory;
 import java.util.Properties;
 
 /**
- * Created by raodeming on 2019/12/25.
+ * decs:默认验证码.
+ *
+ * @author zhimin.ma
+ * @date 2021/1/1
  */
 public class DefaultCaptchaServiceImpl extends AbstractCaptchaService {
 

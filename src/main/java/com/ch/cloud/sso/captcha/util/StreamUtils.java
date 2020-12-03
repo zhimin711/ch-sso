@@ -1,12 +1,14 @@
 package com.ch.cloud.sso.captcha.util;
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
 
 import java.io.*;
 import java.nio.charset.Charset;
 
+/**
+ * decs:输入输出流工具类
+ *
+ * @author zhimin.ma
+ * @date 2021/1/1
+ */
 public abstract class StreamUtils {
     public static final int BUFFER_SIZE = 4096;
     private static final byte[] EMPTY_CONTENT = new byte[0];
@@ -19,7 +21,7 @@ public abstract class StreamUtils {
             return new byte[0];
         } else {
             ByteArrayOutputStream out = new ByteArrayOutputStream(4096);
-            copy((InputStream)in, out);
+            copy((InputStream) in, out);
             return out.toByteArray();
         }
     }
@@ -34,7 +36,7 @@ public abstract class StreamUtils {
             boolean var5 = true;
 
             int bytesRead;
-            while((bytesRead = reader.read(buffer)) != -1) {
+            while ((bytesRead = reader.read(buffer)) != -1) {
                 out.append(buffer, 0, bytesRead);
             }
 
@@ -57,7 +59,7 @@ public abstract class StreamUtils {
         byte[] buffer = new byte[4096];
 
         int bytesRead;
-        for(boolean var4 = true; (bytesRead = in.read(buffer)) != -1; byteCount += bytesRead) {
+        for (boolean var4 = true; (bytesRead = in.read(buffer)) != -1; byteCount += bytesRead) {
             out.write(buffer, 0, bytesRead);
         }
 
@@ -73,17 +75,17 @@ public abstract class StreamUtils {
             long bytesToCopy = end - start + 1L;
             byte[] buffer = new byte[4096];
 
-            while(bytesToCopy > 0L) {
+            while (bytesToCopy > 0L) {
                 int bytesRead = in.read(buffer);
                 if (bytesRead == -1) {
                     break;
                 }
 
-                if ((long)bytesRead <= bytesToCopy) {
+                if ((long) bytesRead <= bytesToCopy) {
                     out.write(buffer, 0, bytesRead);
-                    bytesToCopy -= (long)bytesRead;
+                    bytesToCopy -= (long) bytesRead;
                 } else {
-                    out.write(buffer, 0, (int)bytesToCopy);
+                    out.write(buffer, 0, (int) bytesToCopy);
                     bytesToCopy = 0L;
                 }
             }
@@ -96,7 +98,7 @@ public abstract class StreamUtils {
         byte[] buffer = new byte[4096];
         int byteCount;
         int bytesRead;
-        for(byteCount = 0; (bytesRead = in.read(buffer)) != -1; byteCount += bytesRead) {
+        for (byteCount = 0; (bytesRead = in.read(buffer)) != -1; byteCount += bytesRead) {
         }
 
         return byteCount;

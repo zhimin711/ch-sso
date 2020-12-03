@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 /**
  * decs:
  *
- * @author 01370603
+ * @author zhimin.ma
  * @date 2019/9/9
  */
 public interface IUserService {

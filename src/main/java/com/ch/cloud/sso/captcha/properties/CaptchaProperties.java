@@ -3,12 +3,17 @@ package com.ch.cloud.sso.captcha.properties;
 import com.ch.cloud.sso.captcha.model.common.CaptchaTypeEnum;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import static com.ch.cloud.sso.captcha.properties.AjCaptchaProperties.PREFIX;
-import static com.ch.cloud.sso.captcha.properties.AjCaptchaProperties.StorageType.local;
+import static com.ch.cloud.sso.captcha.properties.CaptchaProperties.PREFIX;
+import static com.ch.cloud.sso.captcha.properties.CaptchaProperties.StorageType.local;
 
-
+/**
+ * decs:验证码配置.
+ *
+ * @author zhimin.ma
+ * @date 2021/1/1
+ */
 @ConfigurationProperties(PREFIX)
-public class AjCaptchaProperties {
+public class CaptchaProperties {
 
     public static final String PREFIX = "aj.captcha";
 

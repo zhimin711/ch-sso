@@ -1,16 +1,16 @@
-/*
- *Copyright © 2018 anji-plus
- *安吉加加信息技术有限公司
- *http://www.anji-plus.com
- *All rights reserved.
- */
+
 package com.ch.cloud.sso.captcha.util;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Random;
 import java.util.UUID;
 
-
+/**
+ * decs:随机工具类
+ *
+ * @author zhimin.ma
+ * @date 2021/1/1
+ */
 public class RandomUtils {
 
     /**
@@ -63,12 +63,13 @@ public class RandomUtils {
 
     /**
      * 随机范围内数字
+     *
      * @param startNum
      * @param endNum
      * @return
      */
     public static Integer getRandomInt(int startNum, int endNum) {
-        return new Random().nextInt(endNum-startNum) + startNum;
+        return new Random().nextInt(endNum - startNum) + startNum;
     }
 
     public static void main(String[] args) {
@@ -81,15 +82,16 @@ public class RandomUtils {
 
     /**
      * 获取随机字符串
+     *
      * @param length
      * @return
      */
-    public static String getRandomString(int length){
-        String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        Random random=new Random();
-        StringBuffer sb=new StringBuffer();
-        for(int i=0;i<length;i++){
-            int number=random.nextInt(62);
+    public static String getRandomString(int length) {
+        String str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random random = new Random();
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < length; i++) {
+            int number = random.nextInt(62);
             sb.append(str.charAt(number));
         }
         return sb.toString();

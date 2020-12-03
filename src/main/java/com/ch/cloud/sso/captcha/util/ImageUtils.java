@@ -1,9 +1,4 @@
-/*
- *Copyright © 2018 anji-plus
- *安吉加加信息技术有限公司
- *http://www.anji-plus.com
- *All rights reserved.
- */
+
 package com.ch.cloud.sso.captcha.util;
 
 import com.alibaba.fastjson.JSONObject;
@@ -20,12 +15,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-
+/**
+ * decs:验证码服务接口
+ *
+ * @author zhimin.ma
+ * @date 2021/1/1
+ */
 public class ImageUtils {
     private static Logger logger = LoggerFactory.getLogger(ImageUtils.class);
-    private static Map<String, String> originalCacheMap = new ConcurrentHashMap();  //滑块底图
-    private static Map<String, String> slidingBlockCacheMap = new ConcurrentHashMap(); //滑块
-    private static Map<String, String> picClickCacheMap = new ConcurrentHashMap(); //点选文字
+    private static Map<String, String> originalCacheMap = new ConcurrentHashMap<>();  //滑块底图
+    private static Map<String, String> slidingBlockCacheMap = new ConcurrentHashMap<>(); //滑块
+    private static Map<String, String> picClickCacheMap = new ConcurrentHashMap<>(); //点选文字
     private static Map<String, String[]> fileNameMap = new ConcurrentHashMap<>();
 
     public static void cacheImage(String captchaOriginalPathJigsaw, String captchaOriginalPathClick) {

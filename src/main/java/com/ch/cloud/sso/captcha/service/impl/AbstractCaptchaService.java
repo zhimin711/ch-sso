@@ -1,9 +1,3 @@
-/*
- *Copyright © 2018 anji-plus
- *安吉加加信息技术有限公司
- *http://www.anji-plus.com
- *All rights reserved.
- */
 package com.ch.cloud.sso.captcha.service.impl;
 
 import com.ch.cloud.sso.captcha.model.common.Const;
@@ -22,7 +16,10 @@ import java.util.Base64;
 import java.util.Properties;
 
 /**
- * Created by raodeming on 2019/12/25.
+ * decs:验证码服务抽象类.
+ *
+ * @author zhimin.ma
+ * @date 2021/1/1
  */
 public abstract class AbstractCaptchaService implements CaptchaService {
 

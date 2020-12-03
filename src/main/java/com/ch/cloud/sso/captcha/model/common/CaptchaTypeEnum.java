@@ -1,18 +1,24 @@
 package com.ch.cloud.sso.captcha.model.common;
 
+/**
+ * decs:验证码类型
+ *
+ * @author zhimin.ma
+ * @date 2021/1/1
+ */
 public enum CaptchaTypeEnum {
     /**
      * 滑块拼图.
      */
-    BLOCKPUZZLE("blockPuzzle","滑块拼图"),
+    BLOCKPUZZLE("blockPuzzle", "滑块拼图"),
     /**
      * 文字点选.
      */
-    CLICKWORD("clickWord","文字点选"),
+    CLICKWORD("clickWord", "文字点选"),
     /**
      * 默认.
      */
-    DEFAULT("default","默认");
+    DEFAULT("default", "默认");
 
     private String codeValue;
     private String codeDesc;
@@ -22,31 +28,39 @@ public enum CaptchaTypeEnum {
         this.codeDesc = codeDesc;
     }
 
-    public String   getCodeValue(){ return this.codeValue;}
+    public String getCodeValue() {
+        return this.codeValue;
+    }
 
-    public String getCodeDesc(){ return this.codeDesc;}
+    public String getCodeDesc() {
+        return this.codeDesc;
+    }
 
     //根据codeValue获取枚举
-    public static CaptchaTypeEnum parseFromCodeValue(String codeValue){
-        for (CaptchaTypeEnum e : CaptchaTypeEnum.values()){
-            if(e.codeValue.equals(codeValue)){ return e;}
+    public static CaptchaTypeEnum parseFromCodeValue(String codeValue) {
+        for (CaptchaTypeEnum e : CaptchaTypeEnum.values()) {
+            if (e.codeValue.equals(codeValue)) {
+                return e;
+            }
         }
         return null;
     }
 
     //根据codeValue获取描述
-    public static String getCodeDescByCodeBalue(String codeValue){
+    public static String getCodeDescByCodeBalue(String codeValue) {
         CaptchaTypeEnum enumItem = parseFromCodeValue(codeValue);
         return enumItem == null ? "" : enumItem.getCodeDesc();
     }
 
     //验证codeValue是否有效
-    public static boolean validateCodeValue(String codeValue){ return parseFromCodeValue(codeValue)!=null;}
+    public static boolean validateCodeValue(String codeValue) {
+        return parseFromCodeValue(codeValue) != null;
+    }
 
     //列出所有值字符串
-    public static String getString(){
+    public static String getString() {
         StringBuffer buffer = new StringBuffer();
-        for (CaptchaTypeEnum e : CaptchaTypeEnum.values()){
+        for (CaptchaTypeEnum e : CaptchaTypeEnum.values()) {
             buffer.append(e.codeValue).append("--").append(e.getCodeDesc()).append(", ");
         }
         buffer.deleteCharAt(buffer.lastIndexOf(","));

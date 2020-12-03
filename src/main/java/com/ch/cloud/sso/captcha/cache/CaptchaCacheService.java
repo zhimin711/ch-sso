@@ -8,8 +8,8 @@ package com.ch.cloud.sso.captcha.cache;
 
 /**
  * 验证码缓存接口
- * @author lide1202@hotmail.com
- * @date 2018-08-21
+ * @author zhimin.ma
+ * @date 2020-08-21
  */
 public interface CaptchaCacheService {
 

@@ -1,5 +1,6 @@
 server:
   port: 7000
+
 logging:
   config: classpath:conf/logback-test.xml
   path: logs
@@ -28,3 +29,6 @@ jwt:
   #jwt token有效时间（分钟）
   tokenExpired: 30m
   refreshTokenExpired: 1d
+spring:
+  thymeleaf:
+    cache: false

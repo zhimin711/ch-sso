@@ -1,21 +1,24 @@
-/*
- *Copyright © 2018 anji-plus
- *安吉加加信息技术有限公司
- *http://www.anji-plus.com
- *All rights reserved.
- */
+
 package com.ch.cloud.sso.captcha.util;
 
+/**
+ * decs:字符串工具
+ *
+ * @author zhimin.ma
+ * @date 2021/1/1
+ */
 public class StringUtils {
 
     /**
      * The empty String <code>""</code>.
+     *
      * @since 2.0
      */
     public static final String EMPTY = "";
 
     /**
      * Represents a failed index search.
+     *
      * @since 2.1
      */
     public static final int INDEX_NOT_FOUND = -1;
@@ -39,6 +42,7 @@ public class StringUtils {
 
     // Empty checks
     //-----------------------------------------------------------------------
+
     /**
      * <p>Checks if a String is empty ("") or null.</p>
      *
@@ -54,7 +58,7 @@ public class StringUtils {
      * It no longer trims the String.
      * That functionality is available in isBlank().</p>
      *
-     * @param str  the String to check, may be null
+     * @param str the String to check, may be null
      * @return <code>true</code> if the String is empty or null
      */
     public static boolean isEmpty(String str) {
@@ -72,7 +76,7 @@ public class StringUtils {
      * StringUtils.isNotEmpty("  bob  ") = true
      * </pre>
      *
-     * @param str  the String to check, may be null
+     * @param str the String to check, may be null
      * @return <code>true</code> if the String is not empty and not null
      */
     public static boolean isNotEmpty(String str) {
@@ -91,7 +95,7 @@ public class StringUtils {
      * StringUtils.isBlank("  bob  ") = false
      * </pre>
      *
-     * @param str  the String to check, may be null
+     * @param str the String to check, may be null
      * @return <code>true</code> if the String is null, empty or whitespace
      * @since 2.0
      */
@@ -100,7 +104,7 @@ public class StringUtils {
         if (str == null || (strLen = str.length()) == 0) {
             return true;
         }
-        if(equals("null", str.trim().toLowerCase())){
+        if (equals("null", str.trim().toLowerCase())) {
             return true;
         }
         for (int i = 0; i < strLen; i++) {
@@ -123,9 +127,9 @@ public class StringUtils {
      * StringUtils.isNotBlank("  bob  ") = true
      * </pre>
      *
-     * @param str  the String to check, may be null
+     * @param str the String to check, may be null
      * @return <code>true</code> if the String is
-     *  not empty and not null and not whitespace
+     * not empty and not null and not whitespace
      * @since 2.0
      */
     public static boolean isNotBlank(String str) {
@@ -134,6 +138,7 @@ public class StringUtils {
 
     // Trim
     //-----------------------------------------------------------------------
+
     /**
      * <p>Removes control characters (char &lt;= 32) from both
      * ends of this String, handling <code>null</code> by returning
@@ -147,11 +152,11 @@ public class StringUtils {
      * StringUtils.clean("     ")       = ""
      * </pre>
      *
-     * @see String#trim()
-     * @param str  the String to clean, may be null
+     * @param str the String to clean, may be null
      * @return the trimmed text, never <code>null</code>
+     * @see String#trim()
      * @deprecated Use the clearer named {@link #trimToEmpty(String)}.
-     *             Method will be removed in Commons Lang 3.0.
+     * Method will be removed in Commons Lang 3.0.
      */
     public static String clean(String str) {
         return str == null ? EMPTY : str.trim();
@@ -177,7 +182,7 @@ public class StringUtils {
      * StringUtils.trim("    abc    ") = "abc"
      * </pre>
      *
-     * @param str  the String to be trimmed, may be null
+     * @param str the String to be trimmed, may be null
      * @return the trimmed string, <code>null</code> if null String input
      */
     public static String trim(String str) {
@@ -201,9 +206,9 @@ public class StringUtils {
      * StringUtils.trimToNull("    abc    ") = "abc"
      * </pre>
      *
-     * @param str  the String to be trimmed, may be null
+     * @param str the String to be trimmed, may be null
      * @return the trimmed String,
-     *  <code>null</code> if only chars &lt;= 32, empty or null String input
+     * <code>null</code> if only chars &lt;= 32, empty or null String input
      * @since 2.0
      */
     public static String trimToNull(String str) {
@@ -228,7 +233,7 @@ public class StringUtils {
      * StringUtils.trimToEmpty("    abc    ") = "abc"
      * </pre>
      *
-     * @param str  the String to be trimmed, may be null
+     * @param str the String to be trimmed, may be null
      * @return the trimmed String, or an empty String if <code>null</code> input
      * @since 2.0
      */
@@ -238,6 +243,7 @@ public class StringUtils {
 
     // Stripping
     //-----------------------------------------------------------------------
+
     /**
      * <p>Strips whitespace from the start and end of a String.</p>
      *
@@ -257,7 +263,7 @@ public class StringUtils {
      * StringUtils.strip(" ab c ") = "ab c"
      * </pre>
      *
-     * @param str  the String to remove whitespace from, may be null
+     * @param str the String to remove whitespace from, may be null
      * @return the stripped String, <code>null</code> if null String input
      */
     public static String strip(String str) {
@@ -282,9 +288,9 @@ public class StringUtils {
      * StringUtils.stripToNull(" ab c ") = "ab c"
      * </pre>
      *
-     * @param str  the String to be stripped, may be null
+     * @param str the String to be stripped, may be null
      * @return the stripped String,
-     *  <code>null</code> if whitespace, empty or null String input
+     * <code>null</code> if whitespace, empty or null String input
      * @since 2.0
      */
     public static String stripToNull(String str) {
@@ -313,7 +319,7 @@ public class StringUtils {
      * StringUtils.stripToEmpty(" ab c ") = "ab c"
      * </pre>
      *
-     * @param str  the String to be stripped, may be null
+     * @param str the String to be stripped, may be null
      * @return the trimmed String, or an empty String if <code>null</code> input
      * @since 2.0
      */
@@ -343,8 +349,8 @@ public class StringUtils {
      * StringUtils.strip("  abcyx", "xyz") = "  abc"
      * </pre>
      *
-     * @param str  the String to remove characters from, may be null
-     * @param stripChars  the characters to remove, null treated as whitespace
+     * @param str        the String to remove characters from, may be null
+     * @param stripChars the characters to remove, null treated as whitespace
      * @return the stripped String, <code>null</code> if null String input
      */
     public static String strip(String str, String stripChars) {
@@ -375,8 +381,8 @@ public class StringUtils {
      * StringUtils.stripStart("yxabc  ", "xyz") = "abc  "
      * </pre>
      *
-     * @param str  the String to remove characters from, may be null
-     * @param stripChars  the characters to remove, null treated as whitespace
+     * @param str        the String to remove characters from, may be null
+     * @param stripChars the characters to remove, null treated as whitespace
      * @return the stripped String, <code>null</code> if null String input
      */
     public static String stripStart(String str, String stripChars) {
@@ -420,8 +426,8 @@ public class StringUtils {
      * StringUtils.stripEnd("120.00", ".0")   = "12"
      * </pre>
      *
-     * @param str  the String to remove characters from, may be null
-     * @param stripChars  the set of characters to remove, null treated as whitespace
+     * @param str        the String to remove characters from, may be null
+     * @param stripChars the set of characters to remove, null treated as whitespace
      * @return the stripped String, <code>null</code> if null String input
      */
     public static String stripEnd(String str, String stripChars) {
@@ -446,6 +452,7 @@ public class StringUtils {
 
     // StripAll
     //-----------------------------------------------------------------------
+
     /**
      * <p>Strips whitespace from the start and end of every String in an array.
      * Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
@@ -462,7 +469,7 @@ public class StringUtils {
      * StringUtils.stripAll(["abc  ", null])  = ["abc", null]
      * </pre>
      *
-     * @param strs  the array to remove whitespace from, may be null
+     * @param strs the array to remove whitespace from, may be null
      * @return the stripped Strings, <code>null</code> if null array input
      */
     public static String[] stripAll(String[] strs) {
@@ -490,8 +497,8 @@ public class StringUtils {
      * StringUtils.stripAll(["yabcz", null], "yz")  = ["abc", null]
      * </pre>
      *
-     * @param strs  the array to remove characters from, may be null
-     * @param stripChars  the characters to remove, null treated as whitespace
+     * @param strs       the array to remove characters from, may be null
+     * @param stripChars the characters to remove, null treated as whitespace
      * @return the stripped Strings, <code>null</code> if null array input
      */
     public static String[] stripAll(String[] strs, String stripChars) {
@@ -508,6 +515,7 @@ public class StringUtils {
 
     // Equals
     //-----------------------------------------------------------------------
+
     /**
      * <p>Compares two Strings, returning <code>true</code> if they are equal.</p>
      *
@@ -522,11 +530,11 @@ public class StringUtils {
      * StringUtils.equals("abc", "ABC") = false
      * </pre>
      *
-     * @see String#equals(Object)
-     * @param str1  the first String, may be null
-     * @param str2  the second String, may be null
+     * @param str1 the first String, may be null
+     * @param str2 the second String, may be null
      * @return <code>true</code> if the Strings are equal, case sensitive, or
-     *  both <code>null</code>
+     * both <code>null</code>
+     * @see String#equals(Object)
      */
     public static boolean equals(String str1, String str2) {
         return str1 == null ? str2 == null : str1.equals(str2);
@@ -547,11 +555,11 @@ public class StringUtils {
      * StringUtils.equalsIgnoreCase("abc", "ABC") = true
      * </pre>
      *
-     * @see String#equalsIgnoreCase(String)
-     * @param str1  the first String, may be null
-     * @param str2  the second String, may be null
+     * @param str1 the first String, may be null
+     * @param str2 the second String, may be null
      * @return <code>true</code> if the Strings are equal, case insensitive, or
-     *  both <code>null</code>
+     * both <code>null</code>
+     * @see String#equalsIgnoreCase(String)
      */
     public static boolean equalsIgnoreCase(String str1, String str2) {
         return str1 == null ? str2 == null : str1.equalsIgnoreCase(str2);
@@ -559,6 +567,7 @@ public class StringUtils {
 
     // IndexOf
     //-----------------------------------------------------------------------
+
     /**
      * <p>Finds the first index within a String, handling <code>null</code>.
      * This method uses {@link String#indexOf(int)}.</p>
@@ -572,10 +581,10 @@ public class StringUtils {
      * StringUtils.indexOf("aabaabaa", 'b') = 2
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchChar  the character to find
+     * @param str        the String to check, may be null
+     * @param searchChar the character to find
      * @return the first index of the search character,
-     *  -1 if no match or <code>null</code> string input
+     * -1 if no match or <code>null</code> string input
      * @since 2.0
      */
     public static int indexOf(String str, char searchChar) {
@@ -603,11 +612,11 @@ public class StringUtils {
      * StringUtils.indexOf("aabaabaa", 'b', -1) = 2
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchChar  the character to find
-     * @param startPos  the start position, negative treated as zero
+     * @param str        the String to check, may be null
+     * @param searchChar the character to find
+     * @param startPos   the start position, negative treated as zero
      * @return the first index of the search character,
-     *  -1 if no match or <code>null</code> string input
+     * -1 if no match or <code>null</code> string input
      * @since 2.0
      */
     public static int indexOf(String str, char searchChar, int startPos) {
@@ -634,10 +643,10 @@ public class StringUtils {
      * StringUtils.indexOf("aabaabaa", "")   = 0
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchStr  the String to find, may be null
+     * @param str       the String to check, may be null
+     * @param searchStr the String to find, may be null
      * @return the first index of the search String,
-     *  -1 if no match or <code>null</code> string input
+     * -1 if no match or <code>null</code> string input
      * @since 2.0
      */
     public static int indexOf(String str, String searchStr) {
@@ -673,11 +682,11 @@ public class StringUtils {
      *   str.substring(0, lastOrdinalIndexOf(str, "\n", n))
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchStr  the String to find, may be null
-     * @param ordinal  the n-th <code>searchStr</code> to find
+     * @param str       the String to check, may be null
+     * @param searchStr the String to find, may be null
+     * @param ordinal   the n-th <code>searchStr</code> to find
      * @return the n-th index of the search String,
-     *  <code>-1</code> (<code>INDEX_NOT_FOUND</code>) if no match or <code>null</code> string input
+     * <code>-1</code> (<code>INDEX_NOT_FOUND</code>) if no match or <code>null</code> string input
      * @since 2.1
      */
     public static int ordinalIndexOf(String str, String searchStr, int ordinal) {
@@ -690,12 +699,12 @@ public class StringUtils {
      *
      * <p>A <code>null</code> String will return <code>-1</code>.</p>
      *
-     * @param str  the String to check, may be null
-     * @param searchStr  the String to find, may be null
-     * @param ordinal  the n-th <code>searchStr</code> to find
+     * @param str       the String to check, may be null
+     * @param searchStr the String to find, may be null
+     * @param ordinal   the n-th <code>searchStr</code> to find
      * @param lastIndex true if lastOrdinalIndexOf() otherwise false if ordinalIndexOf()
      * @return the n-th index of the search String,
-     *  <code>-1</code> (<code>INDEX_NOT_FOUND</code>) if no match or <code>null</code> string input
+     * <code>-1</code> (<code>INDEX_NOT_FOUND</code>) if no match or <code>null</code> string input
      */
     // Shared code between ordinalIndexOf(String,String,int) and lastOrdinalIndexOf(String,String,int)
     private static int ordinalIndexOf(String str, String searchStr, int ordinal, boolean lastIndex) {
@@ -708,7 +717,7 @@ public class StringUtils {
         int found = 0;
         int index = lastIndex ? str.length() : INDEX_NOT_FOUND;
         do {
-            if(lastIndex) {
+            if (lastIndex) {
                 index = str.lastIndexOf(searchStr, index - 1);
             } else {
                 index = str.indexOf(searchStr, index + 1);
@@ -746,11 +755,11 @@ public class StringUtils {
      * StringUtils.indexOf("abc", "", 9)        = 3
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchStr  the String to find, may be null
+     * @param str       the String to check, may be null
+     * @param searchStr the String to find, may be null
      * @param startPos  the start position, negative treated as zero
      * @return the first index of the search String,
-     *  -1 if no match or <code>null</code> string input
+     * -1 if no match or <code>null</code> string input
      * @since 2.0
      */
     public static int indexOf(String str, String searchStr, int startPos) {
@@ -782,10 +791,10 @@ public class StringUtils {
      * StringUtils.indexOfIgnoreCase("aabaabaa", "ab") = 1
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchStr  the String to find, may be null
+     * @param str       the String to check, may be null
+     * @param searchStr the String to find, may be null
      * @return the first index of the search String,
-     *  -1 if no match or <code>null</code> string input
+     * -1 if no match or <code>null</code> string input
      * @since 2.5
      */
     public static int indexOfIgnoreCase(String str, String searchStr) {
@@ -816,11 +825,11 @@ public class StringUtils {
      * StringUtils.indexOfIgnoreCase("abc", "", 9)        = 3
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchStr  the String to find, may be null
+     * @param str       the String to check, may be null
+     * @param searchStr the String to find, may be null
      * @param startPos  the start position, negative treated as zero
      * @return the first index of the search String,
-     *  -1 if no match or <code>null</code> string input
+     * -1 if no match or <code>null</code> string input
      * @since 2.5
      */
     public static int indexOfIgnoreCase(String str, String searchStr, int startPos) {
@@ -847,6 +856,7 @@ public class StringUtils {
 
     // LastIndexOf
     //-----------------------------------------------------------------------
+
     /**
      * <p>Finds the last index within a String, handling <code>null</code>.
      * This method uses {@link String#lastIndexOf(int)}.</p>
@@ -860,10 +870,10 @@ public class StringUtils {
      * StringUtils.lastIndexOf("aabaabaa", 'b') = 5
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchChar  the character to find
+     * @param str        the String to check, may be null
+     * @param searchChar the character to find
      * @return the last index of the search character,
-     *  -1 if no match or <code>null</code> string input
+     * -1 if no match or <code>null</code> string input
      * @since 2.0
      */
     public static int lastIndexOf(String str, char searchChar) {
@@ -893,11 +903,11 @@ public class StringUtils {
      * StringUtils.lastIndexOf("aabaabaa", 'a', 0)  = 0
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchChar  the character to find
-     * @param startPos  the start position
+     * @param str        the String to check, may be null
+     * @param searchChar the character to find
+     * @param startPos   the start position
      * @return the last index of the search character,
-     *  -1 if no match or <code>null</code> string input
+     * -1 if no match or <code>null</code> string input
      * @since 2.0
      */
     public static int lastIndexOf(String str, char searchChar, int startPos) {
@@ -923,10 +933,10 @@ public class StringUtils {
      * StringUtils.lastIndexOf("aabaabaa", "")   = 8
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchStr  the String to find, may be null
+     * @param str       the String to check, may be null
+     * @param searchStr the String to find, may be null
      * @return the last index of the search String,
-     *  -1 if no match or <code>null</code> string input
+     * -1 if no match or <code>null</code> string input
      * @since 2.0
      */
     public static int lastIndexOf(String str, String searchStr) {
@@ -962,11 +972,11 @@ public class StringUtils {
      *   str.substring(lastOrdinalIndexOf(str, "\n", n) + 1)
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchStr  the String to find, may be null
-     * @param ordinal  the n-th last <code>searchStr</code> to find
+     * @param str       the String to check, may be null
+     * @param searchStr the String to find, may be null
+     * @param ordinal   the n-th last <code>searchStr</code> to find
      * @return the n-th last index of the search String,
-     *  <code>-1</code> (<code>INDEX_NOT_FOUND</code>) if no match or <code>null</code> string input
+     * <code>-1</code> (<code>INDEX_NOT_FOUND</code>) if no match or <code>null</code> string input
      * @since 2.5
      */
     public static int lastOrdinalIndexOf(String str, String searchStr, int ordinal) {
@@ -994,11 +1004,11 @@ public class StringUtils {
      * StringUtils.lastIndexOf("aabaabaa", "b", 0)  = -1
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchStr  the String to find, may be null
+     * @param str       the String to check, may be null
+     * @param searchStr the String to find, may be null
      * @param startPos  the start position, negative treated as zero
      * @return the first index of the search String,
-     *  -1 if no match or <code>null</code> string input
+     * -1 if no match or <code>null</code> string input
      * @since 2.0
      */
     public static int lastIndexOf(String str, String searchStr, int startPos) {
@@ -1024,10 +1034,10 @@ public class StringUtils {
      * StringUtils.lastIndexOfIgnoreCase("aabaabaa", "AB") = 4
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchStr  the String to find, may be null
+     * @param str       the String to check, may be null
+     * @param searchStr the String to find, may be null
      * @return the first index of the search String,
-     *  -1 if no match or <code>null</code> string input
+     * -1 if no match or <code>null</code> string input
      * @since 2.5
      */
     public static int lastIndexOfIgnoreCase(String str, String searchStr) {
@@ -1058,11 +1068,11 @@ public class StringUtils {
      * StringUtils.lastIndexOfIgnoreCase("aabaabaa", "B", 0)  = -1
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchStr  the String to find, may be null
+     * @param str       the String to check, may be null
+     * @param searchStr the String to find, may be null
      * @param startPos  the start position
      * @return the first index of the search String,
-     *  -1 if no match or <code>null</code> string input
+     * -1 if no match or <code>null</code> string input
      * @since 2.5
      */
     public static int lastIndexOfIgnoreCase(String str, String searchStr, int startPos) {
@@ -1089,6 +1099,7 @@ public class StringUtils {
 
     // Contains
     //-----------------------------------------------------------------------
+
     /**
      * <p>Checks if String contains a search character, handling <code>null</code>.
      * This method uses {@link String#indexOf(int)}.</p>
@@ -1102,10 +1113,10 @@ public class StringUtils {
      * StringUtils.contains("abc", 'z') = false
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchChar  the character to find
+     * @param str        the String to check, may be null
+     * @param searchChar the character to find
      * @return true if the String contains the search character,
-     *  false if not or <code>null</code> string input
+     * false if not or <code>null</code> string input
      * @since 2.0
      */
     public static boolean contains(String str, char searchChar) {
@@ -1130,10 +1141,10 @@ public class StringUtils {
      * StringUtils.contains("abc", "z")  = false
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchStr  the String to find, may be null
+     * @param str       the String to check, may be null
+     * @param searchStr the String to find, may be null
      * @return true if the String contains the search String,
-     *  false if not or <code>null</code> string input
+     * false if not or <code>null</code> string input
      * @since 2.0
      */
     public static boolean contains(String str, String searchStr) {
@@ -1161,8 +1172,8 @@ public class StringUtils {
      * StringUtils.contains("abc", "Z") = false
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchStr  the String to find, may be null
+     * @param str       the String to check, may be null
+     * @param searchStr the String to find, may be null
      * @return true if the String contains the search String irrespective of
      * case or false if not or <code>null</code> string input
      */
@@ -1183,6 +1194,7 @@ public class StringUtils {
 
     // IndexOfAny strings
     //-----------------------------------------------------------------------
+
     /**
      * <p>Find the first index of any of a set of potential substrings.</p>
      *
@@ -1205,8 +1217,8 @@ public class StringUtils {
      * StringUtils.indexOfAny("", ["a"])                   = -1
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchStrs  the Strings to search for, may be null
+     * @param str        the String to check, may be null
+     * @param searchStrs the Strings to search for, may be null
      * @return the first index of any of the searchStrs in str, -1 if no match
      */
     public static int indexOfAny(String str, String[] searchStrs) {
@@ -1258,8 +1270,8 @@ public class StringUtils {
      * StringUtils.lastIndexOfAny("zzabyycdxx", ["mn",""])   = 10
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param searchStrs  the Strings to search for, may be null
+     * @param str        the String to check, may be null
+     * @param searchStrs the Strings to search for, may be null
      * @return the last index of any of the Strings, -1 if no match
      */
     public static int lastIndexOfAny(String str, String[] searchStrs) {
@@ -1284,6 +1296,7 @@ public class StringUtils {
 
     // Substring
     //-----------------------------------------------------------------------
+
     /**
      * <p>Gets a substring from the specified String avoiding exceptions.</p>
      *
@@ -1303,9 +1316,9 @@ public class StringUtils {
      * StringUtils.substring("abc", -4) = "abc"
      * </pre>
      *
-     * @param str  the String to get the substring from, may be null
-     * @param start  the position to start from, negative means
-     *  count back from the end of the String by this many characters
+     * @param str   the String to get the substring from, may be null
+     * @param start the position to start from, negative means
+     *              count back from the end of the String by this many characters
      * @return substring from start position, <code>null</code> if null String input
      */
     public static String substring(String str, int start) {
@@ -1355,13 +1368,13 @@ public class StringUtils {
      * StringUtils.substring("abc", -4, 2)  = "ab"
      * </pre>
      *
-     * @param str  the String to get the substring from, may be null
-     * @param start  the position to start from, negative means
-     *  count back from the end of the String by this many characters
-     * @param end  the position to end at (exclusive), negative means
-     *  count back from the end of the String by this many characters
+     * @param str   the String to get the substring from, may be null
+     * @param start the position to start from, negative means
+     *              count back from the end of the String by this many characters
+     * @param end   the position to end at (exclusive), negative means
+     *              count back from the end of the String by this many characters
      * @return substring from start position to end positon,
-     *  <code>null</code> if null String input
+     * <code>null</code> if null String input
      */
     public static String substring(String str, int start, int end) {
         if (str == null) {
@@ -1398,6 +1411,7 @@ public class StringUtils {
 
     // Left/Right/Mid
     //-----------------------------------------------------------------------
+
     /**
      * <p>Gets the leftmost <code>len</code> characters of a String.</p>
      *
@@ -1414,8 +1428,8 @@ public class StringUtils {
      * StringUtils.left("abc", 4)   = "abc"
      * </pre>
      *
-     * @param str  the String to get the leftmost characters from, may be null
-     * @param len  the length of the required String
+     * @param str the String to get the leftmost characters from, may be null
+     * @param len the length of the required String
      * @return the leftmost characters, <code>null</code> if null String input
      */
     public static String left(String str, int len) {
@@ -1447,8 +1461,8 @@ public class StringUtils {
      * StringUtils.right("abc", 4)   = "abc"
      * </pre>
      *
-     * @param str  the String to get the rightmost characters from, may be null
-     * @param len  the length of the required String
+     * @param str the String to get the rightmost characters from, may be null
+     * @param len the length of the required String
      * @return the rightmost characters, <code>null</code> if null String input
      */
     public static String right(String str, int len) {
@@ -1484,9 +1498,9 @@ public class StringUtils {
      * StringUtils.mid("abc", -2, 2)  = "ab"
      * </pre>
      *
-     * @param str  the String to get the characters from, may be null
-     * @param pos  the position to start from, negative treated as zero
-     * @param len  the length of the required String
+     * @param str the String to get the characters from, may be null
+     * @param pos the position to start from, negative treated as zero
+     * @param len the length of the required String
      * @return the middle characters, <code>null</code> if null String input
      */
     public static String mid(String str, int pos, int len) {
@@ -1507,6 +1521,7 @@ public class StringUtils {
 
     // SubStringAfter/SubStringBefore
     //-----------------------------------------------------------------------
+
     /**
      * <p>Gets the substring before the first occurrence of a separator.
      * The separator is not returned.</p>
@@ -1528,10 +1543,10 @@ public class StringUtils {
      * StringUtils.substringBefore("abc", null)  = "abc"
      * </pre>
      *
-     * @param str  the String to get a substring from, may be null
-     * @param separator  the String to search for, may be null
+     * @param str       the String to get a substring from, may be null
+     * @param separator the String to search for, may be null
      * @return the substring before the first occurrence of the separator,
-     *  <code>null</code> if null String input
+     * <code>null</code> if null String input
      * @since 2.0
      */
     public static String substringBefore(String str, String separator) {
@@ -1570,10 +1585,10 @@ public class StringUtils {
      * StringUtils.substringAfter("abc", "")    = "abc"
      * </pre>
      *
-     * @param str  the String to get a substring from, may be null
-     * @param separator  the String to search for, may be null
+     * @param str       the String to get a substring from, may be null
+     * @param separator the String to search for, may be null
      * @return the substring after the first occurrence of the separator,
-     *  <code>null</code> if null String input
+     * <code>null</code> if null String input
      * @since 2.0
      */
     public static String substringAfter(String str, String separator) {
@@ -1611,10 +1626,10 @@ public class StringUtils {
      * StringUtils.substringBeforeLast("a", "")      = "a"
      * </pre>
      *
-     * @param str  the String to get a substring from, may be null
-     * @param separator  the String to search for, may be null
+     * @param str       the String to get a substring from, may be null
+     * @param separator the String to search for, may be null
      * @return the substring before the last occurrence of the separator,
-     *  <code>null</code> if null String input
+     * <code>null</code> if null String input
      * @since 2.0
      */
     public static String substringBeforeLast(String str, String separator) {
@@ -1651,10 +1666,10 @@ public class StringUtils {
      * StringUtils.substringAfterLast("a", "z")     = ""
      * </pre>
      *
-     * @param str  the String to get a substring from, may be null
-     * @param separator  the String to search for, may be null
+     * @param str       the String to get a substring from, may be null
+     * @param separator the String to search for, may be null
      * @return the substring after the last occurrence of the separator,
-     *  <code>null</code> if null String input
+     * <code>null</code> if null String input
      * @since 2.0
      */
     public static String substringAfterLast(String str, String separator) {
@@ -1673,6 +1688,7 @@ public class StringUtils {
 
     // Substring between
     //-----------------------------------------------------------------------
+
     /**
      * <p>Gets the String that is nested in between two instances of the
      * same String.</p>
@@ -1689,8 +1705,8 @@ public class StringUtils {
      * StringUtils.substringBetween("tagabctag", "tag") = "abc"
      * </pre>
      *
-     * @param str  the String containing the substring, may be null
-     * @param tag  the String before and after the substring, may be null
+     * @param str the String containing the substring, may be null
+     * @param tag the String before and after the substring, may be null
      * @return the substring, <code>null</code> if no match
      * @since 2.0
      */
@@ -1719,9 +1735,9 @@ public class StringUtils {
      * StringUtils.substringBetween("yabczyabcz", "y", "z")   = "abc"
      * </pre>
      *
-     * @param str  the String containing the substring, may be null
+     * @param str   the String containing the substring, may be null
      * @param open  the String before the substring, may be null
-     * @param close  the String after the substring, may be null
+     * @param close the String after the substring, may be null
      * @return the substring, <code>null</code> if no match
      * @since 2.0
      */

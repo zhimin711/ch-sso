@@ -1,9 +1,4 @@
-/*
- *Copyright © 2018 anji-plus
- *安吉加加信息技术有限公司
- *http://www.anji-plus.com
- *All rights reserved.
- */
+
 package com.ch.cloud.sso.captcha.model.common;
 
 import java.text.MessageFormat;
@@ -12,6 +7,12 @@ import java.text.MessageFormat;
  * 返回应答码
  * @author
  *
+ */
+/**
+ * decs:存储策略自动配置.
+ *
+ * @author zhimin.ma
+ * @date 2021/1/1
  */
 public enum RepCodeEnum {
 

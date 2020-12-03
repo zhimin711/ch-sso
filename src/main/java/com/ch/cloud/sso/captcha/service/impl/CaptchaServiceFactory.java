@@ -12,7 +12,10 @@ import java.util.Properties;
 import java.util.ServiceLoader;
 
 /**
- * Created by raodeming on 2020/5/26.
+ * decs:验证码服务实例化.
+ *
+ * @author zhimin.ma
+ * @date 2021/1/1
  */
 public class CaptchaServiceFactory {
 

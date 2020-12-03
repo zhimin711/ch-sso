@@ -1,26 +1,26 @@
-/*
- *Copyright © 2018 anji-plus
- *安吉加加信息技术有限公司
- *http://www.anji-plus.com
- *All rights reserved.
- */
 package com.ch.cloud.sso.captcha.controller;
 
 import com.ch.cloud.sso.captcha.model.common.ResponseModel;
 import com.ch.cloud.sso.captcha.model.vo.CaptchaVO;
 import com.ch.cloud.sso.captcha.service.CaptchaService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 
+/**
+ * decs:验证码控制层.
+ *
+ * @author zhimin.ma
+ * @date 2021/1/1
+ */
 @RestController
 @RequestMapping("/captcha")
 public class CaptchaController {
 
-    @Autowired
+    @Resource
     private CaptchaService captchaService;
 
     @PostMapping("/get")

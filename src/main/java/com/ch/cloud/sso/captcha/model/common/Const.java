@@ -1,7 +1,10 @@
 package com.ch.cloud.sso.captcha.model.common;
 
-/***
- * @author wongbin
+/**
+ * decs:验证码常量.
+ *
+ * @author zhimin.ma
+ * @date 2021/1/1
  */
 public interface Const {
 

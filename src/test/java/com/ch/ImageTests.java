@@ -29,7 +29,7 @@ public class ImageTests {
                     System.out.println(f.getName() + " \t => " + FileExtUtils.convertSize(f.length()));
                     File nf = new File(newFilePath + "\\scala2", f.getName());
                     FileExtUtils.create(nf);
-                    ImageUtil.compressImage2(f.getPath(), nf.getPath(), 400, 400);
+//                    ImageUtil.compressImage2(f.getPath(), nf.getPath(), 400, 400);
                 }
         }
     }
