@@ -8,7 +8,6 @@ import com.ch.cloud.sso.captcha.model.vo.PointVO;
 import com.ch.cloud.sso.captcha.util.AESUtil;
 import com.ch.cloud.sso.captcha.util.ImageUtils;
 import com.ch.cloud.sso.captcha.util.RandomUtils;
-import com.ch.cloud.sso.captcha.util.StringUtils;
 import com.ch.e.PubError;
 import com.ch.utils.CommonUtils;
 import com.ch.utils.ExceptionUtils;
@@ -49,7 +48,7 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
             ExceptionUtils._throw(PubError.CONFIG, RepCodeEnum.API_CAPTCHA_BASEMAP_NULL.getDesc());
         }
         CaptchaVO imageData = getImageData(bufferedImage);
-        if (StringUtils.isBlank(imageData.getOriginalImageBase64())) {
+        if (CommonUtils.isEmpty(imageData.getOriginalImageBase64())) {
             ExceptionUtils._throw(PubError.CREATE, RepCodeEnum.API_CAPTCHA_ERROR.getDesc());
         }
         return imageData;

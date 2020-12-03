@@ -3,6 +3,7 @@ package com.ch.cloud.sso.captcha.util;
 
 import com.alibaba.fastjson.JSONObject;
 import com.ch.cloud.sso.captcha.model.common.CaptchaBaseMapEnum;
+import com.ch.utils.CommonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,7 @@ public class ImageUtils {
 
     public static void cacheImage(String captchaOriginalPathJigsaw, String captchaOriginalPathClick) {
         //滑动拼图
-        if (StringUtils.isBlank(captchaOriginalPathJigsaw)) {
+        if (CommonUtils.isEmpty(captchaOriginalPathJigsaw)) {
             originalCacheMap.putAll(getResourcesImagesFile("defaultImages/jigsaw/original"));
             slidingBlockCacheMap.putAll(getResourcesImagesFile("defaultImages/jigsaw/slidingBlock"));
         } else {
@@ -38,7 +39,7 @@ public class ImageUtils {
             slidingBlockCacheMap.putAll(getImagesFile(captchaOriginalPathJigsaw + File.separator + "slidingBlock"));
         }
         //点选文字
-        if (StringUtils.isBlank(captchaOriginalPathClick)) {
+        if (CommonUtils.isEmpty(captchaOriginalPathClick)) {
             picClickCacheMap.putAll(getResourcesImagesFile("defaultImages/pic-click"));
         } else {
             picClickCacheMap.putAll(getImagesFile(captchaOriginalPathClick));
@@ -76,8 +77,7 @@ public class ImageUtils {
             return null;
         }
         Integer randomInt = RandomUtils.getRandomInt(0, strings.length);
-        String s = slidingBlockCacheMap.get(strings[randomInt]);
-        return s;
+        return slidingBlockCacheMap.get(strings[randomInt]);
     }
 
     public static BufferedImage getPicClick() {
@@ -161,8 +161,6 @@ public class ImageUtils {
                 byte[] bytes = FileCopyUtils.copyToByteArray(fileInputStream);
                 String string = Base64Utils.encodeToString(bytes);
                 imgMap.put(item.getName(), string);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }

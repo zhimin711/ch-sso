@@ -8,7 +8,6 @@ import com.ch.cloud.sso.captcha.model.vo.PointVO;
 import com.ch.cloud.sso.captcha.util.AESUtil;
 import com.ch.cloud.sso.captcha.util.ImageUtils;
 import com.ch.cloud.sso.captcha.util.RandomUtils;
-import com.ch.cloud.sso.captcha.util.StringUtils;
 import com.ch.e.PubError;
 import com.ch.utils.CommonUtils;
 import com.ch.utils.ExceptionUtils;
@@ -72,8 +71,8 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
         }
         CaptchaVO captcha = pictureTemplatesCut(originalImage, jigsawImage, jigsawImageBase64);
         if (captcha == null
-                || StringUtils.isBlank(captcha.getJigsawImageBase64())
-                || StringUtils.isBlank(captcha.getOriginalImageBase64())) {
+                || CommonUtils.isEmpty(captcha.getJigsawImageBase64())
+                || CommonUtils.isEmpty(captcha.getOriginalImageBase64())) {
             ExceptionUtils._throw(PubError.CONNECT, RepCodeEnum.API_CAPTCHA_ERROR.getDesc());
         }
         return captcha;
@@ -270,7 +269,6 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
      * @param newImage      新抠出的小图
      * @param x             随机扣取坐标X
      * @param y             随机扣取坐标y
-     * @throws Exception
      */
     private static void cutByTemplate(BufferedImage oriImage, BufferedImage templateImage, BufferedImage newImage, int x, int y) {
         //临时数组遍历用于高斯模糊存周边像素值
@@ -318,7 +316,6 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
      * @param templateImage 模板图
      * @param x             随机扣取坐标X
      * @param y             随机扣取坐标y
-     * @throws Exception
      */
     private static void interferenceByTemplate(BufferedImage oriImage, BufferedImage templateImage, int x, int y) {
         //临时数组遍历用于高斯模糊存周边像素值
@@ -381,8 +378,7 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
 
     private static void fillMatrix(int[][] matrix, int[] values) {
         int filled = 0;
-        for (int i = 0; i < matrix.length; i++) {
-            int[] x = matrix[i];
+        for (int[] x : matrix) {
             for (int j = 0; j < x.length; j++) {
                 x[j] = values[filled++];
             }
@@ -393,8 +389,7 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
         int r = 0;
         int g = 0;
         int b = 0;
-        for (int i = 0; i < matrix.length; i++) {
-            int[] x = matrix[i];
+        for (int[] x : matrix) {
             for (int j = 0; j < x.length; j++) {
                 if (j == 1) {
                     continue;

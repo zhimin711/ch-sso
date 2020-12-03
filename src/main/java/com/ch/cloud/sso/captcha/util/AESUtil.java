@@ -1,5 +1,7 @@
 package com.ch.cloud.sso.captcha.util;
 
+import com.ch.utils.CommonUtils;
+
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
@@ -57,7 +59,7 @@ public class AESUtil {
      */
     public static byte[] base64Decode(String base64Code) throws Exception {
         Base64.Decoder decoder = Base64.getDecoder();
-        return StringUtils.isEmpty(base64Code) ? null : decoder.decode(base64Code);
+        return CommonUtils.isEmpty(base64Code) ? null : decoder.decode(base64Code);
     }
 
 
@@ -88,7 +90,7 @@ public class AESUtil {
      * @throws Exception
      */
     public static String aesEncrypt(String content, String encryptKey) throws Exception {
-        if (StringUtils.isBlank(encryptKey)) {
+        if (CommonUtils.isEmpty(encryptKey)) {
             return content;
         }
         return base64Encode(aesEncryptToBytes(content, encryptKey));
@@ -122,10 +124,10 @@ public class AESUtil {
      * @throws Exception
      */
     public static String aesDecrypt(String encryptStr, String decryptKey) throws Exception {
-        if (StringUtils.isBlank(decryptKey)) {
+        if (CommonUtils.isEmpty(decryptKey)) {
             return encryptStr;
         }
-        return StringUtils.isEmpty(encryptStr) ? null : aesDecryptByBytes(base64Decode(encryptStr), decryptKey);
+        return CommonUtils.isEmpty(encryptStr) ? null : aesDecryptByBytes(base64Decode(encryptStr), decryptKey);
     }
 
     /**

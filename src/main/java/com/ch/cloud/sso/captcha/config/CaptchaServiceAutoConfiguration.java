@@ -6,7 +6,7 @@ import com.ch.cloud.sso.captcha.properties.CaptchaProperties;
 import com.ch.cloud.sso.captcha.service.CaptchaService;
 import com.ch.cloud.sso.captcha.service.impl.CaptchaServiceFactory;
 import com.ch.cloud.sso.captcha.util.ImageUtils;
-import com.ch.cloud.sso.captcha.util.StringUtils;
+import com.ch.utils.CommonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -50,8 +50,8 @@ public class CaptchaServiceAutoConfiguration {
         config.put(Const.CAPTCHA_WATER_FONT, prop.getWaterFont());
         config.put(Const.CAPTCHA_CACAHE_MAX_NUMBER, prop.getCacheNumber());
         config.put(Const.CAPTCHA_TIMING_CLEAR_SECOND, prop.getTimingClear());
-        if ((StringUtils.isNotBlank(prop.getJigsaw()) && prop.getJigsaw().startsWith("classpath:"))
-                || (StringUtils.isNotBlank(prop.getPicClick()) && prop.getPicClick().startsWith("classpath:"))) {
+        if ((CommonUtils.isNotEmpty(prop.getJigsaw()) && prop.getJigsaw().startsWith("classpath:"))
+                || (CommonUtils.isNotEmpty(prop.getPicClick()) && prop.getPicClick().startsWith("classpath:"))) {
             //自定义resources目录下初始化底图
             config.put(Const.CAPTCHA_INIT_ORIGINAL, "true");
             initializeBaseMap(prop.getJigsaw(), prop.getPicClick());
