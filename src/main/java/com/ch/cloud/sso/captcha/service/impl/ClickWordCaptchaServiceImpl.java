@@ -10,6 +10,9 @@ import com.ch.cloud.sso.captcha.util.AESUtil;
 import com.ch.cloud.sso.captcha.util.ImageUtils;
 import com.ch.cloud.sso.captcha.util.RandomUtils;
 import com.ch.cloud.sso.captcha.util.StringUtils;
+import com.ch.e.PubError;
+import com.ch.utils.CommonUtils;
+import com.ch.utils.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,25 +43,25 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
     }
 
     @Override
-    public ResponseModel get(CaptchaVO captchaVO) {
+    public CaptchaVO get(CaptchaVO captchaVO) {
         BufferedImage bufferedImage = ImageUtils.getPicClick();
         if (null == bufferedImage) {
             logger.error("滑动底图未初始化成功，请检查路径");
-            return ResponseModel.errorMsg(RepCodeEnum.API_CAPTCHA_BASEMAP_NULL);
+            ExceptionUtils._throw(PubError.CONFIG, RepCodeEnum.API_CAPTCHA_BASEMAP_NULL.getDesc());
         }
         CaptchaVO imageData = getImageData(bufferedImage);
         if (StringUtils.isBlank(imageData.getOriginalImageBase64())) {
-            return ResponseModel.errorMsg(RepCodeEnum.API_CAPTCHA_ERROR);
+            ExceptionUtils._throw(PubError.CREATE, RepCodeEnum.API_CAPTCHA_ERROR.getDesc());
         }
-        return ResponseModel.successData(imageData);
+        return imageData;
     }
 
     @Override
-    public ResponseModel check(CaptchaVO captchaVO) {
+    public CaptchaVO check(CaptchaVO captchaVO) {
         //取坐标信息
         String codeKey = String.format(REDIS_CAPTCHA_KEY, captchaVO.getToken());
         if (!CaptchaServiceFactory.getCache(cacheType).exists(codeKey)) {
-            return ResponseModel.errorMsg(RepCodeEnum.API_CAPTCHA_INVALID);
+            ExceptionUtils._throw(PubError.INVALID, RepCodeEnum.API_CAPTCHA_INVALID.getDesc());
         }
         String s = CaptchaServiceFactory.getCache(cacheType).get(codeKey);
         //验证码只用一次，即刻失效
@@ -89,14 +92,14 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
             point1 = JSONObject.parseArray(pointJson, PointVO.class);
         } catch (Exception e) {
             logger.error("验证码坐标解析失败", e);
-            return ResponseModel.errorMsg(e.getMessage());
+            ExceptionUtils._throw(PubError.INVALID);
         }
         for (int i = 0; i < point.size(); i++) {
             if (point.get(i).x - HAN_ZI_SIZE > point1.get(i).x
                     || point1.get(i).x > point.get(i).x + HAN_ZI_SIZE
                     || point.get(i).y - HAN_ZI_SIZE > point1.get(i).y
                     || point1.get(i).y > point.get(i).y + HAN_ZI_SIZE) {
-                return ResponseModel.errorMsg(RepCodeEnum.API_CAPTCHA_COORDINATE_ERROR);
+                ExceptionUtils._throw(PubError.INVALID, RepCodeEnum.API_CAPTCHA_COORDINATE_ERROR.getDesc());
             }
         }
         //校验成功，将信息存入缓存
@@ -106,41 +109,38 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
             value = AESUtil.aesEncrypt(captchaVO.getToken().concat("---").concat(pointJson), secretKey);
         } catch (Exception e) {
             logger.error("AES加密失败", e);
-            return ResponseModel.errorMsg(e.getMessage());
+            ExceptionUtils._throw(PubError.NOT_);
         }
         String secondKey = String.format(REDIS_SECOND_CAPTCHA_KEY, value);
         CaptchaServiceFactory.getCache(cacheType).set(secondKey, captchaVO.getToken(), EXPIRESIN_THREE);
         captchaVO.setResult(true);
-        return ResponseModel.successData(captchaVO);
+        return captchaVO;
     }
 
     @Override
-    public ResponseModel verification(CaptchaVO captchaVO) {
-        if (captchaVO == null) {
-            return RepCodeEnum.NULL_ERROR.parseError("captchaVO");
-        }
-        if (StringUtils.isEmpty(captchaVO.getCaptchaVerification())) {
-            return RepCodeEnum.NULL_ERROR.parseError("captchaVerification");
+    public CaptchaVO verification(CaptchaVO captchaVO) {
+        if (captchaVO == null || CommonUtils.isEmpty(captchaVO.getCaptchaVerification())) {
+            ExceptionUtils._throw(PubError.NON_NULL);
         }
         try {
             String codeKey = String.format(REDIS_SECOND_CAPTCHA_KEY, captchaVO.getCaptchaVerification());
             if (!CaptchaServiceFactory.getCache(cacheType).exists(codeKey)) {
-                return ResponseModel.errorMsg(RepCodeEnum.API_CAPTCHA_INVALID);
+                ExceptionUtils._throw(PubError.INVALID);
             }
             //二次校验取值后，即刻失效
             CaptchaServiceFactory.getCache(cacheType).delete(codeKey);
         } catch (Exception e) {
             logger.error("验证码坐标解析失败", e);
-            return ResponseModel.errorMsg(e.getMessage());
+            ExceptionUtils._throw(PubError.NOT_);
         }
-        return ResponseModel.success();
+        return new CaptchaVO();
     }
 
 
     private CaptchaVO getImageData(BufferedImage backgroundImage) {
         CaptchaVO dataVO = new CaptchaVO();
-        List<String> wordList = new ArrayList<String>();
-        List<PointVO> pointList = new ArrayList();
+        List<String> wordList = new ArrayList<>();
+        List<PointVO> pointList = new ArrayList<>();
 
         Graphics backgroundGraphics = backgroundImage.getGraphics();
         int width = backgroundImage.getWidth();

@@ -3,6 +3,8 @@ package com.ch.cloud.sso.captcha.controller;
 import com.ch.cloud.sso.captcha.model.common.ResponseModel;
 import com.ch.cloud.sso.captcha.model.vo.CaptchaVO;
 import com.ch.cloud.sso.captcha.service.CaptchaService;
+import com.ch.result.Result;
+import com.ch.result.ResultUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,18 +26,18 @@ public class CaptchaController {
     private CaptchaService captchaService;
 
     @PostMapping("/get")
-    public ResponseModel get(@RequestBody CaptchaVO captchaVO) {
-        return captchaService.get(captchaVO);
+    public Result<?> get(@RequestBody CaptchaVO captchaVO) {
+        return ResultUtils.wrapFail(() -> captchaService.get(captchaVO));
     }
 
     @PostMapping("/check")
-    public ResponseModel check(@RequestBody CaptchaVO captchaVO) {
-        return captchaService.check(captchaVO);
+    public Result<?> check(@RequestBody CaptchaVO captchaVO) {
+        return ResultUtils.wrapFail(() -> captchaService.check(captchaVO));
     }
 
     @PostMapping("/verify")
-    public ResponseModel verify(@RequestBody CaptchaVO captchaVO) {
-        return captchaService.verification(captchaVO);
+    public Result<?> verify(@RequestBody CaptchaVO captchaVO) {
+        return ResultUtils.wrapFail(() -> captchaService.verification(captchaVO));
     }
 
 }

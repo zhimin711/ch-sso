@@ -10,6 +10,9 @@ import com.ch.cloud.sso.captcha.util.AESUtil;
 import com.ch.cloud.sso.captcha.util.ImageUtils;
 import com.ch.cloud.sso.captcha.util.RandomUtils;
 import com.ch.cloud.sso.captcha.util.StringUtils;
+import com.ch.e.PubError;
+import com.ch.utils.CommonUtils;
+import com.ch.utils.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,13 +47,13 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
     }
 
     @Override
-    public ResponseModel get(CaptchaVO captchaVO) {
+    public CaptchaVO get(CaptchaVO captchaVO) {
 
         //原生图片
         BufferedImage originalImage = ImageUtils.getOriginal();
         if (null == originalImage) {
             logger.error("滑动底图未初始化成功，请检查路径");
-            return ResponseModel.errorMsg(RepCodeEnum.API_CAPTCHA_BASEMAP_NULL);
+            ExceptionUtils._throw(PubError.CONFIG, RepCodeEnum.API_CAPTCHA_BASEMAP_NULL.getDesc());
         }
         //设置水印
         Graphics backgroundGraphics = originalImage.getGraphics();
@@ -66,23 +69,23 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
         BufferedImage jigsawImage = ImageUtils.getBase64StrToImage(jigsawImageBase64);
         if (null == jigsawImage) {
             logger.error("滑动底图未初始化成功，请检查路径");
-            return ResponseModel.errorMsg(RepCodeEnum.API_CAPTCHA_BASEMAP_NULL);
+            ExceptionUtils._throw(PubError.CONFIG, RepCodeEnum.API_CAPTCHA_BASEMAP_NULL.getDesc());
         }
         CaptchaVO captcha = pictureTemplatesCut(originalImage, jigsawImage, jigsawImageBase64);
         if (captcha == null
                 || StringUtils.isBlank(captcha.getJigsawImageBase64())
                 || StringUtils.isBlank(captcha.getOriginalImageBase64())) {
-            return ResponseModel.errorMsg(RepCodeEnum.API_CAPTCHA_ERROR);
+            ExceptionUtils._throw(PubError.CONNECT, RepCodeEnum.API_CAPTCHA_ERROR.getDesc());
         }
-        return ResponseModel.successData(captcha);
+        return captcha;
     }
 
     @Override
-    public ResponseModel check(CaptchaVO captchaVO) {
+    public CaptchaVO check(CaptchaVO captchaVO) {
         //取坐标信息
         String codeKey = String.format(REDIS_CAPTCHA_KEY, captchaVO.getToken());
         if (!CaptchaServiceFactory.getCache(cacheType).exists(codeKey)) {
-            return ResponseModel.errorMsg(RepCodeEnum.API_CAPTCHA_INVALID);
+            ExceptionUtils._throw(PubError.INVALID, RepCodeEnum.API_CAPTCHA_INVALID.getDesc());
         }
         String s = CaptchaServiceFactory.getCache(cacheType).get(codeKey);
         //验证码只用一次，即刻失效
@@ -97,12 +100,12 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
             point1 = JSONObject.parseObject(pointJson, PointVO.class);
         } catch (Exception e) {
             logger.error("验证码坐标解析失败", e);
-            return ResponseModel.errorMsg(e.getMessage());
+            ExceptionUtils._throw(PubError.INVALID);
         }
         if (point.x - Integer.parseInt(slipOffset) > point1.x
                 || point1.x > point.x + Integer.parseInt(slipOffset)
                 || point.y != point1.y) {
-            return ResponseModel.errorMsg(RepCodeEnum.API_CAPTCHA_COORDINATE_ERROR);
+            ExceptionUtils._throw(PubError.INVALID, RepCodeEnum.API_CAPTCHA_COORDINATE_ERROR.getDesc());
         }
         //校验成功，将信息存入缓存
         String secretKey = point.getSecretKey();
@@ -111,34 +114,31 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
             value = AESUtil.aesEncrypt(captchaVO.getToken().concat("---").concat(pointJson), secretKey);
         } catch (Exception e) {
             logger.error("AES加密失败", e);
-            return ResponseModel.errorMsg(e.getMessage());
+            ExceptionUtils._throw(PubError.INVALID);
         }
         String secondKey = String.format(REDIS_SECOND_CAPTCHA_KEY, value);
         CaptchaServiceFactory.getCache(cacheType).set(secondKey, captchaVO.getToken(), EXPIRESIN_THREE);
         captchaVO.setResult(true);
-        return ResponseModel.successData(captchaVO);
+        return captchaVO;
     }
 
     @Override
-    public ResponseModel verification(CaptchaVO captchaVO) {
-        if (captchaVO == null) {
-            return RepCodeEnum.NULL_ERROR.parseError("captchaVO");
-        }
-        if (StringUtils.isEmpty(captchaVO.getCaptchaVerification())) {
-            return RepCodeEnum.NULL_ERROR.parseError("captchaVerification");
+    public CaptchaVO verification(CaptchaVO captchaVO) {
+        if (captchaVO == null || CommonUtils.isEmpty(captchaVO.getCaptchaVerification())) {
+            ExceptionUtils._throw(PubError.NON_NULL);
         }
         try {
             String codeKey = String.format(REDIS_SECOND_CAPTCHA_KEY, captchaVO.getCaptchaVerification());
             if (!CaptchaServiceFactory.getCache(cacheType).exists(codeKey)) {
-                return ResponseModel.errorMsg(RepCodeEnum.API_CAPTCHA_INVALID);
+                ExceptionUtils._throw(PubError.INVALID, RepCodeEnum.API_CAPTCHA_INVALID.getDesc());
             }
             //二次校验取值后，即刻失效
             CaptchaServiceFactory.getCache(cacheType).delete(codeKey);
         } catch (Exception e) {
             logger.error("验证码坐标解析失败", e);
-            return ResponseModel.errorMsg(e.getMessage());
+            ExceptionUtils._throw(PubError.INVALID);
         }
-        return ResponseModel.success();
+        return new CaptchaVO();
     }
 
     /**
@@ -213,10 +213,10 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
             ImageIO.write(originalImage, IMAGE_TYPE_PNG, oriImagesOs);//利用ImageIO类提供的write方法，将bi以jpg图片的数据模式写入流。
             byte[] oriCopyImages = oriImagesOs.toByteArray();
             Base64.Encoder encoder = Base64.getEncoder();
-            dataVO.setOriginalImageBase64(encoder.encodeToString(oriCopyImages).replaceAll("\r|\n", ""));
+            dataVO.setOriginalImageBase64(encoder.encodeToString(oriCopyImages).replaceAll("[\r\n]", ""));
             //point信息不传到前端，只做后端check校验
 //            dataVO.setPoint(point);
-            dataVO.setJigsawImageBase64(encoder.encodeToString(jigsawImages).replaceAll("\r|\n", ""));
+            dataVO.setJigsawImageBase64(encoder.encodeToString(jigsawImages).replaceAll("[\r\n]", ""));
             dataVO.setToken(RandomUtils.getUUID());
             dataVO.setSecretKey(point.getSecretKey());
 //            base64StrToImage(encoder.encodeToString(oriCopyImages), "D:\\原图.png");

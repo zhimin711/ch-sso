@@ -24,7 +24,7 @@ public interface CaptchaService {
      * @param captchaVO
      * @return
      */
-    ResponseModel get(CaptchaVO captchaVO);
+    CaptchaVO get(CaptchaVO captchaVO);
 
     /**
      * 核对验证码(前端)
@@ -32,7 +32,7 @@ public interface CaptchaService {
      * @param captchaVO
      * @return
      */
-    ResponseModel check(CaptchaVO captchaVO);
+    CaptchaVO check(CaptchaVO captchaVO);
 
     /**
      * 二次校验验证码(后端)
@@ -40,7 +40,7 @@ public interface CaptchaService {
      * @param captchaVO
      * @return
      */
-    ResponseModel verification(CaptchaVO captchaVO);
+    CaptchaVO verification(CaptchaVO captchaVO);
 
     /***
      * 验证码类型
