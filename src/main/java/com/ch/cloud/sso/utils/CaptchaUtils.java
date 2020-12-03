@@ -3,18 +3,17 @@ package com.ch.cloud.sso.utils;
 import com.ch.cloud.sso.pojo.SlideCaptcha;
 import com.ch.e.PubError;
 import com.ch.utils.ExceptionUtils;
+import com.ch.utils.FileExtUtils;
+import com.ch.utils.ImageUtils;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 public class CaptchaUtils {
 
@@ -108,7 +107,7 @@ public class CaptchaUtils {
      */
     public static SlideCaptcha selectSlideVerificationCode() {
 
-        SlideCaptcha slideCaptcha ;
+        SlideCaptcha slideCaptcha;
         try {
 //            //  原图路径，这种方式不推荐。当运行jar文件的时候，路径是找不到的，我的路径是写到配置文件中的。
 //            String verifyImagePath = URLDecoder.decode(this.getClass().getResource("/").getPath() + "static/targets", "UTF-8");
@@ -169,18 +168,33 @@ public class CaptchaUtils {
         } finally {
 
         }
-        return  null;
+        return null;
     }
 
     private static void initCaptcha() {
-        String path = CaptchaUtils.class.getResource("/static/images/captcha/orig").getPath();
-        File verifyImageDir = new File(path);
-        File[] verifyImageFiles = verifyImageDir.listFiles();
+        if (!verifyImages.isEmpty()) return;
+        String path = CaptchaUtils.class.getResource("/static/images/captcha").getPath();
+        File origImageDir = new File(path, "orig");
+        File verifyImageDir = new File(path, "verify");
+        if (!verifyImageDir.exists()) {
+            FileExtUtils.create(verifyImageDir);
+        }
+        File[] verifyImageFiles = origImageDir.listFiles();
         if (verifyImageFiles == null || verifyImageFiles.length == 0) {
             ExceptionUtils._throw(PubError.NOT_EXISTS, "验证码图片文件不存在！");
         }
         for (File f : verifyImageFiles) {
-            verifyImages.add(f.getPath());
+            File vFile = new File(verifyImageDir.getPath(), f.getName());
+            if (vFile.exists()) {
+                continue;
+            }
+            try {
+//                ImageUtils.reduceImageBy(f.getPath(), vFile.getPath(), DEFAULT_IMAGE_WIDTH, DEFAULT_IMAGE_HEIGHT);
+                ImageUtil.scaleByRatio(f, "", DEFAULT_IMAGE_WIDTH / DEFAULT_IMAGE_HEIGHT);
+                verifyImages.add(vFile.getPath());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
