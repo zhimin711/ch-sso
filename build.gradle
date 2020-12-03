@@ -62,6 +62,8 @@ dependencies {
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
     // https://mvnrepository.com/artifact/com.mortennobel/java-image-scaling
     implementation group: 'com.mortennobel', name: 'java-image-scaling', version: '0.8.6'
+    
+    implementation 'com.google.auto.service:auto-service:1.0-rc7'
 
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
