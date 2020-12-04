@@ -141,8 +141,6 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
 
     /**
      * 根据模板切图
-     *
-     * @throws Exception
      */
     public CaptchaVO pictureTemplatesCut(BufferedImage originalImage, BufferedImage jigsawImage, String jigsawImageBase64) {
         try {
@@ -168,7 +166,7 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
             // 新建的图像根据模板颜色赋值,源图生成遮罩
             cutByTemplate(originalImage, jigsawImage, newJigsawImage, x, 0);
             if (captchaInterferenceOptions > 0) {
-                int position = 0;
+                int position;
                 if (originalWidth - x - 5 > jigsawWidth * 2) {
                     //在原扣图右边插入干扰图
                     position = RandomUtils.getRandomInt(x + jigsawWidth + 5, originalWidth - jigsawWidth);
@@ -235,17 +233,17 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
     /**
      * 随机生成拼图坐标
      *
-     * @param originalWidth
-     * @param originalHeight
-     * @param jigsawWidth
-     * @param jigsawHeight
-     * @return
+     * @param originalWidth  原图宽
+     * @param originalHeight 原图高
+     * @param jigsawWidth    拼图宽
+     * @param jigsawHeight   拼图高
+     * @return 拼图坐标
      */
     private static PointVO generateJigsawPoint(int originalWidth, int originalHeight, int jigsawWidth, int jigsawHeight) {
         Random random = new Random();
         int widthDifference = originalWidth - jigsawWidth;
         int heightDifference = originalHeight - jigsawHeight;
-        int x, y = 0;
+        int x, y;
         if (widthDifference <= 0) {
             x = 5;
         } else {

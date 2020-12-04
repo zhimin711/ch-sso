@@ -32,15 +32,15 @@ public class ImageUtils {
     public static void cacheImage(String captchaOriginalPathJigsaw, String captchaOriginalPathClick) {
         //滑动拼图
         if (CommonUtils.isEmpty(captchaOriginalPathJigsaw)) {
-            originalCacheMap.putAll(getResourcesImagesFile("defaultImages/jigsaw/original"));
-            slidingBlockCacheMap.putAll(getResourcesImagesFile("defaultImages/jigsaw/slidingBlock"));
+            originalCacheMap.putAll(getResourcesImagesFile("static/defaultImages/jigsaw/original"));
+            slidingBlockCacheMap.putAll(getResourcesImagesFile("static/defaultImages/jigsaw/slidingBlock"));
         } else {
             originalCacheMap.putAll(getImagesFile(captchaOriginalPathJigsaw + File.separator + "original"));
             slidingBlockCacheMap.putAll(getImagesFile(captchaOriginalPathJigsaw + File.separator + "slidingBlock"));
         }
         //点选文字
         if (CommonUtils.isEmpty(captchaOriginalPathClick)) {
-            picClickCacheMap.putAll(getResourcesImagesFile("defaultImages/pic-click"));
+            picClickCacheMap.putAll(getResourcesImagesFile("static/defaultImages/pic-click"));
         } else {
             picClickCacheMap.putAll(getImagesFile(captchaOriginalPathClick));
         }

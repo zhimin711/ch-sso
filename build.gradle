@@ -26,7 +26,7 @@ ext {
     springCloudVersion = 'Greenwich.RELEASE'
     aliCloudVersion = '0.9.0.RELEASE'
     springOauth2Version = '2.3.4.RELEASE'
-    chVersion = '1.0.3-SNAPSHOT'
+    chVersion = '1.0.4-SNAPSHOT'
     chUpmsApiVersion = '1.0.0-SNAPSHOT'
     swagger2Version = '2.9.2'
     
@@ -54,7 +54,7 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-thymeleaf')
 
     implementation 'com.alibaba:druid:1.1.15'
-    implementation "mysql:mysql-connector-java:5.1.30"
+    implementation "mysql:mysql-connector-java:8.+"
 //    <!--swagger-->
     implementation "io.springfox:springfox-swagger2:${swagger2Version}"
     implementation "io.springfox:springfox-swagger-ui:${swagger2Version}"
@@ -64,6 +64,8 @@ dependencies {
     implementation group: 'com.mortennobel', name: 'java-image-scaling', version: '0.8.6'
     
     implementation 'com.google.auto.service:auto-service:1.0-rc7'
+
+    implementation 'com.github.ben-manes.caffeine:caffeine:2.6.2'
 
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'

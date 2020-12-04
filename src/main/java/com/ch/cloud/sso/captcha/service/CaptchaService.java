@@ -13,38 +13,37 @@ import java.util.Properties;
 public interface CaptchaService {
     /**
      * 配置初始化
-     *
      */
     void init(Properties config);
 
     /**
      * 获取验证码
      *
-     * @param captchaVO
-     * @return
+     * @param captchaVO 验证码
+     * @return 验证码
      */
     CaptchaVO get(CaptchaVO captchaVO);
 
     /**
      * 核对验证码(前端)
      *
-     * @param captchaVO
-     * @return
+     * @param captchaVO 验证码
+     * @return 验证码
      */
     CaptchaVO check(CaptchaVO captchaVO);
 
     /**
      * 二次校验验证码(后端)
      *
-     * @param captchaVO
-     * @return
+     * @param captchaVO 验证码
+     * @return 验证码
      */
     CaptchaVO verification(CaptchaVO captchaVO);
 
     /***
      * 验证码类型
      * 通过java SPI机制，接入方可自定义实现类，实现新的验证类型
-     * @return
+     * @return 验证码类型
      */
     String captchaType();
 

@@ -67,7 +67,7 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
         List<PointVO> point = null;
         List<PointVO> point1 = null;
         String pointJson = null;
-        /**
+        /*
          * [
          *             {
          *                 "x": 85.0,
@@ -193,7 +193,7 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
         Graphics combinedGraphics = combinedImage.getGraphics();
         combinedGraphics.drawImage(backgroundImage, 0, 0, null);
 
-        dataVO.setOriginalImageBase64(ImageUtils.getImageToBase64Str(backgroundImage).replaceAll("\r|\n", ""));
+        dataVO.setOriginalImageBase64(ImageUtils.getImageToBase64Str(backgroundImage).replaceAll("[\r\n]", ""));
         //pointList信息不传到前端，只做后端check校验
         //dataVO.setPointList(pointList);
         dataVO.setWordList(wordList);
