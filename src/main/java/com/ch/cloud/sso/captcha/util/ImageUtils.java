@@ -7,6 +7,7 @@ import com.ch.utils.CommonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.FileCopyUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -138,6 +139,7 @@ public class ImageUtils {
             InputStream resourceAsStream = classLoader.getResourceAsStream(path.concat("/").concat(String.valueOf(i).concat(".png")));
             byte[] bytes = new byte[0];
             try {
+
                 bytes = FileCopyUtils.copyToByteArray(resourceAsStream);
             } catch (IOException e) {
                 e.printStackTrace();
