@@ -18,6 +18,4 @@ public class PointVO {
     public int x;
 
     public int y;
-
-    private String secretKey;
 }

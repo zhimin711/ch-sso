@@ -6,6 +6,7 @@ import com.ch.cloud.sso.captcha.model.common.CaptchaBaseMapEnum;
 import com.ch.utils.CommonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Base64Utils;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;

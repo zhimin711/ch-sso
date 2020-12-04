@@ -47,7 +47,6 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
 
     @Override
     public CaptchaVO get(CaptchaVO captchaVO) {
-
         //原生图片
         BufferedImage originalImage = ImageUtils.getOriginal();
         if (null == originalImage) {
@@ -96,7 +95,7 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
 
             point = s.getPoints().get(0);
             //aes解密
-            pointJson = decrypt(captchaVO.getPointJson(), point.getSecretKey());
+            pointJson = decrypt(captchaVO.getPointJson(), s.getSecretKey());
             point1 = JSONObject.parseObject(pointJson, PointVO.class);
         } catch (Exception e) {
             logger.error("验证码坐标解析失败", e);
@@ -108,10 +107,9 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
             ExceptionUtils._throw(PubError.INVALID, RepCodeEnum.API_CAPTCHA_COORDINATE_ERROR.getDesc());
         }
         //校验成功，将信息存入缓存
-        String secretKey = point.getSecretKey();
         String value = null;
         try {
-            value = AESUtil.aesEncrypt(captchaVO.getToken().concat("---").concat(pointJson), secretKey);
+            value = AESUtil.aesEncrypt(captchaVO.getToken().concat("---").concat(pointJson), s.getSecretKey());
         } catch (Exception e) {
             logger.error("AES加密失败", e);
             ExceptionUtils._throw(PubError.INVALID);
@@ -216,8 +214,10 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
             dataVO.setPoints(Lists.newArrayList(point));
             dataVO.setJigsawImageBase64(encoder.encodeToString(jigsawImages).replaceAll("[\r\n]", ""));
             dataVO.setToken(RandomUtils.getUUID());
-            dataVO.setSecretKey(point.getSecretKey());
 
+            if (captchaAesStatus) {
+                dataVO.setSecretKey(AESUtil.getKey());;
+            }
             //将坐标信息存入redis中
             String codeKey = String.format(REDIS_CAPTCHA_KEY, dataVO.getToken());
             CaptchaServiceFactory.getCache(cacheType).set(codeKey, dataVO);
@@ -254,11 +254,7 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
         } else {
             y = random.nextInt(originalHeight - jigsawHeight) + 5;
         }
-        String key = null;
-        if (captchaAesStatus) {
-            key = AESUtil.getKey();
-        }
-        return new PointVO(x, y, key);
+        return new PointVO(x, y);
     }
 
     /**

@@ -86,7 +86,7 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
         try {
             point = s.getPoints();
             //aes解密
-            pointJson = decrypt(captchaVO.getPointJson(), point.get(0).getSecretKey());
+            pointJson = decrypt(captchaVO.getPointJson(), s.getSecretKey());
             point1 = JSONObject.parseArray(pointJson, PointVO.class);
         } catch (Exception e) {
             logger.error("验证码坐标解析失败", e);
@@ -101,10 +101,9 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
             }
         }
         //校验成功，将信息存入缓存
-        String secretKey = point.get(0).getSecretKey();
         String value = null;
         try {
-            value = AESUtil.aesEncrypt(captchaVO.getToken().concat("---").concat(pointJson), secretKey);
+            value = AESUtil.aesEncrypt(captchaVO.getToken().concat("---").concat(pointJson), s.getSecretKey());
         } catch (Exception e) {
             logger.error("AES加密失败", e);
             ExceptionUtils._throw(PubError.NOT_);
@@ -162,7 +161,6 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
 
             //随机字体坐标
             PointVO point = randomWordPoint(width, height, i, wordCount);
-            point.setSecretKey(secretKey);
             //随机字体颜色
             if (isFontColorRandom()) {
                 backgroundGraphics.setColor(new Color(RandomUtils.getRandomInt(1, 255), RandomUtils.getRandomInt(1, 255), RandomUtils.getRandomInt(1, 255)));
@@ -203,7 +201,6 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
         String codeKey = String.format(REDIS_CAPTCHA_KEY, dataVO.getToken());
         dataVO.setPoints(pointList);
         CaptchaServiceFactory.getCache(cacheType).set(codeKey, dataVO);
-//        base64StrToImage(getImageToBase64Str(backgroundImage), "D:\\点击.png");
         return dataVO;
     }
 
@@ -229,7 +226,7 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
             }
         }
         y = RandomUtils.getRandomInt(HAN_ZI_SIZE, imageHeight - HAN_ZI_SIZE);
-        return new PointVO(x, y, null);
+        return new PointVO(x, y);
     }
 
 
