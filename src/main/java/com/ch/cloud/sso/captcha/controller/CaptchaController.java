@@ -36,7 +36,7 @@ public class CaptchaController {
 
     @PostMapping("/verify")
     public Result<?> verify(@RequestBody CaptchaVO captchaVO) {
-        return ResultUtils.wrapFail(() -> captchaService.verification(captchaVO));
+        return ResultUtils.wrapFail(() -> captchaService.verification(captchaVO.getCaptchaVerification()));
     }
 
 }

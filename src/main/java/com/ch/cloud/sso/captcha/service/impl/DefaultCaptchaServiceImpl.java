@@ -1,6 +1,5 @@
 package com.ch.cloud.sso.captcha.service.impl;
 
-import com.ch.cloud.sso.captcha.model.common.RepCodeEnum;
 import com.ch.cloud.sso.captcha.model.vo.CaptchaVO;
 import com.ch.cloud.sso.captcha.service.CaptchaService;
 import com.ch.e.PubError;
@@ -18,8 +17,6 @@ import java.util.Properties;
  * @date 2021/1/1
  */
 public class DefaultCaptchaServiceImpl extends AbstractCaptchaService {
-
-    private static Logger logger = LoggerFactory.getLogger(DefaultCaptchaServiceImpl.class);
 
     @Override
     public String captchaType() {
@@ -49,25 +46,6 @@ public class DefaultCaptchaServiceImpl extends AbstractCaptchaService {
             ExceptionUtils._throw(PubError.ARGS);
         }
         return getService(captchaVO.getCaptchaType()).check(captchaVO);
-    }
-
-    @Override
-    public CaptchaVO verification(CaptchaVO captchaVO) {
-        if (captchaVO == null || CommonUtils.isEmptyOr(captchaVO.getCaptchaVerification())) {
-            ExceptionUtils._throw(PubError.ARGS);
-        }
-        try {
-            String codeKey = String.format(REDIS_SECOND_CAPTCHA_KEY, captchaVO.getCaptchaVerification());
-            if (!CaptchaServiceFactory.getCache(cacheType).exists(codeKey)) {
-                ExceptionUtils._throw(PubError.ARGS, RepCodeEnum.API_CAPTCHA_INVALID.getDesc());
-            }
-            //二次校验取值后，即刻失效
-            CaptchaServiceFactory.getCache(cacheType).delete(codeKey);
-        } catch (Exception e) {
-            logger.error("验证码坐标解析失败", e);
-            ExceptionUtils._throw(PubError.NOT_);
-        }
-        return new CaptchaVO();
     }
 
 }

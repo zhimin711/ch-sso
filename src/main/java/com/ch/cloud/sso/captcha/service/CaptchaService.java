@@ -35,10 +35,10 @@ public interface CaptchaService {
     /**
      * 二次校验验证码(后端)
      *
-     * @param captchaVO 验证码
+     * @param captchaVerification 二次验证码
      * @return 验证码
      */
-    CaptchaVO verification(CaptchaVO captchaVO);
+    boolean verification(String captchaVerification);
 
     /***
      * 验证码类型

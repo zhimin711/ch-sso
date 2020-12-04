@@ -120,25 +120,6 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
         return captchaVO;
     }
 
-    @Override
-    public CaptchaVO verification(CaptchaVO captchaVO) {
-        if (captchaVO == null || CommonUtils.isEmpty(captchaVO.getCaptchaVerification())) {
-            ExceptionUtils._throw(PubError.NON_NULL);
-        }
-        try {
-            String codeKey = String.format(REDIS_SECOND_CAPTCHA_KEY, captchaVO.getCaptchaVerification());
-            if (!CaptchaServiceFactory.getCache(cacheType).exists(codeKey)) {
-                ExceptionUtils._throw(PubError.INVALID, RepCodeEnum.API_CAPTCHA_INVALID.getDesc());
-            }
-            //二次校验取值后，即刻失效
-            CaptchaServiceFactory.getCache(cacheType).delete(codeKey);
-        } catch (Exception e) {
-            logger.error("验证码坐标解析失败", e);
-            ExceptionUtils._throw(PubError.INVALID);
-        }
-        return new CaptchaVO();
-    }
-
     /**
      * 根据模板切图
      */

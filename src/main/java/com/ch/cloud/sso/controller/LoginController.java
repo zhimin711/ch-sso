@@ -1,7 +1,7 @@
 package com.ch.cloud.sso.controller;
 
 import com.ch.Constants;
-import com.ch.cloud.client.dto.UserDto;
+import com.ch.cloud.sso.captcha.service.CaptchaService;
 import com.ch.cloud.sso.pojo.LoginDto;
 import com.ch.cloud.sso.pojo.TokenVo;
 import com.ch.cloud.sso.pojo.UserInfo;
@@ -9,7 +9,6 @@ import com.ch.cloud.sso.pojo.UserVo;
 import com.ch.cloud.sso.service.IUserService;
 import com.ch.cloud.sso.tools.JwtTokenTool;
 import com.ch.cloud.sso.utils.CaptchaUtils;
-import com.ch.cloud.sso.utils.SlideCaptchaUtil;
 import com.ch.e.PubError;
 import com.ch.result.Result;
 import com.ch.result.ResultUtils;
@@ -52,6 +51,8 @@ public class LoginController {
 
     @Autowired
     IUserService userService;
+    @Autowired
+    private CaptchaService captchaService;
 
 
     //
@@ -72,13 +73,14 @@ public class LoginController {
      */
     @ApiOperation(value = "获取用户访问令牌", notes = "基于密码模式登录,无需签名,返回access_token")
     @PostMapping(value = "login/token/access", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Result<TokenVo> getLoginToken(@RequestBody LoginDto user, HttpServletRequest request) {
+    public Result<TokenVo> getLoginToken(@RequestBody LoginDto user) {
 
         if (StringUtils.isEmpty(user.getUsername()) || StringUtils.isEmpty(user.getPassword())) {
             return Result.error(PubError.USERNAME_OR_PASSWORD, "用户或者密码不能为空！");
         }
-        String verifyCode = (String) request.getSession().getAttribute("verifyCode");
-        if (StringUtils.isEmpty(user.getCaptchaCode()) || StringUtils.isEmpty(verifyCode) || !verifyCode.equalsIgnoreCase(user.getCaptchaCode())) {
+
+
+        if (StringUtils.isEmpty(user.getCaptchaCode()) || !captchaService.verification(user.getCaptchaCode())) {
             return Result.error(PubError.NOT_, "验证码错误或已过期！");
         }
         return ResultUtils.wrap(() -> userService.login(user.getUsername(), user.getPassword()));
