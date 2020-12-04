@@ -1,5 +1,6 @@
 package com.ch.cloud.sso.captcha.model.vo;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,22 +12,12 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class PointVO {
-
-    private String secretKey;
 
     public int x;
 
     public int y;
 
-    public PointVO(int x, int y, String secretKey) {
-        this.secretKey = secretKey;
-        this.x = x;
-        this.y = y;
-    }
-
-    public PointVO(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
+    private String secretKey;
 }

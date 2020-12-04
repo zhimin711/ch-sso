@@ -13,4 +13,7 @@ public class LoginDto extends com.ch.cloud.client.dto.UserDto {
     @ApiModelProperty(name = "captchaCode", value = "验证码", required = true)
     private String captchaCode;
 
+    @ApiModelProperty(name = "captchaVerification", value = "二次验证码")
+    private String captchaVerification;
+
 }

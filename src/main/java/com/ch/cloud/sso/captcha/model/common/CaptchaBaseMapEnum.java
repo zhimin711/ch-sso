@@ -14,7 +14,7 @@ public enum CaptchaBaseMapEnum {
     private String codeValue;
     private String codeDesc;
 
-    private CaptchaBaseMapEnum(String codeValue, String codeDesc) {
+    CaptchaBaseMapEnum(String codeValue, String codeDesc) {
         this.codeValue = codeValue;
         this.codeDesc = codeDesc;
     }
@@ -38,7 +38,7 @@ public enum CaptchaBaseMapEnum {
     }
 
     //根据codeValue获取描述
-    public static String getCodeDescByCodeBalue(String codeValue) {
+    public static String getCodeDescByCodeValue(String codeValue) {
         CaptchaBaseMapEnum enumItem = parseFromCodeValue(codeValue);
         return enumItem == null ? "" : enumItem.getCodeDesc();
     }
