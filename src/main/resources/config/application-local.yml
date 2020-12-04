@@ -30,7 +30,9 @@ jwt:
   tokenExpired: 30m
   refreshTokenExpired: 1d
 captcha:
+  ##支持项目路径,以classpath:开头,取resource目录下路径,例：classpath:images/jigsaw
   jigsaw: classpath:static/images/jigsaw
+  ##支持项目路径,以classpath:开头,取resource目录下路径,例：classpath:images/pic-click
   pic-click: classpath:static/images/pic-click
   type: DEFAULT
   # local caffeine redis
