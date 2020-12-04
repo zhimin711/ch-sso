@@ -17,7 +17,7 @@ public class CaptchaStorageAutoConfiguration {
 
     @Bean(name = "captchaCacheService")
     public CaptchaCacheService captchaCacheService(CaptchaProperties captchaProperties){
-        //缓存类型redis/local/....
+        //缓存类型redis/local/caffeine
         return CaptchaServiceFactory.getCache(captchaProperties.getCacheType().name());
     }
 }

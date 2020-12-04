@@ -25,7 +25,7 @@ public interface CaptchaCacheService {
     CaptchaVO get(String key);
 
     /**
-     * 缓存类型-local/redis/memcache/..
+     * 缓存类型-local/redis/caffeine/..
      * 通过java SPI机制，接入方可自定义实现类
      *
      * @return 缓存类型
