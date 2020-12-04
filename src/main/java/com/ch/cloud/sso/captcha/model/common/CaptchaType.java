@@ -6,15 +6,15 @@ package com.ch.cloud.sso.captcha.model.common;
  * @author zhimin.ma
  * @date 2021/1/1
  */
-public enum CaptchaTypeEnum {
+public enum CaptchaType {
     /**
      * 滑块拼图.
      */
-    BLOCKPUZZLE("blockPuzzle", "滑块拼图"),
+    BLOCK_PUZZLE("blockPuzzle", "滑块拼图"),
     /**
      * 文字点选.
      */
-    CLICKWORD("clickWord", "文字点选"),
+    CLICK_WORD("clickWord", "文字点选"),
     /**
      * 默认.
      */
@@ -23,7 +23,7 @@ public enum CaptchaTypeEnum {
     private String codeValue;
     private String codeDesc;
 
-    CaptchaTypeEnum(String codeValue, String codeDesc) {
+    CaptchaType(String codeValue, String codeDesc) {
         this.codeValue = codeValue;
         this.codeDesc = codeDesc;
     }
@@ -37,8 +37,8 @@ public enum CaptchaTypeEnum {
     }
 
     //根据codeValue获取枚举
-    public static CaptchaTypeEnum parseFromCodeValue(String codeValue) {
-        for (CaptchaTypeEnum e : CaptchaTypeEnum.values()) {
+    public static CaptchaType parseFromCodeValue(String codeValue) {
+        for (CaptchaType e : CaptchaType.values()) {
             if (e.codeValue.equals(codeValue)) {
                 return e;
             }
@@ -48,7 +48,7 @@ public enum CaptchaTypeEnum {
 
     //根据codeValue获取描述
     public static String getCodeDescByCodeBalue(String codeValue) {
-        CaptchaTypeEnum enumItem = parseFromCodeValue(codeValue);
+        CaptchaType enumItem = parseFromCodeValue(codeValue);
         return enumItem == null ? "" : enumItem.getCodeDesc();
     }
 
@@ -60,7 +60,7 @@ public enum CaptchaTypeEnum {
     //列出所有值字符串
     public static String getString() {
         StringBuffer buffer = new StringBuffer();
-        for (CaptchaTypeEnum e : CaptchaTypeEnum.values()) {
+        for (CaptchaType e : CaptchaType.values()) {
             buffer.append(e.codeValue).append("--").append(e.getCodeDesc()).append(", ");
         }
         buffer.deleteCharAt(buffer.lastIndexOf(","));

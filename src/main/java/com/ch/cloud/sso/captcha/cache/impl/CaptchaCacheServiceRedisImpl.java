@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
  * @author zhimin.ma
  * @date 2019/9/9
  */
+/*
 public class CaptchaCacheServiceRedisImpl implements CaptchaCacheService {
 
     @Override
@@ -47,3 +48,4 @@ public class CaptchaCacheServiceRedisImpl implements CaptchaCacheService {
         return stringRedisTemplate.opsForValue().get(key);
     }
 }
+*/

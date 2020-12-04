@@ -1,6 +1,7 @@
 
 package com.ch.cloud.sso.captcha.model.vo;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.awt.*;
@@ -14,6 +15,7 @@ import java.util.List;
  * @date 2021/1/1
  */
 @Data
+@JsonIgnoreProperties(value = {"captchaId", "projectCode", "points", "pointList"})
 public class CaptchaVO implements Serializable {
 
     /**
@@ -44,7 +46,7 @@ public class CaptchaVO implements Serializable {
     /**
      * 滑块点选坐标
      */
-    private PointVO point;
+    private List<PointVO> points;
 
     /**
      * 滑块图片base64

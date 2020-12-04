@@ -3,7 +3,6 @@ package com.ch.cloud.sso.props;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;
 import org.springframework.boot.convert.DurationUnit;
-import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -15,9 +14,8 @@ import java.time.temporal.ChronoUnit;
  * @date 2019/12/12
  */
 
-@Component
-@ConfigurationPropertiesBinding
 @ConfigurationProperties("jwt")
+@ConfigurationPropertiesBinding
 public class JwtProperties {
     /**
      * ns for nanoseconds

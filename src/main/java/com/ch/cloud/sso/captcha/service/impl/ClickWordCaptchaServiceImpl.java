@@ -1,7 +1,7 @@
 package com.ch.cloud.sso.captcha.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.ch.cloud.sso.captcha.model.common.CaptchaTypeEnum;
+import com.ch.cloud.sso.captcha.model.common.CaptchaType;
 import com.ch.cloud.sso.captcha.model.common.RepCodeEnum;
 import com.ch.cloud.sso.captcha.model.vo.CaptchaVO;
 import com.ch.cloud.sso.captcha.model.vo.PointVO;
@@ -32,7 +32,7 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
 
     @Override
     public String captchaType() {
-        return CaptchaTypeEnum.CLICKWORD.getCodeValue();
+        return CaptchaType.CLICK_WORD.getCodeValue();
     }
 
     @Override
@@ -61,7 +61,7 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
         if (!CaptchaServiceFactory.getCache(cacheType).exists(codeKey)) {
             ExceptionUtils._throw(PubError.INVALID, RepCodeEnum.API_CAPTCHA_INVALID.getDesc());
         }
-        String s = CaptchaServiceFactory.getCache(cacheType).get(codeKey);
+        CaptchaVO s = CaptchaServiceFactory.getCache(cacheType).get(codeKey);
         //验证码只用一次，即刻失效
         CaptchaServiceFactory.getCache(cacheType).delete(codeKey);
         List<PointVO> point = null;
@@ -84,7 +84,7 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
          * ]
          */
         try {
-            point = JSONObject.parseArray(s, PointVO.class);
+            point = s.getPoints();
             //aes解密
             pointJson = decrypt(captchaVO.getPointJson(), point.get(0).getSecretKey());
             point1 = JSONObject.parseArray(pointJson, PointVO.class);
@@ -110,7 +110,7 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
             ExceptionUtils._throw(PubError.NOT_);
         }
         String secondKey = String.format(REDIS_SECOND_CAPTCHA_KEY, value);
-        CaptchaServiceFactory.getCache(cacheType).set(secondKey, captchaVO.getToken(), EXPIRESIN_THREE);
+        CaptchaServiceFactory.getCache(cacheType).set(secondKey, captchaVO);
 //        captchaVO.setResult(true);
         return captchaVO;
     }
@@ -195,13 +195,14 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
 
         dataVO.setOriginalImageBase64(ImageUtils.getImageToBase64Str(backgroundImage).replaceAll("[\r\n]", ""));
         //pointList信息不传到前端，只做后端check校验
-        //dataVO.setPointList(pointList);
+
         dataVO.setWordList(wordList);
         dataVO.setToken(RandomUtils.getUUID());
         dataVO.setSecretKey(secretKey);
         //将坐标信息存入redis中
         String codeKey = String.format(REDIS_CAPTCHA_KEY, dataVO.getToken());
-        CaptchaServiceFactory.getCache(cacheType).set(codeKey, JSONObject.toJSONString(pointList), EXPIRESIN_SECONDS);
+        dataVO.setPoints(pointList);
+        CaptchaServiceFactory.getCache(cacheType).set(codeKey, dataVO);
 //        base64StrToImage(getImageToBase64Str(backgroundImage), "D:\\点击.png");
         return dataVO;
     }

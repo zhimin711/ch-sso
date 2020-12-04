@@ -4,6 +4,7 @@ import com.ch.cloud.sso.captcha.model.common.Const;
 import com.ch.cloud.sso.captcha.service.CaptchaService;
 import com.ch.cloud.sso.captcha.util.AESUtil;
 import com.ch.cloud.sso.captcha.util.CacheUtil;
+import com.ch.cloud.sso.captcha.util.CaffeineCacheUtil;
 import com.ch.cloud.sso.captcha.util.ImageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,9 +76,15 @@ public abstract class AbstractCaptchaService implements CaptchaService {
         cacheType = config.getProperty(Const.CAPTCHA_CACHETYPE, "local");
         captchaInterferenceOptions = Integer.parseInt(config.getProperty(Const.CAPTCHA_INTERFERENCE_OPTIONS, "0"));
         if (cacheType.equals("local")) {
-            logger.info("初始化local缓存...");
+            logger.info("初始化 local 缓存...");
             CacheUtil.init(Integer.parseInt(config.getProperty(Const.CAPTCHA_CACAHE_MAX_NUMBER, "1000")),
                     Long.parseLong(config.getProperty(Const.CAPTCHA_TIMING_CLEAR_SECOND, "180")));
+
+        } else if (cacheType.equals("caffeine")) {
+            logger.info("初始化 caffeine 缓存...");
+            CaffeineCacheUtil.init(Long.parseLong(config.getProperty(Const.CAPTCHA_CACAHE_MAX_NUMBER, "1000")),
+                    Long.parseLong(config.getProperty(Const.CAPTCHA_TIMING_CLEAR_SECOND, "180")));
+
         }
     }
 

@@ -1,7 +1,7 @@
 package com.ch.cloud.sso.captcha.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.ch.cloud.sso.captcha.model.common.CaptchaTypeEnum;
+import com.ch.cloud.sso.captcha.model.common.CaptchaType;
 import com.ch.cloud.sso.captcha.model.common.RepCodeEnum;
 import com.ch.cloud.sso.captcha.model.vo.CaptchaVO;
 import com.ch.cloud.sso.captcha.model.vo.PointVO;
@@ -11,6 +11,7 @@ import com.ch.cloud.sso.captcha.util.RandomUtils;
 import com.ch.e.PubError;
 import com.ch.utils.CommonUtils;
 import com.ch.utils.ExceptionUtils;
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
 
     @Override
     public String captchaType() {
-        return CaptchaTypeEnum.BLOCKPUZZLE.getCodeValue();
+        return CaptchaType.BLOCK_PUZZLE.getCodeValue();
     }
 
     @Override
@@ -85,14 +86,15 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
         if (!CaptchaServiceFactory.getCache(cacheType).exists(codeKey)) {
             ExceptionUtils._throw(PubError.INVALID, RepCodeEnum.API_CAPTCHA_INVALID.getDesc());
         }
-        String s = CaptchaServiceFactory.getCache(cacheType).get(codeKey);
+        CaptchaVO s = CaptchaServiceFactory.getCache(cacheType).get(codeKey);
         //验证码只用一次，即刻失效
         CaptchaServiceFactory.getCache(cacheType).delete(codeKey);
         PointVO point = null;
         PointVO point1 = null;
         String pointJson = null;
         try {
-            point = JSONObject.parseObject(s, PointVO.class);
+
+            point = s.getPoints().get(0);
             //aes解密
             pointJson = decrypt(captchaVO.getPointJson(), point.getSecretKey());
             point1 = JSONObject.parseObject(pointJson, PointVO.class);
@@ -115,7 +117,7 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
             ExceptionUtils._throw(PubError.INVALID);
         }
         String secondKey = String.format(REDIS_SECOND_CAPTCHA_KEY, value);
-        CaptchaServiceFactory.getCache(cacheType).set(secondKey, captchaVO.getToken(), EXPIRESIN_THREE);
+        CaptchaServiceFactory.getCache(cacheType).set(secondKey, s);
 //        captchaVO.setResult(true);
         return captchaVO;
     }
@@ -211,16 +213,14 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
             Base64.Encoder encoder = Base64.getEncoder();
             dataVO.setOriginalImageBase64(encoder.encodeToString(oriCopyImages).replaceAll("[\r\n]", ""));
             //point信息不传到前端，只做后端check校验
-//            dataVO.setPoint(point);
+            dataVO.setPoints(Lists.newArrayList(point));
             dataVO.setJigsawImageBase64(encoder.encodeToString(jigsawImages).replaceAll("[\r\n]", ""));
             dataVO.setToken(RandomUtils.getUUID());
             dataVO.setSecretKey(point.getSecretKey());
-//            base64StrToImage(encoder.encodeToString(oriCopyImages), "D:\\原图.png");
-//            base64StrToImage(encoder.encodeToString(jigsawImages), "D:\\滑动.png");
 
             //将坐标信息存入redis中
             String codeKey = String.format(REDIS_CAPTCHA_KEY, dataVO.getToken());
-            CaptchaServiceFactory.getCache(cacheType).set(codeKey, JSONObject.toJSONString(point), EXPIRESIN_SECONDS);
+            CaptchaServiceFactory.getCache(cacheType).set(codeKey, dataVO);
             logger.debug("token：{},point:{}", dataVO.getToken(), JSONObject.toJSONString(point));
             return dataVO;
         } catch (Exception e) {

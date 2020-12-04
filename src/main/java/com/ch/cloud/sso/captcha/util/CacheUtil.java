@@ -1,16 +1,12 @@
 
 package com.ch.cloud.sso.captcha.util;
 
-import com.ch.cloud.sso.captcha.model.vo.CaptchaVO;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * decs:缓存工具
@@ -23,11 +19,6 @@ public final class CacheUtil {
 
     private static final Map<String, Object> CACHE_MAP = new ConcurrentHashMap<>();
 
-
-    public static final LoadingCache<String, CaptchaVO> captchaInfos = Caffeine.newBuilder()
-            .maximumSize(10_000)
-            .expireAfterAccess(10, TimeUnit.MINUTES)
-            .build(key -> null); // 用户登录信息缓存
     /**
      * 缓存最大个数
      */

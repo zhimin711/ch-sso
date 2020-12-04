@@ -6,23 +6,21 @@
  */
 package com.ch.cloud.sso.captcha.cache;
 
-import com.ch.cloud.sso.captcha.model.vo.CaptchaVO;
-
 /**
- * 验证码缓存新接口
+ * 验证码缓存接口
  *
  * @author zhimin.ma
  * @date 2020-08-21
  */
 public interface CaptchaCacheService {
 
-    void set(String key, CaptchaVO captchaVO);
+    void set(String key, String value, long expiresInSeconds);
 
     boolean exists(String key);
 
     void delete(String key);
 
-    CaptchaVO get(String key);
+    String get(String key);
 
     /**
      * 缓存类型-local/redis/memcache/..

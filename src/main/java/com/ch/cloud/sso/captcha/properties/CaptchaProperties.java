@@ -1,6 +1,6 @@
 package com.ch.cloud.sso.captcha.properties;
 
-import com.ch.cloud.sso.captcha.model.common.CaptchaTypeEnum;
+import com.ch.cloud.sso.captcha.model.common.CaptchaType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import static com.ch.cloud.sso.captcha.properties.CaptchaProperties.PREFIX;
@@ -15,12 +15,12 @@ import static com.ch.cloud.sso.captcha.properties.CaptchaProperties.StorageType.
 @ConfigurationProperties(PREFIX)
 public class CaptchaProperties {
 
-    public static final String PREFIX = "aj.captcha";
+    public static final String PREFIX = "captcha";
 
     /**
      * 验证码类型.
      */
-    private CaptchaTypeEnum type = CaptchaTypeEnum.DEFAULT;
+    private CaptchaType type = CaptchaType.DEFAULT;
 
     /**
      * 滑动拼图底图路径.
@@ -84,6 +84,10 @@ public class CaptchaProperties {
          */
         local,
         /**
+         *  本地缓存.
+         */
+        caffeine,
+        /**
          * redis.
          */
         redis
@@ -93,11 +97,11 @@ public class CaptchaProperties {
         return PREFIX;
     }
 
-    public CaptchaTypeEnum getType() {
+    public CaptchaType getType() {
         return type;
     }
 
-    public void setType(CaptchaTypeEnum type) {
+    public void setType(CaptchaType type) {
         this.type = type;
     }
 
