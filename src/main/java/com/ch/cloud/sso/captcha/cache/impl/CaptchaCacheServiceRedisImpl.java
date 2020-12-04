@@ -1,7 +1,10 @@
 package com.ch.cloud.sso.captcha.cache.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.ch.cloud.sso.captcha.cache.CaptchaCacheService;
+import com.ch.cloud.sso.captcha.model.vo.CaptchaVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.concurrent.TimeUnit;
@@ -16,8 +19,11 @@ import java.util.concurrent.TimeUnit;
  * @author zhimin.ma
  * @date 2019/9/9
  */
-/*
 public class CaptchaCacheServiceRedisImpl implements CaptchaCacheService {
+
+
+    @Value("${captcha.timing.clear:180}")
+    private long expiresInSeconds;
 
     @Override
     public String type() {
@@ -28,8 +34,8 @@ public class CaptchaCacheServiceRedisImpl implements CaptchaCacheService {
     private StringRedisTemplate stringRedisTemplate;
 
     @Override
-    public void set(String key, String value, long expiresInSeconds) {
-        stringRedisTemplate.opsForValue().set(key, value, expiresInSeconds, TimeUnit.SECONDS);
+    public void set(String key, CaptchaVO value) {
+        stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(value), expiresInSeconds, TimeUnit.SECONDS);
     }
 
     @Override
@@ -44,8 +50,7 @@ public class CaptchaCacheServiceRedisImpl implements CaptchaCacheService {
     }
 
     @Override
-    public String get(String key) {
-        return stringRedisTemplate.opsForValue().get(key);
+    public CaptchaVO get(String key) {
+        return JSON.parseObject(stringRedisTemplate.opsForValue().get(key), CaptchaVO.class);
     }
 }
-*/

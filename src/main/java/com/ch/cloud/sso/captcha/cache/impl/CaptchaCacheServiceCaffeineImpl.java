@@ -14,7 +14,7 @@ import com.ch.cloud.sso.captcha.util.CaffeineCacheUtil;
  * @author zhimin.ma
  * @date 2020/12/15 12:46 PM
  */
-public class CaptchaCacheCaffeineImpl implements CaptchaCacheService {
+public class CaptchaCacheServiceCaffeineImpl implements CaptchaCacheService {
 
 
     @Override

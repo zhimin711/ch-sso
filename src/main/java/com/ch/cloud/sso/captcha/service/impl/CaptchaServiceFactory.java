@@ -38,11 +38,11 @@ public class CaptchaServiceFactory {
     public volatile static Map<String, CaptchaCacheService> cacheService = new HashMap<>();
 
     static {
-        logger.info("supported-captchaTypes-service:{}", instances.keySet().toString());
         ServiceLoader<CaptchaService> services = ServiceLoader.load(CaptchaService.class);
         for (CaptchaService item : services) {
             instances.put(item.captchaType(), item);
         }
+        logger.info("supported-captchaTypes-service:{}", instances.keySet().toString());
         ServiceLoader<CaptchaCacheService> cacheServices = ServiceLoader.load(CaptchaCacheService.class);
         for (CaptchaCacheService item : cacheServices) {
             cacheService.put(item.type(), item);
