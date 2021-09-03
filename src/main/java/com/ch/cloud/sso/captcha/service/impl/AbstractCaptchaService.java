@@ -9,7 +9,7 @@ import com.ch.cloud.sso.captcha.util.CaffeineCacheUtil;
 import com.ch.cloud.sso.captcha.util.ImageUtils;
 import com.ch.e.PubError;
 import com.ch.utils.CommonUtils;
-import com.ch.utils.ExceptionUtils;
+import com.ch.e.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

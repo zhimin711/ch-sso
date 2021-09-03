@@ -26,7 +26,7 @@ ext {
     springCloudVersion = 'Greenwich.RELEASE'
     aliCloudVersion = '0.9.0.RELEASE'
     springOauth2Version = '2.3.4.RELEASE'
-    chVersion = '1.0.4-SNAPSHOT'
+    chVersion = '2.0.0-SNAPSHOT'
     chUpmsApiVersion = '1.0.0-SNAPSHOT'
     swagger2Version = '2.9.2'
     

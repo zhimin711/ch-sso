@@ -4,7 +4,7 @@ import com.ch.cloud.sso.pojo.TokenVo;
 import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.props.JwtProperties;
 import com.ch.e.PubError;
-import com.ch.utils.ExceptionUtils;
+import com.ch.e.ExceptionUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;

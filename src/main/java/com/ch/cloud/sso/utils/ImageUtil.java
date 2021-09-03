@@ -1,6 +1,6 @@
 package com.ch.cloud.sso.utils;
 
-import com.ch.utils.FileExtUtils;
+import com.ch.utils.FileUtilsV2;
 import com.ch.utils.IOUtils;
 import com.mortennobel.imagescaling.DimensionConstrain;
 import com.mortennobel.imagescaling.ResampleOp;
@@ -315,7 +315,7 @@ public class ImageUtil {
 
             ByteArrayOutputStream bs = new ByteArrayOutputStream();
             ImageOutputStream imOut = ImageIO.createImageOutputStream(bs);
-            String formatName = FileExtUtils.getFileExtensionName(srcImage);
+            String formatName = FileUtilsV2.getFileExtensionName(srcImage);
 
             ImageIO.write(to,  formatName, imOut);
 

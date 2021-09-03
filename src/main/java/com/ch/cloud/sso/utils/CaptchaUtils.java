@@ -2,8 +2,8 @@ package com.ch.cloud.sso.utils;
 
 import com.ch.cloud.sso.pojo.SlideCaptcha;
 import com.ch.e.PubError;
-import com.ch.utils.ExceptionUtils;
-import com.ch.utils.FileExtUtils;
+import com.ch.e.ExceptionUtils;
+import com.ch.utils.FileUtilsV2;
 import com.ch.utils.ImageUtils;
 import com.google.common.collect.Lists;
 
@@ -177,7 +177,7 @@ public class CaptchaUtils {
         File origImageDir = new File(path, "orig");
         File verifyImageDir = new File(path, "verify");
         if (!verifyImageDir.exists()) {
-            FileExtUtils.create(verifyImageDir);
+            FileUtilsV2.create(verifyImageDir);
         }
         File[] verifyImageFiles = origImageDir.listFiles();
         if (verifyImageFiles == null || verifyImageFiles.length == 0) {

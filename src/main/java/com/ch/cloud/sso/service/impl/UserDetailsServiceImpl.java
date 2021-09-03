@@ -1,6 +1,6 @@
 package com.ch.cloud.sso.service.impl;
 
-import com.ch.NumS;
+import com.ch.Num;
 import com.ch.StatusS;
 import com.ch.cloud.client.dto.PermissionDto;
 import com.ch.cloud.client.dto.RoleDto;
@@ -12,8 +12,8 @@ import com.ch.cloud.sso.tools.JwtTokenTool;
 import com.ch.e.PubError;
 import com.ch.result.Result;
 import com.ch.utils.CommonUtils;
-import com.ch.utils.ExceptionUtils;
-import com.ch.utils.StringExtUtils;
+import com.ch.e.ExceptionUtils;
+import com.ch.utils.StringUtilsV2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -169,7 +169,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
             });
             res3.getRows().forEach(permission -> {
                 //hidden menu add to btn permission
-                if (CommonUtils.isEquals(permission.getType(), NumS._4)) {
+                if (CommonUtils.isEquals(permission.getType(), Num.S4)) {
                     buttonVos.add(new BtnVo(permission.getParentId(), permission.getCode(), permission.getName()));
                 }
             });
@@ -195,7 +195,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         vo.setSort(permission.getSort());
 //        vo.setHidden(permission.isHidden());
         vo.setHidden(CommonUtils.isEquals(permission.getIsShow(), StatusS.DISABLED));
-        String pid = CommonUtils.isEquals(NumS._0, permission.getParentId()) ? permission.getId().toString() : StringExtUtils.linkStr(",", permission.getParentId(), permission.getId().toString());
+        String pid = CommonUtils.isEquals(Num.S0, permission.getParentId()) ? permission.getId().toString() : StringUtilsV2.linkStr(",", permission.getParentId(), permission.getId().toString());
         if (/*"1".equals(permission.getType()) && */pidMap.get(pid) != null) {
             List<MenuVo> menuVos = pidMap.get(pid).stream().map(e -> assemblyMenu(e, pidMap))
                     .sorted(Comparator.comparing(MenuVo::getSort)).collect(Collectors.toList());
