@@ -81,7 +81,7 @@ public class LoginController {
 
 
         if (StringUtils.isEmpty(user.getCaptchaCode()) || !captchaService.verification(user.getCaptchaCode())) {
-            return Result.error(PubError.NOT_, "验证码错误或已过期！");
+            return Result.error(PubError.UNDEFINED, "验证码错误或已过期！");
         }
         return ResultUtils.wrap(() -> userService.login(user.getUsername(), user.getPassword()));
     }

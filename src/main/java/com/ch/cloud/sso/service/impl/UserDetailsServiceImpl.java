@@ -13,9 +13,11 @@ import com.ch.e.PubError;
 import com.ch.result.Result;
 import com.ch.utils.CommonUtils;
 import com.ch.e.ExceptionUtils;
+import com.ch.utils.JSONUtils;
 import com.ch.utils.StringUtilsV2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +43,9 @@ import java.util.stream.Collectors;
  * @author zhimin
  * @date 2019/4/15 12:46 PM
  */
+@Slf4j
 @Service("userDetailsService")
 public class UserDetailsServiceImpl implements UserDetailsService, IUserService {
-
 
     @Resource
     private UpmsClientService upmsClientService;
@@ -64,9 +66,11 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         Long id = user.getId();
 
         Result<RoleDto> res2 = upmsClientService.findRolesByUserId(id);
+
+        log.info("upms roles: {}", JSONUtils.toJson(res2));
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
         if (!res2.isEmpty()) {
-            res2.getRows().forEach(r -> {
+            res2.getRows().stream().filter(Objects::nonNull).forEach(r -> {
                 authorities.add(new SimpleGrantedAuthority(r.getCode()));
                 //todo get role permissions
             });
