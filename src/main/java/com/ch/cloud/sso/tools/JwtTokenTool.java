@@ -185,4 +185,8 @@ public class JwtTokenTool {
         info.setExpireAt(claims.getExpiration().getTime());
         return info;
     }
+
+    public void invalid(TokenVo tokenVo) {
+
+    }
 }

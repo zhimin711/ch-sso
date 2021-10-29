@@ -45,7 +45,6 @@ import java.util.List;
 @Api("用户登录")
 public class LoginController {
 
-
     @Autowired
     private JwtTokenTool jwtTokenTool;
 
@@ -53,7 +52,6 @@ public class LoginController {
     IUserService userService;
     @Autowired
     private CaptchaService captchaService;
-
 
     //
     @GetMapping("login")
@@ -89,7 +87,8 @@ public class LoginController {
 
     @ApiOperation(value = "刷新访问令牌", notes = "刷新访问令牌")
     @GetMapping(value = "login/token/refresh")
-    public Result<TokenVo> refresh(@RequestParam String token, @RequestParam String refreshToken) {
+    public Result<TokenVo> refresh(@RequestHeader(Constants.X_TOKEN) String token,
+                                   @RequestHeader(Constants.X_REFRESH_TOKEN) String refreshToken) {
         return ResultUtils.wrapFail(() -> {
             TokenVo tokenVo = new TokenVo();
             tokenVo.setToken(token);
@@ -113,7 +112,7 @@ public class LoginController {
             @ApiImplicitParam(name = "role", required = true, value = "访问角色", paramType = "query")
     })
     @GetMapping("login/token/user")
-    public Result<UserVo> login(@RequestHeader(Constants.TOKEN_HEADER2) String token, @RequestParam Long role) {
+    public Result<UserVo> login(@RequestHeader(Constants.X_TOKEN) String token, @RequestParam Long role) {
         return ResultUtils.wrapFail(() -> {
             Long r = role;
             String username = userService.validate(token);
@@ -136,7 +135,7 @@ public class LoginController {
     }
 
     @GetMapping(value = "login/token/info")
-    public Result<UserInfo> info(@RequestHeader(Constants.TOKEN_HEADER2) String token) {
+    public Result<UserInfo> info(@RequestHeader(Constants.X_TOKEN) String token) {
         return ResultUtils.wrapFail(() -> userService.extractToken(token));
     }
 

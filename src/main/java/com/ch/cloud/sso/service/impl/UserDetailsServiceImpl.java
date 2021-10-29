@@ -4,6 +4,7 @@ import com.ch.Num;
 import com.ch.StatusS;
 import com.ch.cloud.client.dto.PermissionDto;
 import com.ch.cloud.client.dto.RoleDto;
+import com.ch.cloud.client.dto.TenantDto;
 import com.ch.cloud.client.dto.UserDto;
 import com.ch.cloud.sso.fclient.UpmsClientService;
 import com.ch.cloud.sso.pojo.*;
@@ -188,6 +189,15 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
          */
         userVo.setMenuList(menuVos);
         userVo.setBtnList(buttonVos);
+
+        Result<TenantDto> res5 = upmsClientService.findTenantsByUserId(username);
+        if (!res5.isEmpty()) {
+            userVo.setTenantList(res5.getRows());
+            if (CommonUtils.isEmpty(userVo.getTenant())) {
+                userVo.setTenant(res5.get().getId() + "");
+            }
+        }
+
         return userVo;
     }
 
