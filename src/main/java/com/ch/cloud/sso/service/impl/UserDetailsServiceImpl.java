@@ -127,7 +127,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
 
         userVo.setRoleList(roleVos);
 
-        /**
+        /*
          * 获取当前用户的角色菜单\权限
          */
         Result<PermissionDto> res3;
@@ -142,7 +142,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         if (res3.isEmpty()) {
             return userVo;
         }
-        /**
+        /*
          * 构建一个菜单权限列表
          * 这样的我们在前端的写的时候，就不用解析的很麻烦了
          */
@@ -158,7 +158,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
                 });
             }
         }
-        /**
+        /*
          * 构建一个按钮权限列表
          */
         Set<BtnVo> buttonVos = Sets.newHashSet();
@@ -193,8 +193,9 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         Result<TenantDto> res5 = upmsClientService.findTenantsByUserId(username);
         if (!res5.isEmpty()) {
             userVo.setTenantList(res5.getRows());
-            if (CommonUtils.isEmpty(userVo.getTenant())) {
-                userVo.setTenant(res5.get().getId() + "");
+            if (CommonUtils.isEmpty(userVo.getTenantId())) {
+                userVo.setTenantId(res5.get().getId());
+                userVo.setTenantName(res5.get().getName());
             }
         }
 

@@ -134,6 +134,12 @@ public class LoginController {
         });
     }
 
+    /**
+     * 网关获取Token包含详细信息
+     *
+     * @param token 令牌
+     * @return
+     */
     @GetMapping(value = "login/token/info")
     public Result<UserInfo> info(@RequestHeader(Constants.X_TOKEN) String token) {
         return ResultUtils.wrapFail(() -> userService.extractToken(token));

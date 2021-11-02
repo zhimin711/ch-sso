@@ -41,7 +41,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         // 从这里开始获取 request 中的 jwt token
-        String authHeader = request.getHeader(Constants.TOKEN_HEADER);
+        String authHeader = request.getHeader(Constants.X_TOKEN);
 
         logger.info("token header：{}", authHeader);
         // 验证token是否存在

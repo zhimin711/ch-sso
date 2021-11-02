@@ -25,7 +25,8 @@ public class UserVo extends UserDto {
 
     private String avatar;
 
-    private String tenant;
+    private Long tenantId;
+    private String tenantName;
 
     @ApiModelProperty(hidden = true)
     private String password;
