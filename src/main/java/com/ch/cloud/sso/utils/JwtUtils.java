@@ -1,6 +1,6 @@
 package com.ch.cloud.sso.utils;
 
-import com.ch.cloud.client.dto.UserDto;
+import com.ch.cloud.sso.pojo.UserVo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -25,7 +25,7 @@ public class JwtUtils {
      * @param user      登录成功的user对象
      * @return
      */
-    public static String createJWT(long ttlMillis, UserDto user) {
+    public static String createJWT(long ttlMillis, UserVo user) {
         //指定签名的时候使用的签名算法，也就是header那部分，jjwt已经将这部分内容封装好了。
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
@@ -76,7 +76,7 @@ public class JwtUtils {
      * @param user  用户的对象
      * @return
      */
-    public static Claims parseJWT(String token, UserDto user) {
+    public static Claims parseJWT(String token, UserVo user) {
         //签名秘钥，和生成的签名的秘钥一模一样
         String key = user.getPassword();
 
@@ -98,7 +98,7 @@ public class JwtUtils {
      * @param user
      * @return
      */
-    public static Boolean isVerify(String token, UserDto user) {
+    public static Boolean isVerify(String token, UserVo user) {
         //签名秘钥，和生成的签名的秘钥一模一样
         String key = user.getPassword();
 

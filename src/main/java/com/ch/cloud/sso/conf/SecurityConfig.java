@@ -1,5 +1,7 @@
 package com.ch.cloud.sso.conf;
 
+import com.ch.cloud.sso.security.JwtLoginFilter;
+import com.ch.cloud.sso.tools.JwtTokenTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +15,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import javax.servlet.Filter;
 
 /**
  * 安全配置
@@ -29,6 +34,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private UserDetailsService userDetailsService;
+    @Autowired
+    private JwtTokenTool jwtTokenTool;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -38,15 +45,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .requestMatchers()
                 .antMatchers("/login") //, "/login", "/logout"
                 .antMatchers("/oauth/authorize", "/oauth/token")
-                .antMatchers("/user", "/user/*")
+//                .antMatchers("/user/*")
                 .and()
                 .authorizeRequests()
                 .anyRequest().authenticated()
 //                .antMatchers("/user").authenticated()
                 .and().formLogin().loginPage("/login").permitAll()   // 自定义登录页面，这里配置了 loginPage, 就会通过 LoginController 的 login 接口加载登录页面
 //                .and().logout().logoutUrl("/logout")
-                .and().csrf().disable();
+                .and().addFilterAt(jwtLoginFilter(), UsernamePasswordAuthenticationFilter.class).csrf().disable();
 
+    }
+
+    private Filter jwtLoginFilter() {
+        return new JwtLoginFilter(jwtTokenTool, userDetailsService);
     }
 
     @Override

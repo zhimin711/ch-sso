@@ -1,8 +1,6 @@
 package com.ch;
 
-import com.ch.cloud.sso.utils.ImageUtil;
-import com.ch.utils.FileExtUtils;
-import com.ch.utils.ImageUtils;
+import com.ch.utils.FileUtilsV2;
 import org.junit.Test;
 
 import java.io.File;
@@ -26,9 +24,9 @@ public class ImageTests {
             File[] files = dir.listFiles();
             if (files != null && files.length > 0)
                 for (File f : files) {
-                    System.out.println(f.getName() + " \t => " + FileExtUtils.convertSize(f.length()));
+                    System.out.println(f.getName() + " \t => " + FileUtilsV2.convertSize(f.length()));
                     File nf = new File(newFilePath + "\\scala2", f.getName());
-                    FileExtUtils.create(nf);
+                    FileUtilsV2.create(nf);
 //                    ImageUtil.compressImage2(f.getPath(), nf.getPath(), 400, 400);
                 }
         }

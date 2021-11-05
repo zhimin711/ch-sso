@@ -2,10 +2,7 @@ package com.ch.cloud.sso.controller;
 
 import com.ch.Constants;
 import com.ch.cloud.sso.captcha.service.CaptchaService;
-import com.ch.cloud.sso.pojo.LoginDto;
-import com.ch.cloud.sso.pojo.TokenVo;
-import com.ch.cloud.sso.pojo.UserInfo;
-import com.ch.cloud.sso.pojo.UserVo;
+import com.ch.cloud.sso.pojo.*;
 import com.ch.cloud.sso.service.IUserService;
 import com.ch.cloud.sso.tools.JwtTokenTool;
 import com.ch.cloud.sso.utils.CaptchaUtils;
@@ -104,34 +101,6 @@ public class LoginController {
     @GetMapping(value = "login/token/validate")
     public Result<String> validate(@RequestParam String token) {
         return Result.success(userService.validate(token));
-    }
-
-    @ApiOperation(value = "访问令牌获取用户授权", notes = "访问令牌获取,返回用户授权信息")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "token", required = true, value = "访问令牌", paramType = "query"),
-            @ApiImplicitParam(name = "role", required = true, value = "访问角色", paramType = "query")
-    })
-    @GetMapping("login/token/user")
-    public Result<UserVo> login(@RequestHeader(Constants.X_TOKEN) String token, @RequestParam Long role) {
-        return ResultUtils.wrapFail(() -> {
-            Long r = role;
-            String username = userService.validate(token);
-            if (CommonUtils.isEmpty(username)) {
-                ExceptionUtils._throw(PubError.INVALID, "访问令牌已失效!");
-            }
-            UserInfo user = userService.extractToken(token);
-            if (r == 0 && user.getRoleId() > 0) {
-                r = user.getRoleId();
-            }
-            UserVo userVo = userService.findUserInfo(username, r);
-            userVo.setPassword(null);
-            if (!CommonUtils.isEquals(r, user.getRoleId())) {
-                user.setRoleId(r);
-                String newToken = jwtTokenTool.generateToken(user);
-                userVo.setToken(newToken);
-            }
-            return userVo;
-        });
     }
 
     /**

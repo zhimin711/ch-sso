@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @ApiModel("用户登录信息")
-public class LoginDto extends com.ch.cloud.client.dto.UserDto {
+public class LoginDto extends com.ch.cloud.client.dto.LoginUserDto {
 
     @ApiModelProperty(name = "captchaCode", value = "验证码", required = true)
     private String captchaCode;

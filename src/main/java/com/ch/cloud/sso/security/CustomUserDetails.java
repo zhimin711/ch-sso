@@ -21,16 +21,22 @@ public class CustomUserDetails extends org.springframework.security.core.userdet
      * 租户Id
      */
     private Long tenantId;
+    /**
+     * 安全密钥
+     */
+    private String secret;
 
 
-    public CustomUserDetails(String username, String password, Collection<? extends GrantedAuthority> authorities) {
+    public CustomUserDetails(String username, String password, Collection<? extends GrantedAuthority> authorities, String secret) {
         super(username, password, authorities);
+        this.secret = secret;
     }
 
-    public CustomUserDetails(String username, String password, Collection<? extends GrantedAuthority> authorities, Long roleId, Long tenantId) {
+    public CustomUserDetails(String username, String password, Collection<? extends GrantedAuthority> authorities, Long roleId, Long tenantId, String secret) {
         super(username, password, authorities);
         this.roleId = roleId;
         this.tenantId = tenantId;
+        this.secret = secret;
     }
 
     public Long getRoleId() {
@@ -47,5 +53,9 @@ public class CustomUserDetails extends org.springframework.security.core.userdet
 
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public String getSecret() {
+        return secret;
     }
 }

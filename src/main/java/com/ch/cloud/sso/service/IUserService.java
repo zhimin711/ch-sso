@@ -3,6 +3,7 @@ package com.ch.cloud.sso.service;
 import com.ch.cloud.client.dto.UserDto;
 import com.ch.cloud.sso.pojo.TokenVo;
 import com.ch.cloud.sso.pojo.UserInfo;
+import com.ch.cloud.sso.pojo.UserPermissionVo;
 import com.ch.cloud.sso.pojo.UserVo;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
@@ -15,7 +16,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 public interface IUserService {
     UserDto findByUsername(String username) throws UsernameNotFoundException;
 
-    UserVo findUserInfo(String username, Long roleId);
+    UserVo findUserInfo(String username);
 
     TokenVo login(String username, String password);
 
@@ -30,4 +31,6 @@ public interface IUserService {
     String validate(String token);
 
     UserInfo extractToken(String token);
+
+    UserPermissionVo findPermission(UserInfo userInfo);
 }

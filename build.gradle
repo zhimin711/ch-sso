@@ -58,6 +58,7 @@ dependencies {
     implementation "io.springfox:springfox-swagger-ui:${swagger2Version}"
     // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+//    implementation 'com.auth0:java-jwt:3.3.0'
     // https://mvnrepository.com/artifact/com.mortennobel/java-image-scaling
     implementation group: 'com.mortennobel', name: 'java-image-scaling', version: '0.8.6'
     

@@ -2,11 +2,12 @@ server:
   port: 7000
 
 logging:
-  config: classpath:conf/logback-test.xml
-  path: logs
+#  config: classpath:conf/logback-test.xml
   level:
     com.ch: debug
     com.alibaba.nacos.client: warn
+  file:
+    path: logs
 ###feign 默认关闭熔断，请看HystrixFeignConfiguration
 feign:
   hystrix:
@@ -36,7 +37,7 @@ captcha:
   pic-click: classpath:static/images/pic-click
   type: DEFAULT
   # local caffeine redis
-  cache-type: caffeine
+  cache-type: redis
   #右下角水印文字
   water-mark:
   #右下角水印字体(宋体)
@@ -71,4 +72,4 @@ spring:
     host: 192.168.0.250
     port: 30379
     password: admin123
-    database: 0
+    database: 1
