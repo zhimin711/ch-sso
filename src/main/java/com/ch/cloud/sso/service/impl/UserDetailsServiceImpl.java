@@ -153,16 +153,6 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         return new TokenVo(token, refreshToken, userInfo.getExpireAt());
     }
 
-    private RoleVo findRoleByUsername(String username) {
-        Result<RoleDto> res = upmsClientService.findRoleByUsername(username);
-        if (res.isEmpty()) {
-            return null;
-        }
-        RoleDto dto = res.get();
-        return new RoleVo(dto.getId(), dto.getCode(), dto.getName());
-    }
-
-
     @Override
     public void refreshToken(TokenVo tokenVo) {
         jwtTokenTool.refreshToken(tokenVo);
@@ -189,6 +179,15 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
     @Override
     public UserPermissionVo findPermission(UserInfo user) {
         UserPermissionVo userPermissionVo = new UserPermissionVo();
+
+        /*
+         * 获取当前用户的租户
+         */
+        Result<TenantDto> res5 = upmsClientService.findTenantsByUserId(user.getUsername());
+        if (!res5.isEmpty()) {
+            userPermissionVo.setTenantList(res5.getRows());
+        }
+
         /*
          * 获取当前用户的所有角色
          */
@@ -264,10 +263,6 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         userPermissionVo.setMenuList(menuVos);
         userPermissionVo.setBtnList(buttonVos);
 
-        Result<TenantDto> res5 = upmsClientService.findTenantsByUserId(user.getUsername());
-        if (!res5.isEmpty()) {
-            userPermissionVo.setTenantList(res5.getRows());
-        }
         return userPermissionVo;
     }
 
