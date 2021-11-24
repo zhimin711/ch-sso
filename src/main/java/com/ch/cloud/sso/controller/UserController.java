@@ -1,10 +1,12 @@
 package com.ch.cloud.sso.controller;
 
 import com.ch.Constants;
+import com.ch.cloud.sso.fclient.GatewayClientService;
 import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.pojo.UserPermissionVo;
 import com.ch.cloud.sso.pojo.UserVo;
 import com.ch.cloud.sso.service.IUserService;
+import com.ch.cloud.sso.tools.JwtTokenTool;
 import com.ch.e.ExceptionUtils;
 import com.ch.e.PubError;
 import com.ch.result.Result;
@@ -34,6 +36,12 @@ public class UserController {
 
     @Autowired
     IUserService userService;
+
+    @Autowired
+    private GatewayClientService gatewayClientService;
+
+    @Autowired
+    private JwtTokenTool jwtTokenTool;
 
     /**
      * 资源服务器提供的受保护接口
@@ -82,6 +90,13 @@ public class UserController {
             user.setUsername(username);
             UserVo userVo = userService.findUserInfo(username);
             user.setUserId(userVo.getId());
+            boolean refresh = jwtTokenTool.refreshUserRole(username, user.getRoleId());
+            if(refresh) {
+                try {
+                    gatewayClientService.cleanUser(token);
+                } catch (Exception ignored) {
+                }
+            }
             return userService.findPermission(user);
         });
     }

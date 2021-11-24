@@ -7,6 +7,7 @@ import com.ch.e.ExceptionUtils;
 import com.ch.e.PubError;
 import com.ch.utils.CommonUtils;
 import com.ch.utils.EncryptUtils;
+import com.ch.utils.NumberUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -14,6 +15,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.TextCodec;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -42,6 +44,7 @@ public class JwtTokenTool {
     public static final String USER_TOKEN         = "sso:user_token:";
     public static final String USER_REFRESH_TOKEN = "sso:user_refresh_token:";
     public static final String TOKEN_SECRET       = "sso:token:";
+    public static final String USER_ROLE          = "sso:user_role";
 
     /**
      * 从数据声明生成令牌
@@ -286,5 +289,31 @@ public class JwtTokenTool {
     public String generateSecret(String password) {
 
         return TextCodec.BASE64.encode(password);
+    }
+
+    public boolean refreshUserRole(String username, Long roleId) {
+        HashOperations<String, String, String> ops = stringRedisTemplate.opsForHash();
+        String role = roleId == null ? "" : roleId + "";
+        if (ops.hasKey(USER_ROLE, username)) {
+            String v = ops.get(USER_ROLE, username);
+            if (!CommonUtils.isEquals(role, v)) {
+                ops.put(USER_ROLE, username, role);
+                return true;
+            }
+        } else {
+            ops.put(USER_ROLE, username, role);
+        }
+        return false;
+    }
+
+    public Long getUserRole(String username, Long defaultRole) {
+        HashOperations<String, String, String> ops = stringRedisTemplate.opsForHash();
+        if (ops.hasKey(USER_ROLE, username)) {
+            String v = ops.get(USER_ROLE, username);
+            if (NumberUtils.isNumeric(v)) {
+                return Long.parseLong(v);
+            }
+        }
+        return defaultRole;
     }
 }

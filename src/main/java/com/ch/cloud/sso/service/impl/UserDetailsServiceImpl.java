@@ -108,6 +108,8 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         if (CommonUtils.isEmpty(user.getRoleId())) {
             ExceptionUtils._throw(PubError.NOT_EXISTS, "用户没有角色或角色已失效！");
         }
+        Long roleId = jwtTokenTool.getUserRole(username, user.getRoleId());
+        userVo.setRoleId(roleId);
         return userVo;
     }
 
