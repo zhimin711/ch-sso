@@ -8,12 +8,18 @@ import com.ch.e.PubError;
 import com.ch.utils.CommonUtils;
 import com.ch.utils.EncryptUtils;
 import com.ch.utils.NumberUtils;
+import com.google.common.collect.Lists;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.TextCodec;
 import lombok.extern.log4j.Log4j2;
+import org.redisson.api.RBucket;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.redisson.client.codec.StringCodec;
+import org.redisson.codec.JsonJacksonCodec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -24,6 +30,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * decs:
@@ -40,11 +47,15 @@ public class JwtTokenTool {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private RedissonClient      redissonClient;
 
     public static final String USER_TOKEN         = "sso:user_token:";
     public static final String USER_REFRESH_TOKEN = "sso:user_refresh_token:";
     public static final String TOKEN_SECRET       = "sso:token:";
+    public static final String REFRESH_TOKEN      = "sso:refresh_token:";
     public static final String USER_ROLE          = "sso:user_role";
+    public static final String LOCK_TOKEN         = "sso:lock_token:";
 
     /**
      * 从数据声明生成令牌
@@ -152,29 +163,56 @@ public class JwtTokenTool {
      * @return 新令牌
      */
     public void refreshToken(TokenVo tokenVo) {
-        ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
+        String md51 = EncryptUtils.md5(tokenVo.getToken());
         String md52 = EncryptUtils.md5(tokenVo.getRefreshToken());
-        String secret = ops.get(TOKEN_SECRET + md52);
-        if (CommonUtils.isEmpty(secret)) {
-            ExceptionUtils._throw(PubError.EXPIRED, tokenVo.getRefreshToken());
-        }
+        RLock lock = redissonClient.getLock(LOCK_TOKEN + md52);
         try {
+
+            boolean locked = lock.tryLock(5, TimeUnit.SECONDS);
+
+            log.info("{} lock status: {}", md52, locked);
+            if (!locked) {
+                ExceptionUtils._throw(PubError.RETRY, "网络异常，请稍后重试......");
+            }
+            RBucket<String> bucket2 = redissonClient.getBucket(REFRESH_TOKEN + md52, StringCodec.INSTANCE);
+            if (bucket2.isExists()) {
+                long timeout = bucket2.remainTimeToLive();
+
+                if (timeout > 300000) {
+                    tokenVo.setToken(bucket2.get());
+                    tokenVo.setExpireAt(System.currentTimeMillis() + timeout);
+                    return;
+                }
+            }
+//            RMapCache<String, String> map = redissonClient.getMapCache("anyMap");
+            ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
+            String secret = ops.get(TOKEN_SECRET + md52);
+            if (CommonUtils.isEmpty(secret)) {
+                ExceptionUtils._throw(PubError.EXPIRED, tokenVo.getRefreshToken());
+            }
 
             Claims claims = getClaimsWithExpired(tokenVo.getToken(), secret);
             claims.put("created", new Date());
             Date date = new Date(System.currentTimeMillis() + jwtProperties.getTokenExpired().toMillis());
             String refreshedToken = generateToken(claims, date, secret);
+
             String md5 = EncryptUtils.md5(refreshedToken);
             String oldMd5 = ops.getAndSet(USER_TOKEN + claims.getSubject(), md5);
             if (CommonUtils.isNotEmpty(oldMd5)) {
                 stringRedisTemplate.delete(TOKEN_SECRET + oldMd5);
             }
-            ops.set(TOKEN_SECRET + md5, secret, jwtProperties.getTokenExpired());
             tokenVo.setToken(refreshedToken);
             tokenVo.setExpireAt(date.getTime());
+
+            ops.set(TOKEN_SECRET + md5, secret, jwtProperties.getTokenExpired());
+
+//            bucket2.set(refreshedToken);
+            bucket2.set(refreshedToken, jwtProperties.getTokenExpired().getSeconds(), TimeUnit.SECONDS);
         } catch (Exception e) {
             log.error("refresh token error!", e);
-            throw ExceptionUtils.create(PubError.INVALID, "TOKEN " + tokenVo.getToken() + " 无效");
+            ExceptionUtils._throw(PubError.INVALID, "TOKEN " + tokenVo.getToken() + " 无效");
+        } finally {
+            if (lock.isLocked()) lock.unlock();
         }
     }
 
@@ -255,7 +293,15 @@ public class JwtTokenTool {
     }
 
     public void invalid(TokenVo tokenVo) {
+        String md51 = EncryptUtils.md5(tokenVo.getToken());
+        String md52 = EncryptUtils.md5(tokenVo.getRefreshToken());
 
+        RBucket<String> bucket = redissonClient.getBucket(TOKEN_SECRET + md51, JsonJacksonCodec.INSTANCE);
+        RBucket<String> bucket2 = redissonClient.getBucket(REFRESH_TOKEN + md52, JsonJacksonCodec.INSTANCE);
+        bucket.delete();
+        bucket2.delete();
+
+        stringRedisTemplate.delete(Lists.newArrayList(TOKEN_SECRET + md51, TOKEN_SECRET + md52));
     }
 
     /**
