@@ -15,9 +15,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.TextCodec;
 import lombok.extern.log4j.Log4j2;
-import org.redisson.api.RBucket;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
+import org.redisson.api.*;
 import org.redisson.client.codec.StringCodec;
 import org.redisson.codec.JsonJacksonCodec;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +53,7 @@ public class JwtTokenTool {
     public static final String TOKEN_SECRET       = "sso:token:";
     public static final String REFRESH_TOKEN      = "sso:refresh_token:";
     public static final String USER_ROLE          = "sso:user_role";
+    public static final String USERS_ROLES        = "sso:users_roles";
     public static final String LOCK_TOKEN         = "sso:lock_token:";
 
     /**
@@ -353,6 +352,12 @@ public class JwtTokenTool {
     }
 
     public Long getUserRole(String username, Long defaultRole) {
+
+        RMapCache<Object, Object> map = redissonClient.getMapCache(USERS_ROLES, StringCodec.INSTANCE);
+        if (map.containsKey(username)) {
+            map.put(username, defaultRole, jwtProperties.getTokenExpired().getSeconds(), TimeUnit.SECONDS);
+        }
+
         HashOperations<String, String, String> ops = stringRedisTemplate.opsForHash();
         if (ops.hasKey(USER_ROLE, username)) {
             String v = ops.get(USER_ROLE, username);

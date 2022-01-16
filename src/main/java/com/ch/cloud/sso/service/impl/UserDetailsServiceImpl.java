@@ -213,7 +213,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
          * 获取当前用户的角色菜单\权限
          */
         Result<PermissionDto> res3 = upmsClientService.findMenusByRoleId(user.getRoleId());
-        Result<PermissionDto> res4 = upmsClientService.findPermissionsByRoleId(user.getRoleId());
+        Result<PermissionDto> res4 = upmsClientService.findPermissionsByRoleId(user.getRoleId(), null);
         if (res3.isEmpty()) {
             return userPermissionVo;
         }
