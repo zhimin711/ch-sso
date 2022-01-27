@@ -5,9 +5,6 @@ metadata:
   namespace: ch
   labels:
     app: ch-sso
-  annotations:
-    deployment.kubernetes.io/revision: '$BUILD_NUMBER'
-    kubesphere.io/creator: zhimin
 spec:
   replicas: 1
   selector:
@@ -21,7 +18,7 @@ spec:
     spec:
       containers:
         - name: container-y5d7kj
-          image: 'hub.ch.cn/ch/ch-sso:v$BUILD_NUMBER'
+          image: 'hub.ch.cn/ch/ch-sso:${DATETIME}'
           ports:
             - name: tcp-8080
               containerPort: 8080
