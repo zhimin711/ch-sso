@@ -5,6 +5,8 @@ metadata:
   namespace: ch
   labels:
     app: ch-sso
+  annotations:
+    kubesphere.io/creator: zhimin
 spec:
   replicas: 1
   selector:
