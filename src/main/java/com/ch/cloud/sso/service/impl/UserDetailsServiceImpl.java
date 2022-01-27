@@ -1,5 +1,6 @@
 package com.ch.cloud.sso.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.ch.Num;
 import com.ch.StatusS;
 import com.ch.cloud.client.dto.*;
@@ -193,12 +194,14 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         /*
          * 获取当前用户的所有角色
          */
-        Result<RoleDto> res2 = upmsClientService.findRolesByUserId(user.getUserId());
+        Result<RoleDto> res2 = upmsClientService.findRolesByUserId2(user.getUserId());
+        log.info("get user roles: {}", JSONObject.toJSONString(res2));
         if (res2.isEmpty()) {
             return userPermissionVo;
         }
         List<Long> roleIds = Lists.newArrayList();
         List<RoleVo> roleVos = res2.getRows().stream().map(role -> {
+            if(role == null) return null;
             roleIds.add(role.getId());
             return new RoleVo(role.getId(), role.getCode(), role.getName());
         }).collect(Collectors.toList());

@@ -51,7 +51,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-    implementation 'org.apache.httpcomponents:httpclient:+'
+//    implementation 'org.apache.httpcomponents:httpclient:+'
     implementation 'io.github.openfeign:feign-httpclient:+'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-hystrix'
 
