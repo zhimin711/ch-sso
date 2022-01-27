@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: container-y5d7kj
-          image: 'hub.ch.cn/ch/ch-sso:$BUILD_NUMBER'
+          image: 'hub.ch.cn/ch/ch-sso:v$BUILD_NUMBER'
           ports:
             - name: tcp-8080
               containerPort: 8080
