@@ -30,6 +30,6 @@ spec:
             - name: JAVA_OPTS
               value: >-
                 -Dnacos.config.server-addr=nacos.public.svc.cluster.local:8848
-                -Dnacos.config.namespace=e9ae1f48-6c01-4a07-862c-98bc69c1781
+                -Dnacos.config.namespace=e9ae1f48-6c01-4a07-862c-98bc69c17819
       imagePullSecrets:
         - name: ch-hub
