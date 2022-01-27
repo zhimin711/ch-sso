@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ch-sso
+  namespace: ch
+  labels:
+    app: ch-sso
+  annotations:
+    deployment.kubernetes.io/revision: '$BUILD_NUMBER'
+    kubesphere.io/creator: zhimin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ch-sso
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: ch-sso
+    spec:
+      containers:
+        - name: container-y5d7kj
+          image: 'hub.ch.cn/ch/ch-sso:$BUILD_NUMBER'
+          ports:
+            - name: tcp-8080
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: JAVA_OPTS
+              value: >-
+                -Dnacos.config.server-addr=nacos.public.svc.cluster.local:8848
+                -Dnacos.config.namespace=e9ae1f48-6c01-4a07-862c-98bc69c1781
