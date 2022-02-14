@@ -1,32 +1,29 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: ch-sso-v1
+  name: ch-sso
   namespace: ch
   labels:
     app: ch-sso
-    version: v1
   annotations:
-    deployment.kubernetes.io/revision: '3'
+    deployment.kubernetes.io/revision: '1'
     kubesphere.io/creator: zhimin
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: ch-sso
-      version: v1
   template:
     metadata:
       creationTimestamp: null
       labels:
         app: ch-sso
-        version: v1
     spec:
       containers:
-        - name: container-oyba8r
+        - name: container-8lalcy
           image: '192.168.0.253:8082/ch/ch-sso:${DATETIME}'
           ports:
-            - name: http-8080
+            - name: tcp-8080
               containerPort: 8080
               protocol: TCP
           env:
