@@ -1,7 +1,7 @@
 nacos:
   config:
     namespace: local
-    server-addr: 10.202.10.66:8848
+    server-addr: 192.168.0.208:8848
 spring:
   application:
     name: ch-sso

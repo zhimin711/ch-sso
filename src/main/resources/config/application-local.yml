@@ -71,7 +71,7 @@ spring:
     ### 连接超时时间（毫秒）
     timeout: 60000
     ### Redis数据库索引(默认为0)
-    host: 192.168.0.250
-    port: 30379
+    host: 192.168.0.203
+    port: 6379
     password: admin123
     database: 1
