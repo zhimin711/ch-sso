@@ -8,12 +8,6 @@ logging:
     com.alibaba.nacos.client: warn
   file:
     path: logs
-###feign 默认关闭熔断，请看HystrixFeignConfiguration
-feign:
-  hystrix:
-    enabled: false
-  httpclient:
-    enabled: true
 hystrix:
   command:
     default:

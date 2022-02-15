@@ -1,0 +1,6 @@
+###feign 默认关闭熔断，请看HystrixFeignConfiguration
+feign:
+  hystrix:
+    enabled: false
+  httpclient:
+    enabled: true
