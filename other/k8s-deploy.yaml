@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: container-8lalcy
-          image: '192.168.0.253:8082/ch/ch-sso:${DATETIME}'
+          image: 'registry.kubeoperator.io:8082/ch/ch-sso:${DATETIME}'
           ports:
             - name: tcp-8080
               containerPort: 8080
