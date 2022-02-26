@@ -1,4 +1,4 @@
-FROM java:openjdk-8-alpine2
+FROM java:openjdk-8-alpine
 VOLUME /tmp
 ADD ch-sso-1.0.0-SNAPSHOT.jar app.jar
 RUN sh -c 'touch /app.jar'
