@@ -2,6 +2,7 @@ package com.ch.cloud.sso.pojo;
 
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -12,6 +13,7 @@ import java.util.Date;
  * @date 2022/3/15 6:29 PM
  */
 @Data
+@NoArgsConstructor
 public class TokenCache {
     /**
      * jwt token
