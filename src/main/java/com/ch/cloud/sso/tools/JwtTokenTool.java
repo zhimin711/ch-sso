@@ -214,7 +214,7 @@ public class JwtTokenTool {
      */
     public Boolean validateToken(String token, UserDetails userDetails) {
         RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
-        if(!tokenMap.containsKey(token)) return false;
+        if (!tokenMap.containsKey(token)) return false;
 
         return (tokenMap.get(token).getSecret().equals(generateSecret(userDetails.getPassword())) && !isTokenExpired(token));
     }
@@ -262,6 +262,7 @@ public class JwtTokenTool {
     public TokenVo generateToken(UserInfo user, String secret) {
 
         String accessToken = UuidUtils.generateUuid();
+        Date current = DateUtils.current();
 
         Map<String, Object> claims = new HashMap<>(5);
         claims.put("sub", user.getUsername());
@@ -269,12 +270,12 @@ public class JwtTokenTool {
         claims.put("roleId", user.getRoleId());
         claims.put("tenantId", user.getTenantId());
         claims.put("created", new Date());
-        Date jwtExpired = new Date(System.currentTimeMillis() + jwtProperties.getRefreshTokenExpired().toMillis());
+        Date jwtExpired = DateUtils.addSeconds(current, (int) jwtProperties.getRefreshTokenExpired().getSeconds());//new Date(System.currentTimeMillis() + jwtProperties.getRefreshTokenExpired().toMillis());
         String jwtToken = generateToken(claims, jwtExpired, secret);
         String refreshToken = EncryptUtils.md5(jwtToken);
 
-        Date accessExpired = new Date(System.currentTimeMillis() + jwtProperties.getTokenExpired().toMillis());
-
+        Date accessExpired = DateUtils.addSeconds(current, (int) jwtProperties.getTokenExpired().getSeconds());//new Date(System.currentTimeMillis() + jwtProperties.getTokenExpired().toMillis());
+        log.info("generate Token time current: {}, accessExpired: {}", DateUtils.format(current), DateUtils.format(accessExpired));
         RMapCache<String, TokenCache> tokenCache = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
         tokenCache.put(accessToken, TokenCache.build(jwtToken, secret, user.getUsername(), accessExpired), jwtProperties.getTokenExpired().getSeconds(), TimeUnit.SECONDS);
         tokenCache.put(refreshToken, TokenCache.build(jwtToken, secret, user.getUsername(), jwtExpired), jwtProperties.getRefreshTokenExpired().getSeconds(), TimeUnit.SECONDS);
