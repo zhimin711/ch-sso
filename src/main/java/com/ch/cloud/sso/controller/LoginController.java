@@ -46,7 +46,7 @@ public class LoginController {
     private JwtTokenTool jwtTokenTool;
 
     @Autowired
-    IUserService userService;
+    private IUserService   userService;
     @Autowired
     private CaptchaService captchaService;
 

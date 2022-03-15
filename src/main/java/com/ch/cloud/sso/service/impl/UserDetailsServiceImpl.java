@@ -150,10 +150,8 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         userInfo.setUsername(username);
         userInfo.setRoleId(userDetails.getRoleId());
         userInfo.setTenantId(userDetails.getTenantId());
-        String token = jwtTokenTool.generateToken(userInfo, userDetails.getSecret());
-        String refreshToken = jwtTokenTool.generateRefreshToken(userInfo, userDetails.getSecret());
 
-        return new TokenVo(token, refreshToken, userInfo.getExpireAt());
+        return jwtTokenTool.generateToken(userInfo, userDetails.getSecret());
     }
 
     @Override

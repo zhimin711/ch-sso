@@ -52,13 +52,13 @@ dependencies {
 
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 //    implementation 'org.apache.httpcomponents:httpclient:+'
-    implementation 'io.github.openfeign:feign-httpclient:+'
+    implementation 'io.github.openfeign:feign-httpclient:11.8'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-hystrix'
 
     implementation('org.springframework.boot:spring-boot-starter-thymeleaf')
 
-    implementation 'com.alibaba:druid:1.1.15'
-    implementation "mysql:mysql-connector-java:8.+"
+    implementation 'com.alibaba:druid:1.2.8'
+    implementation 'mysql:mysql-connector-java:8.0.28'
 //    <!--swagger-->
     implementation "io.springfox:springfox-swagger2:${swagger2Version}"
     implementation "io.springfox:springfox-swagger-ui:${swagger2Version}"
@@ -68,11 +68,11 @@ dependencies {
     // https://mvnrepository.com/artifact/com.mortennobel/java-image-scaling
     implementation group: 'com.mortennobel', name: 'java-image-scaling', version: '0.8.6'
     
-    implementation 'com.google.auto.service:auto-service:1.0-rc7'
+    implementation 'com.google.auto.service:auto-service:1.0.1'
 
     implementation 'com.github.ben-manes.caffeine:caffeine:2.6.2'
 
-    implementation 'org.redisson:redisson-spring-boot-starter:3.+',  {
+    implementation 'org.redisson:redisson-spring-boot-starter:3.16.8',  {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-web'
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-actuator'
     }
@@ -80,7 +80,7 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
 }
 
 dependencyManagement {

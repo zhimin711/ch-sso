@@ -69,7 +69,7 @@ public class UserController {
             if (CommonUtils.isEmpty(username)) {
                 ExceptionUtils._throw(PubError.INVALID, "访问令牌已失效!");
             }
-            UserInfo user = userService.extractToken(token);
+//            UserInfo user = userService.extractToken(token);
             return userService.findUserInfo(username);
         });
     }

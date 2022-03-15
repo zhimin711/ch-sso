@@ -40,20 +40,20 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        // 从这里开始获取 request 中的 jwt token
-        String authHeader = request.getHeader(Constants.X_TOKEN);
+        // 从这里开始获取 request 中的 access token
+        String accessToken = request.getHeader(Constants.X_TOKEN);
 
-        logger.info("token header：{}", authHeader);
+        logger.info("token header：{}", accessToken);
         // 验证token是否存在
-        if (StringUtils.isNotEmpty(authHeader)) {
+        if (StringUtils.isNotEmpty(accessToken)) {
             // 根据token 获取用户名
-            String username = jwtTokenTool.getUsernameFromToken(authHeader);
+            String username = jwtTokenTool.getUsernameFromToken(accessToken);
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 // 通过用户名 获取用户的信息
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
                 // 验证token和用户是否匹配
-                if (jwtTokenTool.validateToken(authHeader, userDetails)) {
+                if (jwtTokenTool.validateToken(accessToken, userDetails)) {
                     // 然后把构造UsernamePasswordAuthenticationToken对象
                     // 最后绑定到当前request中，在后面的请求中就可以获取用户信息
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
