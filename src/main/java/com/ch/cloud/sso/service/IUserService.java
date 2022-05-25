@@ -1,10 +1,10 @@
 package com.ch.cloud.sso.service;
 
-import com.ch.cloud.client.dto.UserDto;
 import com.ch.cloud.sso.pojo.TokenVo;
 import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.pojo.UserPermissionVo;
 import com.ch.cloud.sso.pojo.UserVo;
+import com.ch.cloud.upms.dto.UserDto;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 /**

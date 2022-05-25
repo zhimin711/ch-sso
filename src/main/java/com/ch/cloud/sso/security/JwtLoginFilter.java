@@ -1,15 +1,9 @@
 package com.ch.cloud.sso.security;
 
 import com.ch.Constants;
-import com.ch.cloud.client.dto.LoginUserDto;
-import com.ch.cloud.sso.fclient.UpmsClientService;
 import com.ch.cloud.sso.pojo.UserInfo;
-import com.ch.cloud.sso.service.IUserService;
 import com.ch.cloud.sso.tools.JwtTokenTool;
-import com.ch.result.Result;
 import com.ch.utils.CommonUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -18,7 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 

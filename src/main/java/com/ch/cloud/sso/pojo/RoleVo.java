@@ -1,6 +1,6 @@
 package com.ch.cloud.sso.pojo;
 
-import com.ch.cloud.client.dto.RoleDto;
+import com.ch.cloud.upms.dto.RoleDto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

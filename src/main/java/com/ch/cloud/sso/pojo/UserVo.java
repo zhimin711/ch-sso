@@ -1,6 +1,6 @@
 package com.ch.cloud.sso.pojo;
 
-import com.ch.cloud.client.dto.UserDto;
+import com.ch.cloud.upms.dto.UserDto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

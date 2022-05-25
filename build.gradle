@@ -29,7 +29,7 @@ ext {
     aliCloudVersion = '0.9.0.RELEASE'
     springOauth2Version = '2.3.4.RELEASE'
     chVersion = '2.0.0-SNAPSHOT'
-    chUpmsApiVersion = '1.0.0-SNAPSHOT'
+    chUpmsApiVersion = '1.0.1-SNAPSHOT'
     swagger2Version = '2.9.2'
     
 }
@@ -37,7 +37,7 @@ ext {
 dependencies {
 
     implementation("com.ch:ch-core:${chVersion}")
-    implementation("com.ch:ch-upms-api:${chUpmsApiVersion}")
+    implementation("com.ch.cloud:ch-upms-client:${chUpmsApiVersion}")
 //    implementation(fileTree("${rootDir}/other/libs/zhaohua"))
 
     implementation "org.springframework.cloud:spring-cloud-starter-alibaba-nacos-config:${aliCloudVersion}"
@@ -76,6 +76,7 @@ dependencies {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-web'
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-actuator'
     }
+    implementation 'org.apache.rocketmq:rocketmq-spring-boot-starter:2.1.0'
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'

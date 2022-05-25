@@ -3,12 +3,14 @@ package com.ch.cloud.sso.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.ch.Num;
 import com.ch.StatusS;
-import com.ch.cloud.client.dto.*;
-import com.ch.cloud.sso.fclient.UpmsClientService;
 import com.ch.cloud.sso.pojo.*;
 import com.ch.cloud.sso.security.CustomUserDetails;
 import com.ch.cloud.sso.service.IUserService;
 import com.ch.cloud.sso.tools.JwtTokenTool;
+import com.ch.cloud.upms.client.UpmsPermissionClientService;
+import com.ch.cloud.upms.client.UpmsRoleClientService;
+import com.ch.cloud.upms.client.UpmsUserClientService;
+import com.ch.cloud.upms.dto.*;
 import com.ch.e.ExceptionUtils;
 import com.ch.e.PubError;
 import com.ch.result.Result;
@@ -46,7 +48,11 @@ import java.util.stream.Collectors;
 public class UserDetailsServiceImpl implements UserDetailsService, IUserService {
 
     @Resource
-    private UpmsClientService upmsClientService;
+    private UpmsUserClientService       upmsUserClientService;
+    @Resource
+    private UpmsRoleClientService       upmsRoleClientService;
+    @Resource
+    private UpmsPermissionClientService upmsPermissionClientService;
 
     // 如果在WebSecurityConfigurerAdapter中，没有重新，这里就会报注入失败的异常
     @Autowired
@@ -58,7 +64,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Result<LoginUserDto> res = upmsClientService.findUserByUsername(username);
+        Result<LoginUserDto> res = upmsUserClientService.findUserByUsername(username);
         if (res.isEmpty()) {
             throw new UsernameNotFoundException(username);
         }
@@ -80,7 +86,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         if (StringUtils.isEmpty(username)) {
             throw new UsernameNotFoundException("用户名不可以为空!");
         }
-        Result<UserDto> res = upmsClientService.findInfo2(username);
+        Result<UserDto> res = upmsUserClientService.findInfo2(username);
         if (res.isEmpty()) {
             throw new UsernameNotFoundException("用户名不存在!");
         }
@@ -96,7 +102,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         if (StringUtils.isEmpty(username)) {
             throw new UsernameNotFoundException("用户名不可以为空!");
         }
-        Result<UserDto> res = upmsClientService.findInfo2(username);
+        Result<UserDto> res = upmsUserClientService.findInfo2(username);
         if (res.isEmpty()) {
             throw new UsernameNotFoundException("用户名不存在!");
         }
@@ -184,7 +190,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         /*
          * 获取当前用户的租户
          */
-        Result<TenantDto> res5 = upmsClientService.findTenantsByUserId(user.getUsername());
+        Result<TenantDto> res5 = upmsUserClientService.findTenantsByUserId(user.getUsername());
         if (!res5.isEmpty()) {
             userPermissionVo.setTenantList(res5.getRows());
         }
@@ -192,14 +198,14 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         /*
          * 获取当前用户的所有角色
          */
-        Result<RoleDto> res2 = upmsClientService.findRolesByUserId2(user.getUserId());
+        Result<RoleDto> res2 = upmsUserClientService.findRolesByUserId2(user.getUserId());
         log.info("get user roles: {}", JSONObject.toJSONString(res2));
         if (res2.isEmpty()) {
             return userPermissionVo;
         }
         List<Long> roleIds = Lists.newArrayList();
         List<RoleVo> roleVos = res2.getRows().stream().map(role -> {
-            if(role == null) return null;
+            if (role == null) return null;
             roleIds.add(role.getId());
             return new RoleVo(role.getId(), role.getCode(), role.getName());
         }).collect(Collectors.toList());
@@ -213,8 +219,8 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         /*
          * 获取当前用户的角色菜单\权限
          */
-        Result<PermissionDto> res3 = upmsClientService.findMenusByRoleId(user.getRoleId());
-        Result<PermissionDto> res4 = upmsClientService.findPermissionsByRoleId(user.getRoleId(), null);
+        Result<PermissionDto> res3 = upmsRoleClientService.findMenusByRoleId(user.getRoleId());
+        Result<PermissionDto> res4 = upmsRoleClientService.findPermissionsByRoleId(user.getRoleId(), null);
         if (res3.isEmpty()) {
             return userPermissionVo;
         }

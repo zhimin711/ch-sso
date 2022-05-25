@@ -1,6 +1,6 @@
 package com.ch.cloud.sso.pojo;
 
-import com.ch.cloud.client.dto.TenantDto;
+import com.ch.cloud.upms.dto.TenantDto;
 import lombok.Data;
 
 import java.util.ArrayList;

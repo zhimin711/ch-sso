@@ -1,7 +1,7 @@
 package com.ch.cloud.sso.controller;
 
 import com.ch.Constants;
-import com.ch.cloud.sso.fclient.GatewayClientService;
+import com.ch.cloud.sso.mq.GatewayNotifySender;
 import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.pojo.UserPermissionVo;
 import com.ch.cloud.sso.pojo.UserVo;
@@ -9,6 +9,7 @@ import com.ch.cloud.sso.service.IUserService;
 import com.ch.cloud.sso.tools.JwtTokenTool;
 import com.ch.e.ExceptionUtils;
 import com.ch.e.PubError;
+import com.ch.pojo.KeyValue;
 import com.ch.result.Result;
 import com.ch.result.ResultUtils;
 import com.ch.utils.CommonUtils;
@@ -38,7 +39,7 @@ public class UserController {
     IUserService userService;
 
     @Autowired
-    private GatewayClientService gatewayClientService;
+    private GatewayNotifySender gatewayNotifySender;
 
     @Autowired
     private JwtTokenTool jwtTokenTool;
@@ -91,9 +92,9 @@ public class UserController {
             UserVo userVo = userService.findUserInfo(username);
             user.setUserId(userVo.getId());
             boolean refresh = jwtTokenTool.refreshUserRole(username, user.getRoleId());
-            if(refresh) {
+            if (refresh) {
                 try {
-                    gatewayClientService.cleanUser(token);
+                    gatewayNotifySender.cleanNotify(new KeyValue("users", token));
                 } catch (Exception ignored) {
                 }
             }
