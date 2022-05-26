@@ -1,6 +1,6 @@
 FROM openjdk:8u322-jdk-buster
 VOLUME /tmp
-ADD ch-sso-1.0.0-SNAPSHOT.jar app.jar
+ADD ch-sso-*-SNAPSHOT.jar app.jar
 RUN sh -c 'touch /app.jar'
 #RUN apk add --update font-adobe-100dpi ttf-dejavu fontconfig
 #RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
