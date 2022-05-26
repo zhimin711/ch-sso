@@ -11,7 +11,7 @@ spring:
         server-addr: ${nacos.config.server-addr}
         namespace: ${nacos.config.namespace:}
       config:
-        enabled: false
+#        enabled: false
         group: ${spring.application.name}
         server-addr: ${nacos.config.server-addr}
         namespace: ${nacos.config.namespace:}
