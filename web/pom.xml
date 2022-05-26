@@ -224,9 +224,9 @@
                         <exclude>**/*.properties</exclude>
                         <exclude>config/application-*.yml</exclude>
                         <exclude>config/application-*.yaml</exclude>
-                        <exclude>static/**</exclude>
                         <exclude>public/**</exclude>
-                        <exclude>templates/**</exclude>
+<!--                        <exclude>static/**</exclude>-->
+<!--                        <exclude>templates/**</exclude>-->
                     </excludes>
                 </configuration>
             </plugin>
