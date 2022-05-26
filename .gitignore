@@ -1,5 +1,6 @@
 .gradle
 /build/
+/target/
 /out/
 !gradle/wrapper/gradle-wrapper.jar
 
@@ -20,6 +21,7 @@
 ### NetBeans ###
 nbproject/private/
 build/
+target/
 nbbuild/
 dist/
 nbdist/

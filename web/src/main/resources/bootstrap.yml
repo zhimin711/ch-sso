@@ -1,0 +1,23 @@
+nacos:
+  config:
+    namespace: cloud-dev
+    server-addr: 192.168.150.203:8848
+spring:
+  application:
+    name: ch-sso
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${nacos.config.server-addr}
+        namespace: ${nacos.config.namespace:}
+      config:
+        enabled: false
+        group: ${spring.application.name}
+        server-addr: ${nacos.config.server-addr}
+        namespace: ${nacos.config.namespace:}
+        shared-configs:
+          -
+            dataId: ch-sso.yml
+            refresh: true
+            group: ${spring.application.name}
+

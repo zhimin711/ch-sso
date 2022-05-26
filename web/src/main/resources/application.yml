@@ -1,0 +1,11 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  profiles:
+    active: local   # 指定启动环境
+###feign 默认关闭熔断，请看HystrixFeignConfiguration
+feign:
+  hystrix:
+    enabled: false
+  httpclient:
+    enabled: true
