@@ -15,6 +15,7 @@ import com.ch.result.ResultUtils;
 import com.ch.utils.CommonUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import java.security.Principal;
 @RestController
 @RequestMapping("/user")
 @Api("用户信息")
+@Slf4j
 public class UserController {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -95,7 +97,8 @@ public class UserController {
             if (refresh) {
                 try {
                     gatewayNotifySender.cleanNotify(new KeyValue("users", token));
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    log.error("cleanNotify", e);
                 }
             }
             return userService.findPermission(user);
