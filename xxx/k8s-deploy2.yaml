@@ -10,6 +10,6 @@ spec:
     spec:
       containers:
         - name: container-8lalcy
-          image: 'registry.kubeoperator.io:8082/ch/ch-sso:${DATETIME}'
+          image: 'registry.kubeoperator.io:8082/ch/ch-sso:20220708142519'
       imagePullSecrets:
         - name: ch-nexus
