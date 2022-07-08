@@ -1,0 +1,15 @@
+apiVersion: app/v1
+kind: Deployment
+metadata:
+  name: ch-sso
+spec:
+  template:
+    metadata:
+      labels:
+        app: ch-sso
+    spec:
+      containers:
+        - name: container-8lalcy
+          image: 'registry.kubeoperator.io:8082/ch/ch-sso:${DATETIME}'
+      imagePullSecrets:
+        - name: ch-nexus
