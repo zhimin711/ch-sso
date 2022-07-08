@@ -115,7 +115,8 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         BeanUtils.copyProperties(user, userVo);
 
         if (CommonUtils.isEmpty(user.getRoleId())) {
-            ExceptionUtils._throw(PubError.NOT_EXISTS, "用户没有角色或角色已失效！");
+//            ExceptionUtils._throw(PubError.NOT_EXISTS, "用户没有角色或角色已失效！请联系管理员.");
+            user.setRoleId(-1L);
         }
         Long roleId = jwtTokenTool.getUserRole(username, user.getRoleId());
         userVo.setRoleId(roleId);
@@ -212,11 +213,11 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
             return new RoleVo(role.getId(), role.getCode(), role.getName());
         }).collect(Collectors.toList());
 
-
-        if (!roleIds.contains(user.getRoleId())) {
-            ExceptionUtils._throw(PubError.NOT_EXISTS, "用户角色无效！");
-        }
         userPermissionVo.setRoleList(roleVos);
+        if (!roleIds.contains(user.getRoleId())) {
+//            ExceptionUtils._throw(PubError.NOT_EXISTS, "用户角色无效！");
+            return userPermissionVo;
+        }
 
         /*
          * 获取当前用户的角色菜单\权限
