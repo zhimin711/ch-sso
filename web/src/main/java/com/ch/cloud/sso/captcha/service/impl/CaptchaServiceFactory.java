@@ -42,11 +42,11 @@ public class CaptchaServiceFactory {
         for (CaptchaService item : services) {
             instances.put(item.captchaType(), item);
         }
-        logger.info("supported-captchaTypes-service:{}", instances.keySet().toString());
+        logger.info("supported-captchaTypes-service:{}", instances.keySet());
         ServiceLoader<CaptchaCacheService> cacheServices = ServiceLoader.load(CaptchaCacheService.class);
         for (CaptchaCacheService item : cacheServices) {
             cacheService.put(item.type(), item);
         }
-        logger.info("supported-captchaCache-service:{}", cacheService.keySet().toString());
+        logger.info("supported-captchaCache-service:{}", cacheService.keySet());
     }
 }

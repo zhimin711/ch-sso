@@ -3,6 +3,7 @@ package com.ch.cloud.sso.captcha.service.impl;
 import com.ch.cloud.sso.captcha.model.vo.CaptchaVO;
 import com.ch.cloud.sso.captcha.service.CaptchaService;
 import com.ch.e.PubError;
+import com.ch.utils.AssertUtils;
 import com.ch.utils.CommonUtils;
 import com.ch.e.ExceptionUtils;
 import org.slf4j.Logger;
@@ -34,17 +35,13 @@ public class DefaultCaptchaServiceImpl extends AbstractCaptchaService {
 
     @Override
     public CaptchaVO get(CaptchaVO captchaVO) {
-        if (captchaVO == null || CommonUtils.isEmpty(captchaVO.getCaptchaType())) {
-            ExceptionUtils._throw(PubError.ARGS);
-        }
+        AssertUtils.isTrue(captchaVO == null || CommonUtils.isEmpty(captchaVO.getCaptchaType()), PubError.ARGS);
         return getService(captchaVO.getCaptchaType()).get(captchaVO);
     }
 
     @Override
     public CaptchaVO check(CaptchaVO captchaVO) {
-        if (captchaVO == null || CommonUtils.isEmptyOr(captchaVO.getCaptchaType(), captchaVO.getToken())) {
-            ExceptionUtils._throw(PubError.ARGS);
-        }
+        AssertUtils.isTrue(captchaVO == null || CommonUtils.isEmpty(captchaVO.getToken()), PubError.ARGS);
         return getService(captchaVO.getCaptchaType()).check(captchaVO);
     }
 

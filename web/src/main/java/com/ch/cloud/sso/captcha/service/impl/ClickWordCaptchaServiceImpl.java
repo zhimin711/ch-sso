@@ -1,6 +1,7 @@
 package com.ch.cloud.sso.captcha.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.ch.cloud.sso.captcha.model.common.CaptchaType;
 import com.ch.cloud.sso.captcha.model.common.RepCodeEnum;
 import com.ch.cloud.sso.captcha.model.vo.CaptchaVO;
@@ -87,7 +88,7 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
             point = s.getPoints();
             //aes解密
             pointJson = decrypt(captchaVO.getPointJson(), s.getSecretKey());
-            point1 = JSONObject.parseArray(pointJson, PointVO.class);
+            point1 = JSON.parseArray(pointJson, PointVO.class);
         } catch (Exception e) {
             logger.error("验证码坐标解析失败", e);
             ExceptionUtils._throw(PubError.INVALID);

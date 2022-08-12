@@ -1,7 +1,7 @@
 
 package com.ch.cloud.sso.captcha.util;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.ch.cloud.sso.captcha.model.common.CaptchaBaseMapEnum;
 import com.ch.utils.CommonUtils;
 import org.slf4j.Logger;

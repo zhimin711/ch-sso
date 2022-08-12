@@ -1,7 +1,7 @@
 package com.ch.cloud.sso.captcha.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.ch.cloud.sso.captcha.model.common.CaptchaType;
 import com.ch.cloud.sso.captcha.model.common.RepCodeEnum;
 import com.ch.cloud.sso.captcha.model.vo.CaptchaVO;
@@ -33,28 +33,28 @@ import java.util.Random;
  * @since 2021/1/1
  */
 public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
-    
+
     private static Logger logger = LoggerFactory.getLogger(BlockPuzzleCaptchaServiceImpl.class);
-    
-    
+
+
     @Override
     public void init(Properties config) {
         super.init(config);
     }
-    
+
     @Override
     public String captchaType() {
         return CaptchaType.BLOCK_PUZZLE.getCodeValue();
     }
-    
+
     @Override
     public CaptchaVO get(CaptchaVO captchaVO) {
         //原生图片
         BufferedImage originalImage = ImageUtils.getOriginal();
-        if (null == originalImage) {
-            logger.error("滑动底图未初始化成功，请检查路径");
-            ExceptionUtils._throw(PubError.CONFIG, RepCodeEnum.API_CAPTCHA_BASEMAP_NULL.getDesc());
-        }
+        AssertUtils.isNull(originalImage, PubError.CONFIG, RepCodeEnum.API_CAPTCHA_BASEMAP_NULL.getDesc());
+//        if (null == originalImage) {
+//            logger.error("滑动底图未初始化成功，请检查路径");
+//        }
         //设置水印
         Graphics backgroundGraphics = originalImage.getGraphics();
         int width = originalImage.getWidth();
@@ -63,22 +63,23 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
         backgroundGraphics.setFont(watermark);
         backgroundGraphics.setColor(Color.white);
         backgroundGraphics.drawString(waterMark, width - getEnOrChLength(waterMark), height - (HAN_ZI_SIZE / 2) + 7);
-        
+
         //抠图图片
         String jigsawImageBase64 = ImageUtils.getslidingBlock();
         BufferedImage jigsawImage = ImageUtils.getBase64StrToImage(jigsawImageBase64);
-        if (null == jigsawImage) {
-            logger.error("滑动底图未初始化成功，请检查路径");
-            ExceptionUtils._throw(PubError.CONFIG, RepCodeEnum.API_CAPTCHA_BASEMAP_NULL.getDesc());
-        }
+        AssertUtils.isNull(jigsawImage, PubError.CONFIG, RepCodeEnum.API_CAPTCHA_BASEMAP_NULL.getDesc());
+//        if (null == jigsawImage) {
+//            logger.error("滑动底图未初始化成功，请检查路径");
+//        }
         CaptchaVO captcha = pictureTemplatesCut(originalImage, jigsawImage, jigsawImageBase64);
-        if (captcha == null || CommonUtils.isEmpty(captcha.getJigsawImageBase64()) || CommonUtils.isEmpty(
-                captcha.getOriginalImageBase64())) {
-            ExceptionUtils._throw(PubError.CONNECT, RepCodeEnum.API_CAPTCHA_ERROR.getDesc());
-        }
+
+        AssertUtils.isTrue(captcha == null
+                || CommonUtils.isEmpty(captcha.getJigsawImageBase64())
+                || CommonUtils.isEmpty(captcha.getOriginalImageBase64())
+                , PubError.CONNECT, RepCodeEnum.API_CAPTCHA_ERROR.getDesc());
         return captcha;
     }
-    
+
     @Override
     public CaptchaVO check(CaptchaVO captchaVO) {
         //取坐标信息
@@ -86,20 +87,22 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
         AssertUtils.isFalse(CaptchaServiceFactory.getCache(cacheType).exists(codeKey), PubError.INVALID,
                 RepCodeEnum.API_CAPTCHA_INVALID.getDesc());
         CaptchaVO s = CaptchaServiceFactory.getCache(cacheType).get(codeKey);
-        
+
         //验证码只用一次，即刻失效
         CaptchaServiceFactory.getCache(cacheType).delete(codeKey);
         PointVO point = null;
         PointVO point1 = null;
         String pointJson = null;
         try {
-            
-            AssertUtils.isEmpty(s.getPoints(), PubError.INVALID, "");
+
+            AssertUtils.isEmpty(s.getPoints(), PubError.INVALID, captchaVO.getToken());
             point = s.getPoints().get(0);
             //aes解密
             pointJson = decrypt(captchaVO.getPointJson(), s.getSecretKey());
             point1 = JSON.parseObject(pointJson, PointVO.class);
         } catch (Exception e) {
+            s.setJigsawImageBase64(null);
+            s.setOriginalImageBase64(null);
             logger.error("验证码坐标解析失败:" + JSON.toJSONString(s), e);
             ExceptionUtils._throw(PubError.INVALID);
         }
@@ -120,29 +123,29 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
         //        captchaVO.setResult(true);
         return captchaVO;
     }
-    
+
     /**
      * 根据模板切图
      */
     public CaptchaVO pictureTemplatesCut(BufferedImage originalImage, BufferedImage jigsawImage,
-            String jigsawImageBase64) {
+                                         String jigsawImageBase64) {
         try {
             CaptchaVO dataVO = new CaptchaVO();
-            
+
             int originalWidth = originalImage.getWidth();
             int originalHeight = originalImage.getHeight();
             int jigsawWidth = jigsawImage.getWidth();
             int jigsawHeight = jigsawImage.getHeight();
-            
+
             //随机生成拼图坐标
             PointVO point = generateJigsawPoint(originalWidth, originalHeight, jigsawWidth, jigsawHeight);
             int x = point.getX();
             int y = point.getY();
-            
+
             //生成新的拼图图像
             BufferedImage newJigsawImage = new BufferedImage(jigsawWidth, jigsawHeight, jigsawImage.getType());
             Graphics2D graphics = newJigsawImage.createGraphics();
-            
+
             int bold = 5;
             //如果需要生成RGB格式，需要做如下配置,Transparency 设置透明
             newJigsawImage = graphics.getDeviceConfiguration()
@@ -178,17 +181,17 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
                     }
                 }
             }
-            
+
             // 设置“抗锯齿”的属性
             graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             graphics.setStroke(new BasicStroke(bold, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
             graphics.drawImage(newJigsawImage, 0, 0, null);
             graphics.dispose();
-            
+
             ByteArrayOutputStream os = new ByteArrayOutputStream();//新建流。
             ImageIO.write(newJigsawImage, IMAGE_TYPE_PNG, os);//利用ImageIO类提供的write方法，将bi以png图片的数据模式写入流。
             byte[] jigsawImages = os.toByteArray();
-            
+
             ByteArrayOutputStream oriImagesOs = new ByteArrayOutputStream();//新建流。
             ImageIO.write(originalImage, IMAGE_TYPE_PNG, oriImagesOs);//利用ImageIO类提供的write方法，将bi以jpg图片的数据模式写入流。
             byte[] oriCopyImages = oriImagesOs.toByteArray();
@@ -198,23 +201,22 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
             dataVO.setPoints(Lists.newArrayList(point));
             dataVO.setJigsawImageBase64(encoder.encodeToString(jigsawImages).replaceAll("[\r\n]", ""));
             dataVO.setToken(RandomUtils.getUUID());
-            
+
             if (captchaAesStatus) {
                 dataVO.setSecretKey(AESUtil.getKey());
-                ;
             }
             //将坐标信息存入redis中
             String codeKey = String.format(REDIS_CAPTCHA_KEY, dataVO.getToken());
             CaptchaServiceFactory.getCache(cacheType).set(codeKey, dataVO);
-            logger.debug("token：{}, point:{}", dataVO.getToken(), JSONObject.toJSONString(point));
+            logger.debug("token：{}, point:{}", dataVO.getToken(), JSON.toJSONString(point));
             return dataVO;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
-    
-    
+
+
     /**
      * 随机生成拼图坐标
      *
@@ -225,7 +227,7 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
      * @return 拼图坐标
      */
     private static PointVO generateJigsawPoint(int originalWidth, int originalHeight, int jigsawWidth,
-            int jigsawHeight) {
+                                               int jigsawHeight) {
         Random random = new Random();
         int widthDifference = originalWidth - jigsawWidth;
         int heightDifference = originalHeight - jigsawHeight;
@@ -242,7 +244,7 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
         }
         return new PointVO(x, y);
     }
-    
+
     /**
      * @param oriImage      原图
      * @param templateImage 模板图
@@ -251,11 +253,11 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
      * @param y             随机扣取坐标y
      */
     private static void cutByTemplate(BufferedImage oriImage, BufferedImage templateImage, BufferedImage newImage,
-            int x, int y) {
+                                      int x, int y) {
         //临时数组遍历用于高斯模糊存周边像素值
         int[][] martrix = new int[3][3];
         int[] values = new int[9];
-        
+
         int xLength = templateImage.getWidth();
         int yLength = templateImage.getHeight();
         // 模板图像宽度
@@ -266,13 +268,13 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
                 int rgb = templateImage.getRGB(i, j);
                 if (rgb < 0) {
                     newImage.setRGB(i, j, oriImage.getRGB(x + i, y + j));
-                    
+
                     //抠图区域高斯模糊
                     readPixel(oriImage, x + i, y + j, values);
                     fillMatrix(martrix, values);
                     oriImage.setRGB(x + i, y + j, avgMatrix(martrix));
                 }
-                
+
                 //防止数组越界判断
                 if (i == (xLength - 1) || j == (yLength - 1)) {
                     continue;
@@ -287,10 +289,10 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
                 }
             }
         }
-        
+
     }
-    
-    
+
+
     /**
      * 干扰抠图处理
      *
@@ -303,7 +305,7 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
         //临时数组遍历用于高斯模糊存周边像素值
         int[][] martrix = new int[3][3];
         int[] values = new int[9];
-        
+
         int xLength = templateImage.getWidth();
         int yLength = templateImage.getHeight();
         // 模板图像宽度
@@ -331,9 +333,9 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
                 }
             }
         }
-        
+
     }
-    
+
     private static void readPixel(BufferedImage img, int x, int y, int[] pixels) {
         int xStart = x - 1;
         int yStart = y - 1;
@@ -343,7 +345,7 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
                 int tx = i;
                 if (tx < 0) {
                     tx = -tx;
-                    
+
                 } else if (tx >= img.getWidth()) {
                     tx = x;
                 }
@@ -354,11 +356,11 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
                     ty = y;
                 }
                 pixels[current++] = img.getRGB(tx, ty);
-                
+
             }
         }
     }
-    
+
     private static void fillMatrix(int[][] matrix, int[] values) {
         int filled = 0;
         for (int[] x : matrix) {
@@ -367,7 +369,7 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
             }
         }
     }
-    
+
     private static int avgMatrix(int[][] matrix) {
         int r = 0;
         int g = 0;
@@ -385,6 +387,6 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
         }
         return new Color(r / 8, g / 8, b / 8).getRGB();
     }
-    
-    
+
+
 }
