@@ -54,7 +54,7 @@ public class UserController {
      */
     @GetMapping("/")
     public Principal user(Principal principal) {
-        logger.debug("授权用户信息: {}", principal.toString());
+        logger.debug("授权用户信息: {}", principal);
         return principal;
     }
 

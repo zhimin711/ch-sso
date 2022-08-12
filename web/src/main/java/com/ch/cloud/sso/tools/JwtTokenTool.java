@@ -137,7 +137,7 @@ public class JwtTokenTool {
      * @param token 令牌
      * @return 是否过期
      */
-    public Boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         try {
             RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
             TokenCache cache = tokenMap.get(token);

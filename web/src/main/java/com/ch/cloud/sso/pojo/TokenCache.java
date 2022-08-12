@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 /**
- * desc:
+ * desc: redis cache token info
  *
  * @author zhimin
  * @since 2022/3/15 6:29 PM
@@ -16,11 +16,11 @@ import java.util.Date;
 @NoArgsConstructor
 public class TokenCache {
     /**
-     * jwt token
+     * token
      */
     private String token;
     /**
-     * jwt secret
+     * jwt token
      */
     private String secret;
     /**
