@@ -26,7 +26,15 @@ public class CaptchaController {
 
     @PostMapping("/get")
     public Result<?> get(@RequestBody CaptchaVO captchaVO) {
-        return ResultUtils.wrapFail(() -> captchaService.get(captchaVO));
+        return ResultUtils.wrapFail(() -> {
+
+            CaptchaVO captcha = captchaService.get(captchaVO);
+            captcha.setCaptchaId(null);
+            captcha.setProjectCode(null);
+            captcha.setPoints(null);
+            captcha.setPointList(null);
+            return captcha;
+        });
     }
 
     @PostMapping("/check")

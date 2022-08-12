@@ -15,7 +15,7 @@ import java.util.List;
  * @since 2021/1/1
  */
 @Data
-@JsonIgnoreProperties(value = {"captchaId", "projectCode", "points", "pointList"})
+//@JsonIgnoreProperties(value = {"captchaId", "projectCode", "points", "pointList"})
 public class CaptchaVO implements Serializable {
 
     /**
