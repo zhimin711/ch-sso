@@ -1,8 +1,6 @@
 package com.ch.cloud.sso.tools;
 
-import com.alibaba.fastjson.JSONObject;
 import com.alibaba.nacos.common.utils.UuidUtils;
-import com.ch.Constants;
 import com.ch.cloud.sso.pojo.TokenCache;
 import com.ch.cloud.sso.pojo.TokenVo;
 import com.ch.cloud.sso.pojo.UserInfo;
@@ -13,17 +11,13 @@ import com.ch.utils.AssertUtils;
 import com.ch.utils.CommonUtils;
 import com.ch.utils.DateUtils;
 import com.ch.utils.EncryptUtils;
-import com.ch.utils.NetUtils;
 import com.ch.utils.NumberUtils;
-import com.ch.utils.PlatformUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.TextCodec;
 import lombok.extern.log4j.Log4j2;
-import nl.basjes.parse.useragent.UserAgent;
-import nl.basjes.parse.useragent.UserAgentAnalyzer;
 import org.redisson.api.RLock;
 import org.redisson.api.RMapCache;
 import org.redisson.api.RedissonClient;
@@ -81,7 +75,7 @@ public class TokenTool {
     
     public static final String LOCK_TOKEN = "sso:lock_token:";
     
-    UserAgentAnalyzer uaa = UserAgentAnalyzer.newBuilder().hideMatcherLoadStats().withCache(10000).build();
+//    UserAgentAnalyzer uaa = UserAgentAnalyzer.newBuilder().hideMatcherLoadStats().withCache(10000).build();
     
     /**
      * 从数据声明生成令牌
@@ -117,11 +111,11 @@ public class TokenTool {
     
     public void parseUserAgent(String userAgent) {
         
-        UserAgent agent = uaa.parse(userAgent);
+ /*       UserAgent agent = uaa.parse(userAgent);
         for (String fieldName : agent.getAvailableFieldNamesSorted()) {
             log.info(fieldName + " = " + agent.getValue(fieldName));
         }
-        
+        */
     }
     
     /**
