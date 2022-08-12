@@ -2,7 +2,7 @@ package com.ch.cloud.sso.controller;
 
 import com.ch.Constants;
 import com.ch.cloud.sso.pojo.TokenVo;
-import com.ch.cloud.sso.tools.JwtTokenTool;
+import com.ch.cloud.sso.tools.TokenTool;
 import com.ch.e.PubError;
 import com.ch.result.Result;
 import com.ch.utils.CommonUtils;
@@ -29,7 +29,7 @@ public class LogoutController {
     //    @Autowired
 //    PasswordService passwordService;
     @Autowired
-    private JwtTokenTool jwtTokenTool;
+    private TokenTool tokenTool;
 
 
     @GetMapping("oauth/logout")
@@ -60,7 +60,7 @@ public class LogoutController {
             return Result.error(PubError.INVALID, "token invalid!");
         }*/
         tokenVo.setToken(token);
-        jwtTokenTool.invalid(tokenVo);
+        tokenTool.invalid(tokenVo);
         return Result.success();
     }
 

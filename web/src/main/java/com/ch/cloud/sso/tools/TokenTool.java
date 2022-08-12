@@ -1,22 +1,29 @@
 package com.ch.cloud.sso.tools;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.nacos.common.utils.UuidUtils;
+import com.ch.Constants;
 import com.ch.cloud.sso.pojo.TokenCache;
 import com.ch.cloud.sso.pojo.TokenVo;
 import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.props.JwtProperties;
 import com.ch.e.ExceptionUtils;
 import com.ch.e.PubError;
+import com.ch.utils.AssertUtils;
 import com.ch.utils.CommonUtils;
 import com.ch.utils.DateUtils;
 import com.ch.utils.EncryptUtils;
+import com.ch.utils.NetUtils;
 import com.ch.utils.NumberUtils;
+import com.ch.utils.PlatformUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.TextCodec;
 import lombok.extern.log4j.Log4j2;
+import nl.basjes.parse.useragent.UserAgent;
+import nl.basjes.parse.useragent.UserAgentAnalyzer;
 import org.redisson.api.RLock;
 import org.redisson.api.RMapCache;
 import org.redisson.api.RedissonClient;
@@ -27,7 +34,11 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,26 +52,37 @@ import java.util.concurrent.TimeUnit;
  */
 @Log4j2
 @Component
-public class JwtTokenTool {
-
+public class TokenTool {
+    
     @Autowired
     private JwtProperties jwtProperties;
-
+    
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    
     @Autowired
-    private RedissonClient      redissonClient;
-
-    public static final String USER_TOKEN          = "sso:user_token:";
-    public static final String USER_REFRESH_TOKEN  = "sso:user_refresh_token:";
-    public static final String TOKEN_SECRET        = "sso:token:";
-    public static final String REFRESH_TOKEN       = "sso:refresh_token:";
-    public static final String TOKEN_CACHE         = "sso:token";
+    private RedissonClient redissonClient;
+    
+    public static final String USER_TOKEN = "sso:user_token:";
+    
+    public static final String USER_REFRESH_TOKEN = "sso:user_refresh_token:";
+    
+    public static final String TOKEN_SECRET = "sso:token:";
+    
+    public static final String REFRESH_TOKEN = "sso:refresh_token:";
+    
+    public static final String TOKEN_CACHE = "sso:token";
+    
     public static final String REFRESH_TOKEN_CACHE = "sso:refresh_token";
-    public static final String USER_ROLE           = "sso:user_role";
-    public static final String USERS_ROLES         = "sso:users_roles";
-    public static final String LOCK_TOKEN          = "sso:lock_token:";
-
+    
+    public static final String USER_ROLE = "sso:user_role";
+    
+    public static final String USERS_ROLES = "sso:users_roles";
+    
+    public static final String LOCK_TOKEN = "sso:lock_token:";
+    
+    UserAgentAnalyzer uaa = UserAgentAnalyzer.newBuilder().hideMatcherLoadStats().withCache(10000).build();
+    
     /**
      * 从数据声明生成令牌
      *
@@ -70,14 +92,11 @@ public class JwtTokenTool {
      * @return 令牌
      */
     private String generateToken(Map<String, Object> claims, Date expired, String secret) {
-
-        return Jwts.builder()
-                .setClaims(claims)
-                .setExpiration(expired)
-                .signWith(SignatureAlgorithm.HS512, secret).
-                compact();
+        
+        return Jwts.builder().setClaims(claims).setExpiration(expired).signWith(SignatureAlgorithm.HS512, secret)
+                .compact();
     }
-
+    
     /**
      * 从令牌中获取数据声明
      *
@@ -95,8 +114,16 @@ public class JwtTokenTool {
         }
         return claims;
     }
-
-
+    
+    public void parseUserAgent(String userAgent) {
+        
+        UserAgent agent = uaa.parse(userAgent);
+        for (String fieldName : agent.getAvailableFieldNamesSorted()) {
+            log.info(fieldName + " = " + agent.getValue(fieldName));
+        }
+        
+    }
+    
     /**
      * 从令牌中获取数据声明
      *
@@ -117,8 +144,8 @@ public class JwtTokenTool {
         }
         return claims;
     }
-
-
+    
+    
     /**
      * 从令牌中获取用户名
      *
@@ -127,10 +154,12 @@ public class JwtTokenTool {
      */
     public String getUsernameFromToken(String token) {
         RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
-        if (tokenMap.containsKey(token)) return tokenMap.get(token).getUsername();
+        if (tokenMap.containsKey(token)) {
+            return tokenMap.get(token).getUsername();
+        }
         return null;
     }
-
+    
     /**
      * 判断令牌是否过期
      *
@@ -141,9 +170,13 @@ public class JwtTokenTool {
         try {
             RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
             TokenCache cache = tokenMap.get(token);
-            if (cache == null) return true;
+            if (cache == null) {
+                return true;
+            }
             Claims claims = getClaimsFromToken(cache.getToken(), cache.getSecret());
-            if (claims == null) return true;
+            if (claims == null) {
+                return true;
+            }
             Date expiration = claims.getExpiration();
             return expiration.before(new Date());
         } catch (Exception e) {
@@ -151,7 +184,7 @@ public class JwtTokenTool {
             return false;
         }
     }
-
+    
     /**
      * 刷新令牌
      *
@@ -161,19 +194,18 @@ public class JwtTokenTool {
     public void refreshToken(TokenVo tokenVo) {
         RLock lock = redissonClient.getLock(LOCK_TOKEN + tokenVo.getRefreshToken());
         try {
-
+            
             boolean locked = lock.tryLock(5, TimeUnit.SECONDS);
-
+            
             log.info("{} lock status: {}", tokenVo.getRefreshToken(), locked);
             if (!locked) {
                 ExceptionUtils._throw(PubError.RETRY, "网络异常，请稍后重试......");
             }
             RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
-            RMapCache<String, String> refreshTokenMap = redissonClient.getMapCache(REFRESH_TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
+            RMapCache<String, String> refreshTokenMap = redissonClient.getMapCache(REFRESH_TOKEN_CACHE,
+                    JsonJacksonCodec.INSTANCE);
             TokenCache cache2 = tokenMap.get(tokenVo.getRefreshToken());
-            if (CommonUtils.isEmpty(cache2)) {
-                ExceptionUtils._throw(PubError.EXPIRED, tokenVo.getRefreshToken());
-            }
+            AssertUtils.isEmpty(cache2, PubError.EXPIRED, tokenVo.getRefreshToken());
             Date current = DateUtils.current();
             TokenCache cache1 = tokenMap.get(tokenVo.getToken());
             if (cache1 != null) {//原Token过期 > 300s return original token
@@ -195,16 +227,21 @@ public class JwtTokenTool {
             Date accessExpired = new Date(System.currentTimeMillis() + jwtProperties.getTokenExpired().toMillis());
             tokenVo.setToken(accessToken);
             tokenVo.setExpireAt(accessExpired.getTime());
-
-            tokenMap.put(accessToken, TokenCache.build(cache2.getToken(), cache2.getSecret(), cache2.getUsername(), accessExpired), jwtProperties.getTokenExpired().getSeconds(), TimeUnit.SECONDS);
+            TokenCache refreshToken = TokenCache.build(cache2.getToken(), cache2.getSecret(), cache2.getUsername(),
+                    accessExpired);
+            getRequestInfo(refreshToken);
+            AssertUtils.isFalse(cache2.equals(refreshToken), PubError.INVALID, "用户");
+            tokenMap.put(accessToken, refreshToken, jwtProperties.getTokenExpired().getSeconds(), TimeUnit.SECONDS);
         } catch (Exception e) {
             log.error("refresh token error!", e);
             ExceptionUtils._throw(PubError.INVALID, "TOKEN " + tokenVo.getToken() + " 无效");
         } finally {
-            if (lock.isLocked()) lock.unlock();
+            if (lock.isLocked()) {
+                lock.unlock();
+            }
         }
     }
-
+    
     /**
      * 验证令牌
      *
@@ -214,11 +251,14 @@ public class JwtTokenTool {
      */
     public Boolean validateToken(String token, UserDetails userDetails) {
         RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
-        if (!tokenMap.containsKey(token)) return false;
-
-        return (tokenMap.get(token).getSecret().equals(generateSecret(userDetails.getPassword())) && !isTokenExpired(token));
+        if (!tokenMap.containsKey(token)) {
+            return false;
+        }
+        
+        return (tokenMap.get(token).getSecret().equals(generateSecret(userDetails.getPassword())) && !isTokenExpired(
+                token));
     }
-
+    
     public UserInfo getUserInfoFromToken(String token) {
         RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
         TokenCache cache = tokenMap.get(token);
@@ -236,7 +276,7 @@ public class JwtTokenTool {
         Long userId = claims.get("userId", Long.class);
         Long roleId = claims.get("roleId", Long.class);
         Long tenantId = claims.get("tenantId", Long.class);
-
+        
         UserInfo info = new UserInfo();
         info.setUsername(username);
         info.setUserId(userId);
@@ -245,13 +285,13 @@ public class JwtTokenTool {
         info.setExpireAt(claims.getExpiration().getTime());
         return info;
     }
-
+    
     public void invalid(TokenVo tokenVo) {
         RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
         tokenMap.remove(tokenVo.getToken());
         tokenMap.remove(tokenVo.getRefreshToken());
     }
-
+    
     /**
      * 根据用户密钥生成刷新Token
      *
@@ -260,33 +300,40 @@ public class JwtTokenTool {
      * @return
      */
     public TokenVo generateToken(UserInfo user, String secret) {
-
+        
         String accessToken = UuidUtils.generateUuid();
         Date current = DateUtils.current();
-
+        
         Map<String, Object> claims = new HashMap<>(5);
         claims.put("sub", user.getUsername());
         claims.put("userId", user.getUserId());
         claims.put("roleId", user.getRoleId());
         claims.put("tenantId", user.getTenantId());
         claims.put("created", new Date());
-        Date jwtExpired = DateUtils.addSeconds(current, (int) jwtProperties.getRefreshTokenExpired().getSeconds());//new Date(System.currentTimeMillis() + jwtProperties.getRefreshTokenExpired().toMillis());
+        //new Date(System.currentTimeMillis() + jwtProperties.getRefreshTokenExpired().toMillis());
+        Date jwtExpired = DateUtils.addSeconds(current, (int) jwtProperties.getRefreshTokenExpired().getSeconds());
         String jwtToken = generateToken(claims, jwtExpired, secret);
         String refreshToken = EncryptUtils.md5(jwtToken);
-
-        Date accessExpired = DateUtils.addSeconds(current, (int) jwtProperties.getTokenExpired().getSeconds());//new Date(System.currentTimeMillis() + jwtProperties.getTokenExpired().toMillis());
-        log.info("generate Token time current: {}, accessExpired: {}", DateUtils.format(current), DateUtils.format(accessExpired));
+        
+        //new Date(System.currentTimeMillis() + jwtProperties.getTokenExpired().toMillis());
+        Date accessExpired = DateUtils.addSeconds(current, (int) jwtProperties.getTokenExpired().getSeconds());
+        log.info("generate Token time current: {}, accessExpired: {}", DateUtils.format(current),
+                DateUtils.format(accessExpired));
         RMapCache<String, TokenCache> tokenCache = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
-        tokenCache.put(accessToken, TokenCache.build(jwtToken, secret, user.getUsername(), accessExpired), jwtProperties.getTokenExpired().getSeconds(), TimeUnit.SECONDS);
-        tokenCache.put(refreshToken, TokenCache.build(jwtToken, secret, user.getUsername(), jwtExpired), jwtProperties.getRefreshTokenExpired().getSeconds(), TimeUnit.SECONDS);
-
+        TokenCache token = TokenCache.build(jwtToken, secret, user.getUsername(), accessExpired);
+        getRequestInfo(token);
+        tokenCache.put(accessToken, token, jwtProperties.getTokenExpired().getSeconds(), TimeUnit.SECONDS);
+        TokenCache token2 = TokenCache.build(jwtToken, secret, user.getUsername(), jwtExpired);
+        getRequestInfo(token2);
+        tokenCache.put(refreshToken, token2, jwtProperties.getRefreshTokenExpired().getSeconds(), TimeUnit.SECONDS);
+        
         return new TokenVo(accessToken, refreshToken, accessExpired.getTime());
     }
-
+    
     public String generateSecret(String password) {
         return TextCodec.BASE64.encode(password);
     }
-
+    
     public boolean refreshUserRole(String username, Long roleId) {
         HashOperations<String, String, String> ops = stringRedisTemplate.opsForHash();
         String role = roleId == null ? "" : roleId + "";
@@ -301,14 +348,14 @@ public class JwtTokenTool {
         }
         return false;
     }
-
+    
     public Long getUserRole(String username, Long defaultRole) {
-
+        
         RMapCache<Object, Object> map = redissonClient.getMapCache(USERS_ROLES, StringCodec.INSTANCE);
         if (map.containsKey(username)) {
             map.put(username, defaultRole, jwtProperties.getTokenExpired().getSeconds(), TimeUnit.SECONDS);
         }
-
+        
         HashOperations<String, String, String> ops = stringRedisTemplate.opsForHash();
         if (ops.hasKey(USER_ROLE, username)) {
             String v = ops.get(USER_ROLE, username);
@@ -317,5 +364,40 @@ public class JwtTokenTool {
             }
         }
         return defaultRole;
+    }
+    
+    private void getRequestInfo(TokenCache tokenCache) {
+        RequestAttributes reqAttr = RequestContextHolder.getRequestAttributes();
+        if (reqAttr == null) {
+            return;
+        }
+        HttpServletRequest request = ((ServletRequestAttributes) reqAttr).getRequest();
+        tokenCache.setReferer(request.getHeader("Referer"));
+        tokenCache.setUserAgent(request.getHeader("User-Agent"));
+        String ip = getIP(request);
+        tokenCache.setClientIp(ip);
+        
+    }
+    
+    public static final String UNKNOWN = "unknown";
+    
+    public String getIP(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
+            ip = request.getHeader("X-Original-Forwarded-For");
+        }
+        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
+            ip = request.getHeader("X-Real-IP");
+        }
+        /*if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }*/
+        return ip == null ? "N/A" : ip;
     }
 }

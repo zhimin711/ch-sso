@@ -4,16 +4,13 @@ import com.ch.Constants;
 import com.ch.cloud.sso.captcha.service.CaptchaService;
 import com.ch.cloud.sso.pojo.*;
 import com.ch.cloud.sso.service.IUserService;
-import com.ch.cloud.sso.tools.JwtTokenTool;
+import com.ch.cloud.sso.tools.TokenTool;
 import com.ch.cloud.sso.utils.CaptchaUtils;
 import com.ch.e.PubError;
 import com.ch.result.Result;
 import com.ch.result.ResultUtils;
-import com.ch.utils.CommonUtils;
 import com.ch.e.ExceptionUtils;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +40,7 @@ import java.util.List;
 public class LoginController {
 
     @Autowired
-    private JwtTokenTool jwtTokenTool;
+    private TokenTool tokenTool;
 
     @Autowired
     private IUserService   userService;
@@ -53,7 +50,8 @@ public class LoginController {
     //
     @GetMapping("login")
     @ApiIgnore
-    public ModelAndView index() {
+    public ModelAndView index(HttpServletRequest request) {
+        tokenTool.parseUserAgent(request.getHeader("User-Agent"));
         return new ModelAndView("login");
     }
 
@@ -78,6 +76,7 @@ public class LoginController {
         if (StringUtils.isEmpty(user.getCaptchaCode()) || !captchaService.verification(user.getCaptchaCode())) {
             return Result.error(PubError.UNDEFINED, "验证码错误或已过期！");
         }
+        
         return ResultUtils.wrap(() -> userService.login(user.getUsername(), user.getPassword()));
     }
 
@@ -90,7 +89,7 @@ public class LoginController {
             TokenVo tokenVo = new TokenVo();
             tokenVo.setToken(token);
             tokenVo.setRefreshToken(refreshToken);
-            if (jwtTokenTool.isTokenExpired(tokenVo.getRefreshToken())) {
+            if (tokenTool.isTokenExpired(tokenVo.getRefreshToken())) {
                 ExceptionUtils._throw(PubError.EXPIRED, "刷新令牌已失效!");
             }
             userService.refreshToken(tokenVo);

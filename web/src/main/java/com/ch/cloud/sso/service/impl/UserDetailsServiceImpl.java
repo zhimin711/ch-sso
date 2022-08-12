@@ -6,7 +6,7 @@ import com.ch.StatusS;
 import com.ch.cloud.sso.pojo.*;
 import com.ch.cloud.sso.security.CustomUserDetails;
 import com.ch.cloud.sso.service.IUserService;
-import com.ch.cloud.sso.tools.JwtTokenTool;
+import com.ch.cloud.sso.tools.TokenTool;
 import com.ch.cloud.upms.client.UpmsPermissionClientService;
 import com.ch.cloud.upms.client.UpmsRoleClientService;
 import com.ch.cloud.upms.client.UpmsUserClientService;
@@ -61,7 +61,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private JwtTokenTool jwtTokenTool;
+    private TokenTool tokenTool;
 
 
     @Override
@@ -79,7 +79,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         String password = user.getPassword();
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
 //        authorities.add(new SimpleGrantedAuthority(user.getUsername()));
-        String secret = jwtTokenTool.generateSecret(password);
+        String secret = tokenTool.generateSecret(password);
         return new CustomUserDetails(username, password, authorities, secret);
     }
 
@@ -118,7 +118,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
 //            ExceptionUtils._throw(PubError.NOT_EXISTS, "用户没有角色或角色已失效！请联系管理员.");
             user.setRoleId(-1L);
         }
-        Long roleId = jwtTokenTool.getUserRole(username, user.getRoleId());
+        Long roleId = tokenTool.getUserRole(username, user.getRoleId());
         userVo.setRoleId(roleId);
         return userVo;
     }
@@ -160,30 +160,30 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         userInfo.setRoleId(userDetails.getRoleId());
         userInfo.setTenantId(userDetails.getTenantId());
 
-        return jwtTokenTool.generateToken(userInfo, userDetails.getSecret());
+        return tokenTool.generateToken(userInfo, userDetails.getSecret());
     }
 
     @Override
     public void refreshToken(TokenVo tokenVo) {
-        jwtTokenTool.refreshToken(tokenVo);
+        tokenTool.refreshToken(tokenVo);
     }
 
     @Override
     public String validate(String token) {
         if (CommonUtils.isEmpty(token)) return null;
-        String username = jwtTokenTool.getUsernameFromToken(token);
+        String username = tokenTool.getUsernameFromToken(token);
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // 通过用户名 获取用户的信息
             UserDetails userDetails = loadUserByUsername(username);
             // 验证token和用户是否匹配
-            if (jwtTokenTool.validateToken(token, userDetails)) return username;
+            if (tokenTool.validateToken(token, userDetails)) return username;
         }
         return null;
     }
 
     @Override
     public UserInfo extractToken(String token) {
-        return jwtTokenTool.getUserInfoFromToken(token);
+        return tokenTool.getUserInfoFromToken(token);
     }
 
     @Override

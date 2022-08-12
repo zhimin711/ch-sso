@@ -6,7 +6,7 @@ import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.pojo.UserPermissionVo;
 import com.ch.cloud.sso.pojo.UserVo;
 import com.ch.cloud.sso.service.IUserService;
-import com.ch.cloud.sso.tools.JwtTokenTool;
+import com.ch.cloud.sso.tools.TokenTool;
 import com.ch.e.ExceptionUtils;
 import com.ch.e.PubError;
 import com.ch.pojo.KeyValue;
@@ -44,7 +44,7 @@ public class UserController {
     private GatewayNotifySender gatewayNotifySender;
 
     @Autowired
-    private JwtTokenTool jwtTokenTool;
+    private TokenTool tokenTool;
 
     /**
      * 资源服务器提供的受保护接口
@@ -93,7 +93,7 @@ public class UserController {
             user.setUsername(username);
             UserVo userVo = userService.findUserInfo(username);
             user.setUserId(userVo.getId());
-            boolean refresh = jwtTokenTool.refreshUserRole(username, user.getRoleId());
+            boolean refresh = tokenTool.refreshUserRole(username, user.getRoleId());
             if (refresh) {
                 try {
                     gatewayNotifySender.cleanNotify(new KeyValue("users", token));

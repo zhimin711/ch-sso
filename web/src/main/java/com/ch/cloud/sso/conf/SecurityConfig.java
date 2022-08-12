@@ -1,7 +1,7 @@
 package com.ch.cloud.sso.conf;
 
 import com.ch.cloud.sso.security.JwtLoginFilter;
-import com.ch.cloud.sso.tools.JwtTokenTool;
+import com.ch.cloud.sso.tools.TokenTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +35,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserDetailsService userDetailsService;
     @Autowired
-    private JwtTokenTool jwtTokenTool;
+    private TokenTool tokenTool;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -57,7 +57,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private Filter jwtLoginFilter() {
-        return new JwtLoginFilter(jwtTokenTool, userDetailsService);
+        return new JwtLoginFilter(tokenTool, userDetailsService);
     }
 
     @Override
