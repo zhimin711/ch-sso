@@ -1,5 +1,6 @@
 package com.ch.cloud.sso.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.ch.Num;
 import com.ch.StatusS;
@@ -202,7 +203,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
          * 获取当前用户的所有角色
          */
         Result<RoleDto> res2 = upmsUserClientService.findRolesByUserId2(user.getUserId());
-        log.info("get user roles: {}", JSONObject.toJSONString(res2));
+//        log.info("get user roles: {}", JSON.toJSONString(res2));
         if (res2.isEmpty()) {
             return userPermissionVo;
         }
