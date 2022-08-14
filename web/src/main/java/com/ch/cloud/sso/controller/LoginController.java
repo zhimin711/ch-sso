@@ -29,7 +29,7 @@ import java.io.OutputStream;
 import java.util.List;
 
 /**
- * desc:
+ * desc:登录与授权服务
  *
  * @author zhimin
  * @since 2018/12/21 10:40 PM
@@ -66,7 +66,7 @@ public class LoginController {
      */
     @ApiOperation(value = "获取用户访问令牌", notes = "基于密码模式登录,无需签名,返回access_token")
     @PostMapping(value = "login/token/access", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Result<TokenVo> getLoginToken(@RequestBody LoginDto user) {
+    public Result<TokenVo> loginAccess(@RequestBody LoginDto user) {
 
         if (StringUtils.isEmpty(user.getUsername()) || StringUtils.isEmpty(user.getPassword())) {
             return Result.error(PubError.USERNAME_OR_PASSWORD, "用户或者密码不能为空！");
@@ -76,10 +76,23 @@ public class LoginController {
         if (StringUtils.isEmpty(user.getCaptchaCode()) || !captchaService.verification(user.getCaptchaCode())) {
             return Result.error(PubError.UNDEFINED, "验证码错误或已过期！");
         }
-        
+
         return ResultUtils.wrap(() -> userService.login(user.getUsername(), user.getPassword()));
     }
 
+
+    @ApiOperation(value = "获取授权码", notes = "获取授权码")
+    @GetMapping(value = "login/access/code")
+    public Result<String> loginAccessCode(@RequestHeader(Constants.X_TOKEN) String token,
+                                          @RequestHeader(Constants.X_REFRESH_TOKEN) String refreshToken) {
+        return ResultUtils.wrapFail(() -> tokenTool.authCode(token, refreshToken));
+    }
+
+    @ApiOperation(value = "获取授权码", notes = "获取授权码")
+    @GetMapping(value = "login/access")
+    public Result<TokenVo> loginAccess(@RequestParam String code) {
+        return ResultUtils.wrapFail(() -> tokenTool.authToken(code));
+    }
 
     @ApiOperation(value = "刷新访问令牌", notes = "刷新访问令牌")
     @GetMapping(value = "login/token/refresh")
@@ -89,9 +102,6 @@ public class LoginController {
             TokenVo tokenVo = new TokenVo();
             tokenVo.setToken(token);
             tokenVo.setRefreshToken(refreshToken);
-            if (tokenTool.isTokenExpired(tokenVo.getRefreshToken())) {
-                ExceptionUtils._throw(PubError.EXPIRED, "刷新令牌已失效!");
-            }
             userService.refreshToken(tokenVo);
             return tokenVo;
         });

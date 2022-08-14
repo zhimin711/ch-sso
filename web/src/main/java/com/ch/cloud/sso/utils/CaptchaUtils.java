@@ -4,7 +4,6 @@ import com.ch.cloud.sso.pojo.SlideCaptcha;
 import com.ch.e.PubError;
 import com.ch.e.ExceptionUtils;
 import com.ch.utils.FileUtilsV2;
-import com.ch.utils.ImageUtils;
 import com.google.common.collect.Lists;
 
 import javax.imageio.ImageIO;

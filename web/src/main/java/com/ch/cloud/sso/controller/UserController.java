@@ -12,6 +12,7 @@ import com.ch.e.PubError;
 import com.ch.pojo.KeyValue;
 import com.ch.result.Result;
 import com.ch.result.ResultUtils;
+import com.ch.utils.AssertUtils;
 import com.ch.utils.CommonUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -49,8 +50,8 @@ public class UserController {
     /**
      * 资源服务器提供的受保护接口
      *
-     * @param principal
-     * @return
+     * @param principal 授权信息
+     * @return 授权信息
      */
     @GetMapping("/")
     public Principal user(Principal principal) {
@@ -62,17 +63,14 @@ public class UserController {
      * 用户授权信息
      *
      * @param token 访问令牌
-     * @return
+     * @return 用户信息
      */
     @ApiOperation(value = "访问令牌获取用户授权", notes = "访问令牌获取,返回用户授权信息")
     @GetMapping("/info")
     public Result<UserVo> info(@RequestHeader(Constants.X_TOKEN) String token) {
         return ResultUtils.wrapFail(() -> {
             String username = userService.validate(token);
-            if (CommonUtils.isEmpty(username)) {
-                ExceptionUtils._throw(PubError.INVALID, "访问令牌已失效!");
-            }
-//            UserInfo user = userService.extractToken(token);
+            AssertUtils.isEmpty(username,PubError.INVALID, "访问令牌已失效!");
             return userService.findUserInfo(username);
         });
     }
@@ -80,7 +78,7 @@ public class UserController {
     /**
      * 获取用户菜单与权限
      *
-     * @return
+     * @return 用户菜单与权限
      */
     @ApiOperation(value = "访问令牌获取用户授权", notes = "访问令牌获取,返回用户授权信息")
     @PostMapping("/permissions")

@@ -18,11 +18,11 @@
         <maven.test.skip>true</maven.test.skip>
     </properties>
     <dependencies>
-        <!--<dependency>
+        <dependency>
             <groupId>nl.basjes.parse.useragent</groupId>
             <artifactId>yauaa</artifactId>
             <version>7.3.0</version>
-        </dependency>-->
+        </dependency>
         <dependency>
             <groupId>com.ch.cloud</groupId>
             <artifactId>ch-sso-service</artifactId>

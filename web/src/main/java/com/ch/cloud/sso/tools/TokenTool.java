@@ -1,28 +1,29 @@
 package com.ch.cloud.sso.tools;
 
 import com.alibaba.nacos.common.utils.UuidUtils;
-import com.ch.cloud.sso.pojo.TokenCache;
+import com.ch.cloud.sso.captcha.util.RandomUtils;
+import com.ch.cloud.sso.dto.RefreshTokenCache;
+import com.ch.cloud.sso.dto.TokenCache;
 import com.ch.cloud.sso.pojo.TokenVo;
 import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.props.JwtProperties;
 import com.ch.e.ExceptionUtils;
 import com.ch.e.PubError;
-import com.ch.utils.AssertUtils;
-import com.ch.utils.CommonUtils;
-import com.ch.utils.DateUtils;
-import com.ch.utils.EncryptUtils;
-import com.ch.utils.NumberUtils;
+import com.ch.utils.*;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.TextCodec;
 import lombok.extern.log4j.Log4j2;
+import nl.basjes.parse.useragent.UserAgent;
+import nl.basjes.parse.useragent.UserAgentAnalyzer;
 import org.redisson.api.RLock;
 import org.redisson.api.RMapCache;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.StringCodec;
 import org.redisson.codec.JsonJacksonCodec;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -34,49 +35,46 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * decs:
+ * decs: 授权工具类
  *
- * @author 01370603
+ * @author zhimin
  * @since 2019/8/31
  */
 @Log4j2
 @Component
 public class TokenTool {
-    
+
     @Autowired
     private JwtProperties jwtProperties;
-    
+
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
-    
+
     @Autowired
     private RedissonClient redissonClient;
-    
-    public static final String USER_TOKEN = "sso:user_token:";
-    
-    public static final String USER_REFRESH_TOKEN = "sso:user_refresh_token:";
-    
-    public static final String TOKEN_SECRET = "sso:token:";
-    
-    public static final String REFRESH_TOKEN = "sso:refresh_token:";
-    
+
+    public static final String AUTH_TOKEN = "sso:auth_token";
+
     public static final String TOKEN_CACHE = "sso:token";
-    
+
     public static final String REFRESH_TOKEN_CACHE = "sso:refresh_token";
-    
+
     public static final String USER_ROLE = "sso:user_role";
-    
+
     public static final String USERS_ROLES = "sso:users_roles";
-    
+
     public static final String LOCK_TOKEN = "sso:lock_token:";
-    
-//    UserAgentAnalyzer uaa = UserAgentAnalyzer.newBuilder().hideMatcherLoadStats().withCache(10000).build();
-    
+
+    public static final String REFRESHING_TOKEN = "sso:refreshing_token:";
+
+    UserAgentAnalyzer uaa = UserAgentAnalyzer.newBuilder().hideMatcherLoadStats().withCache(10000).build();
+
     /**
      * 从数据声明生成令牌
      *
@@ -86,11 +84,11 @@ public class TokenTool {
      * @return 令牌
      */
     private String generateToken(Map<String, Object> claims, Date expired, String secret) {
-        
+
         return Jwts.builder().setClaims(claims).setExpiration(expired).signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
     }
-    
+
     /**
      * 从令牌中获取数据声明
      *
@@ -108,21 +106,19 @@ public class TokenTool {
         }
         return claims;
     }
-    
+
     public void parseUserAgent(String userAgent) {
-        
- /*       UserAgent agent = uaa.parse(userAgent);
+        UserAgent agent = uaa.parse(userAgent);
         for (String fieldName : agent.getAvailableFieldNamesSorted()) {
             log.info(fieldName + " = " + agent.getValue(fieldName));
         }
-        */
     }
-    
+
     /**
      * 从令牌中获取数据声明
      *
      * @param token  令牌
-     * @param secret
+     * @param secret 密钥
      * @return 数据声明
      */
     private Claims getClaimsWithExpired(String token, String secret) {
@@ -138,8 +134,8 @@ public class TokenTool {
         }
         return claims;
     }
-    
-    
+
+
     /**
      * 从令牌中获取用户名
      *
@@ -153,7 +149,7 @@ public class TokenTool {
         }
         return null;
     }
-    
+
     /**
      * 判断令牌是否过期
      *
@@ -167,65 +163,60 @@ public class TokenTool {
             if (cache == null) {
                 return true;
             }
-            Claims claims = getClaimsFromToken(cache.getToken(), cache.getSecret());
-            if (claims == null) {
-                return true;
-            }
-            Date expiration = claims.getExpiration();
-            return expiration.before(new Date());
+            return DateUtils.parseTimestamp(cache.getExpireAt()).before(new Date());
         } catch (Exception e) {
             log.error("token error: " + token, e);
             return false;
         }
     }
-    
+
     /**
      * 刷新令牌
      *
      * @param tokenVo 原令牌
-     * @return 新令牌
      */
     public void refreshToken(TokenVo tokenVo) {
         RLock lock = redissonClient.getLock(LOCK_TOKEN + tokenVo.getRefreshToken());
+
         try {
-            
             boolean locked = lock.tryLock(5, TimeUnit.SECONDS);
-            
+
             log.info("{} lock status: {}", tokenVo.getRefreshToken(), locked);
-            if (!locked) {
-                ExceptionUtils._throw(PubError.RETRY, "网络异常，请稍后重试......");
-            }
+            AssertUtils.isFalse(locked, PubError.RETRY, "网络异常，请稍后重试......");
+
+            RMapCache<String, RefreshTokenCache> refreshTokenMap = redissonClient.getMapCache(REFRESH_TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
+            RefreshTokenCache cache2 = refreshTokenMap.get(tokenVo.getRefreshToken());
+            AssertUtils.isEmpty(cache2, PubError.EXPIRED, "刷新令牌");
+
+            RMapCache<String, String> refreshAccessToken = redissonClient.getMapCache(REFRESHING_TOKEN + tokenVo.getRefreshToken(), JsonJacksonCodec.INSTANCE);
+
+            TokenCache cache1 = new TokenCache();
+            getRequestInfo(cache1);
+
             RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
-            RMapCache<String, String> refreshTokenMap = redissonClient.getMapCache(REFRESH_TOKEN_CACHE,
-                    JsonJacksonCodec.INSTANCE);
-            TokenCache cache2 = tokenMap.get(tokenVo.getRefreshToken());
-            AssertUtils.isEmpty(cache2, PubError.EXPIRED, tokenVo.getRefreshToken());
-            Date current = DateUtils.current();
-            TokenCache cache1 = tokenMap.get(tokenVo.getToken());
-            if (cache1 != null) {//原Token过期 > 300s return original token
-                Date expired = DateUtils.addSeconds(cache1.getExpired(), -300);
-                if (expired.after(current)) {
-                    return;
-                }
-            }
-            if (refreshTokenMap.containsKey(tokenVo.getRefreshToken())) {
-                String accessToken = refreshTokenMap.get(tokenVo.getRefreshToken());
+            if (refreshAccessToken.containsKey(cache1.getHost())) {
+                String accessToken = refreshAccessToken.get(cache1.getHost());
                 cache1 = tokenMap.get(accessToken);
-                if (cache1 != null) {
-                    tokenVo.setToken(accessToken);
-                    tokenVo.setExpireAt(cache1.getExpired().getTime());
-                    return;
-                }
+                tokenVo.setToken(accessToken);
+                tokenVo.setExpireAt(cache1.getExpireAt());
+                return;
             }
+            UserInfo userInfo = getUserInfoFromRefreshToken(cache2);
+            BeanUtils.copyProperties(userInfo, cache1);
+            cache1.setPassword(cache2.getSecret());
+
             String accessToken = UuidUtils.generateUuid();
             Date accessExpired = new Date(System.currentTimeMillis() + jwtProperties.getTokenExpired().toMillis());
+
+            cache1.setExpireAt(accessExpired.getTime());
+            tokenMap.put(accessToken, cache1, jwtProperties.getTokenExpired().getSeconds(), TimeUnit.SECONDS);
+
             tokenVo.setToken(accessToken);
             tokenVo.setExpireAt(accessExpired.getTime());
-            TokenCache refreshToken = TokenCache.build(cache2.getToken(), cache2.getSecret(), cache2.getUsername(),
-                    accessExpired);
-            getRequestInfo(refreshToken);
-            AssertUtils.isFalse(cache2.equals(refreshToken), PubError.INVALID, "用户");
-            tokenMap.put(accessToken, refreshToken, jwtProperties.getTokenExpired().getSeconds(), TimeUnit.SECONDS);
+
+            if (!refreshAccessToken.containsKey(cache1.getHost())) {
+                refreshAccessToken.put(cache1.getHost(), accessToken, 60, TimeUnit.SECONDS);
+            }
         } catch (Exception e) {
             log.error("refresh token error!", e);
             ExceptionUtils._throw(PubError.INVALID, "TOKEN " + tokenVo.getToken() + " 无效");
@@ -235,7 +226,7 @@ public class TokenTool {
             }
         }
     }
-    
+
     /**
      * 验证令牌
      *
@@ -248,29 +239,26 @@ public class TokenTool {
         if (!tokenMap.containsKey(token)) {
             return false;
         }
-        
-        return (tokenMap.get(token).getSecret().equals(generateSecret(userDetails.getPassword())) && !isTokenExpired(
-                token));
+
+        return tokenMap.get(token).getPassword().equals(generateSecret(userDetails.getPassword()));
     }
-    
-    public UserInfo getUserInfoFromToken(String token) {
-        RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
-        TokenCache cache = tokenMap.get(token);
-        if (cache == null) {
-            throw ExceptionUtils.create(PubError.EXPIRED, "TOKEN 已过期");
-        }
-        Claims claims = getClaimsFromToken(cache.getToken(), cache.getSecret());
-        if (claims == null) {
-            throw ExceptionUtils.create(PubError.INVALID, "TOKEN 无效");
-        }
-        if (isTokenExpired(token)) {
-            throw ExceptionUtils.create(PubError.EXPIRED, "TOKEN 已过期");
-        }
+
+    public UserInfo getUserInfoFromRefreshToken(String token) {
+        RMapCache<String, RefreshTokenCache> tokenMap = redissonClient.getMapCache(REFRESH_TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
+        RefreshTokenCache cache = tokenMap.get(token);
+        AssertUtils.isNull(cache, PubError.EXPIRED, "Refresh Token");
+        return getUserInfoFromRefreshToken(cache);
+    }
+
+    public UserInfo getUserInfoFromRefreshToken(RefreshTokenCache refreshTokenCache) {
+        Claims claims = getClaimsFromToken(refreshTokenCache.getToken(), refreshTokenCache.getSecret());
+        AssertUtils.isNull(claims, PubError.INVALID, "Refresh Token 无效");
+        AssertUtils.isTrue(DateUtils.current().after(refreshTokenCache.getExpired()), PubError.EXPIRED, "TOKEN 已过期");
         String username = claims.getSubject();
         Long userId = claims.get("userId", Long.class);
         Long roleId = claims.get("roleId", Long.class);
         Long tenantId = claims.get("tenantId", Long.class);
-        
+
         UserInfo info = new UserInfo();
         info.setUsername(username);
         info.setUserId(userId);
@@ -279,55 +267,61 @@ public class TokenTool {
         info.setExpireAt(claims.getExpiration().getTime());
         return info;
     }
-    
+
     public void invalid(TokenVo tokenVo) {
         RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
+        RMapCache<String, RefreshTokenCache> refreshTokenMap = redissonClient.getMapCache(REFRESH_TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
         tokenMap.remove(tokenVo.getToken());
-        tokenMap.remove(tokenVo.getRefreshToken());
+        refreshTokenMap.remove(tokenVo.getRefreshToken());
     }
-    
+
     /**
      * 根据用户密钥生成刷新Token
      *
      * @param user   用户信息
      * @param secret 密钥
-     * @return
+     * @return 登录Token
      */
     public TokenVo generateToken(UserInfo user, String secret) {
-        
-        String accessToken = UuidUtils.generateUuid();
+
         Date current = DateUtils.current();
-        
+
         Map<String, Object> claims = new HashMap<>(5);
         claims.put("sub", user.getUsername());
         claims.put("userId", user.getUserId());
         claims.put("roleId", user.getRoleId());
         claims.put("tenantId", user.getTenantId());
         claims.put("created", new Date());
-        //new Date(System.currentTimeMillis() + jwtProperties.getRefreshTokenExpired().toMillis());
-        Date jwtExpired = DateUtils.addSeconds(current, (int) jwtProperties.getRefreshTokenExpired().getSeconds());
-        String jwtToken = generateToken(claims, jwtExpired, secret);
-        String refreshToken = EncryptUtils.md5(jwtToken);
-        
         //new Date(System.currentTimeMillis() + jwtProperties.getTokenExpired().toMillis());
         Date accessExpired = DateUtils.addSeconds(current, (int) jwtProperties.getTokenExpired().getSeconds());
+        //new Date(System.currentTimeMillis() + jwtProperties.getRefreshTokenExpired().toMillis());
+        Date refreshExpired = DateUtils.addSeconds(current, (int) jwtProperties.getRefreshTokenExpired().getSeconds());
+        String jwtToken = generateToken(claims, refreshExpired, secret);
+
+        String accessToken = UuidUtils.generateUuid();
+        String refreshToken = EncryptUtils.md5(jwtToken);
+
         log.info("generate Token time current: {}, accessExpired: {}", DateUtils.format(current),
                 DateUtils.format(accessExpired));
+
         RMapCache<String, TokenCache> tokenCache = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
-        TokenCache token = TokenCache.build(jwtToken, secret, user.getUsername(), accessExpired);
+        RMapCache<String, RefreshTokenCache> refreshTokenMap = redissonClient.getMapCache(REFRESH_TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
+
+        TokenCache token = BeanUtilsV2.clone(user, TokenCache.class);
+        token.setPassword(secret);
         getRequestInfo(token);
         tokenCache.put(accessToken, token, jwtProperties.getTokenExpired().getSeconds(), TimeUnit.SECONDS);
-        TokenCache token2 = TokenCache.build(jwtToken, secret, user.getUsername(), jwtExpired);
-        getRequestInfo(token2);
-        tokenCache.put(refreshToken, token2, jwtProperties.getRefreshTokenExpired().getSeconds(), TimeUnit.SECONDS);
-        
+
+        RefreshTokenCache refreshTokenCache = RefreshTokenCache.build(jwtToken, secret, user.getUsername(), refreshExpired);
+        refreshTokenMap.put(refreshToken, refreshTokenCache, jwtProperties.getRefreshTokenExpired().getSeconds(), TimeUnit.SECONDS);
+
         return new TokenVo(accessToken, refreshToken, accessExpired.getTime());
     }
-    
+
     public String generateSecret(String password) {
         return TextCodec.BASE64.encode(password);
     }
-    
+
     public boolean refreshUserRole(String username, Long roleId) {
         HashOperations<String, String, String> ops = stringRedisTemplate.opsForHash();
         String role = roleId == null ? "" : roleId + "";
@@ -342,14 +336,14 @@ public class TokenTool {
         }
         return false;
     }
-    
+
     public Long getUserRole(String username, Long defaultRole) {
-        
+
         RMapCache<Object, Object> map = redissonClient.getMapCache(USERS_ROLES, StringCodec.INSTANCE);
         if (map.containsKey(username)) {
             map.put(username, defaultRole, jwtProperties.getTokenExpired().getSeconds(), TimeUnit.SECONDS);
         }
-        
+
         HashOperations<String, String, String> ops = stringRedisTemplate.opsForHash();
         if (ops.hasKey(USER_ROLE, username)) {
             String v = ops.get(USER_ROLE, username);
@@ -359,23 +353,28 @@ public class TokenTool {
         }
         return defaultRole;
     }
-    
+
     private void getRequestInfo(TokenCache tokenCache) {
         RequestAttributes reqAttr = RequestContextHolder.getRequestAttributes();
         if (reqAttr == null) {
             return;
         }
         HttpServletRequest request = ((ServletRequestAttributes) reqAttr).getRequest();
-        tokenCache.setReferer(request.getHeader("Referer"));
+        tokenCache.setHost(request.getHeader("Host"));
         tokenCache.setUserAgent(request.getHeader("User-Agent"));
         String ip = getIP(request);
         tokenCache.setClientIp(ip);
-        
+
     }
-    
+
     public static final String UNKNOWN = "unknown";
-    
+
     public String getIP(HttpServletRequest request) {
+        Enumeration<String> names = request.getHeaderNames();
+        while (names.hasMoreElements()) {
+            String key = names.nextElement();
+            log.info("header key: {}, value: {}", key, request.getHeader(key));
+        }
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
             ip = request.getHeader("X-Original-Forwarded-For");
@@ -393,5 +392,43 @@ public class TokenTool {
             ip = request.getRemoteAddr();
         }*/
         return ip == null ? "N/A" : ip;
+    }
+
+    public TokenVo authToken(String authCode) {
+        RMapCache<String, RefreshTokenCache> authCodeMap = redissonClient.getMapCache(AUTH_TOKEN, JsonJacksonCodec.INSTANCE);
+        RefreshTokenCache refreshTokenCache = authCodeMap.get(authCode);
+        AssertUtils.isNull(refreshTokenCache, PubError.EXPIRED, "授权码");
+        authCodeMap.remove(authCode);
+
+        RMapCache<String, RefreshTokenCache> refreshTokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
+
+        UserInfo userInfo = getUserInfoFromRefreshToken(refreshTokenCache);
+        TokenCache cache2 = BeanUtilsV2.clone(userInfo, TokenCache.class);
+//        getRequestInfo(cache2);
+
+        TokenVo tokenVo = new TokenVo();
+        tokenVo.setToken(UuidUtils.generateUuid());
+        tokenVo.setRefreshToken(EncryptUtils.md5(refreshTokenCache.getToken()));
+        return tokenVo;
+    }
+
+    public String authCode(String token, String refreshToken) {
+        RMapCache<String, RefreshTokenCache> refreshTokenMap = redissonClient.getMapCache(REFRESH_TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
+        AssertUtils.isFalse(refreshTokenMap.containsKey(refreshToken), PubError.EXPIRED, "token");
+        String code = RandomUtils.getRandomString(6);
+        RMapCache<String, RefreshTokenCache> authMap = redissonClient.getMapCache(AUTH_TOKEN, JsonJacksonCodec.INSTANCE);
+        while (authMap.containsKey(code)) {
+            code = RandomUtils.getRandomString(6);
+        }
+        RefreshTokenCache refreshTokenCache = refreshTokenMap.get(refreshToken);
+        authMap.put(code, refreshTokenCache, 15, TimeUnit.SECONDS);
+        return code;
+    }
+
+    public UserInfo getUserInfoFromToken(String token) {
+        RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
+        AssertUtils.isFalse(tokenMap.containsKey(token), PubError.EXPIRED, "token");
+        TokenCache tokenCache = tokenMap.get(token);
+        return BeanUtilsV2.clone(tokenCache, UserInfo.class);
     }
 }
