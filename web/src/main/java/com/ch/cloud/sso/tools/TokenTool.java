@@ -308,6 +308,7 @@ public class TokenTool {
         RMapCache<String, RefreshTokenCache> refreshTokenMap = redissonClient.getMapCache(REFRESH_TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
 
         TokenCache token = BeanUtilsV2.clone(user, TokenCache.class);
+        token.setExpireAt(accessExpired.getTime());
         token.setPassword(secret);
         getRequestInfo(token);
         tokenCache.put(accessToken, token, jwtProperties.getTokenExpired().getSeconds(), TimeUnit.SECONDS);
