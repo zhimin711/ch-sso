@@ -97,10 +97,8 @@ public class LoginController {
     @ApiOperation(value = "刷新访问令牌", notes = "刷新访问令牌")
     @GetMapping(value = "login/token/refresh")
     public Result<TokenVo> refresh(@RequestHeader(Constants.X_TOKEN) String token,
-                                   @RequestHeader(Constants.X_REFRESH_TOKEN) String refreshToken,
-                                   HttpServletRequest request) {
+                                   @RequestHeader(Constants.X_REFRESH_TOKEN) String refreshToken) {
         return ResultUtils.wrapFail(() -> {
-            tokenTool.getIP(request);
             TokenVo tokenVo = new TokenVo();
             tokenVo.setToken(token);
             tokenVo.setRefreshToken(refreshToken);
