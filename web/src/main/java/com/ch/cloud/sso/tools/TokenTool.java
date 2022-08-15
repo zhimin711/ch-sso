@@ -401,15 +401,22 @@ public class TokenTool {
         AssertUtils.isNull(refreshTokenCache, PubError.EXPIRED, "授权码");
         authCodeMap.remove(authCode);
 
-        RMapCache<String, RefreshTokenCache> refreshTokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
+        RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
 
         UserInfo userInfo = getUserInfoFromRefreshToken(refreshTokenCache);
         TokenCache cache2 = BeanUtilsV2.clone(userInfo, TokenCache.class);
-//        getRequestInfo(cache2);
+        getRequestInfo(cache2);
+        Date current = DateUtils.current();
+        String accessToken = UuidUtils.generateUuid();
+        Date accessExpired = DateUtils.addSeconds(current, (int) jwtProperties.getTokenExpired().getSeconds());
+
+        cache2.setExpireAt(accessExpired.getTime());
+        tokenMap.put(accessToken, cache2, jwtProperties.getTokenExpired().getSeconds(), TimeUnit.SECONDS);
 
         TokenVo tokenVo = new TokenVo();
-        tokenVo.setToken(UuidUtils.generateUuid());
+        tokenVo.setToken(accessToken);
         tokenVo.setRefreshToken(EncryptUtils.md5(refreshTokenCache.getToken()));
+        tokenVo.setExpireAt(cache2.getExpireAt());
         return tokenVo;
     }
 
