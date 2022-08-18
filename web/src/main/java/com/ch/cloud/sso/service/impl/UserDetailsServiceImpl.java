@@ -65,7 +65,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Result<LoginUserDto> res = upmsUserClientService.findUserByUsername(username);
+        Result<LoginUserDto> res = upmsUserClientService.loginByUsername(username);
         if (res.isEmpty()) {
             throw new UsernameNotFoundException(username);
         }
@@ -87,7 +87,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         if (StringUtils.isEmpty(username)) {
             throw new UsernameNotFoundException("用户名不可以为空!");
         }
-        Result<UserDto> res = upmsUserClientService.findInfo2(username);
+        Result<UserDto> res = upmsUserClientService.findInfoByUsername(username);
         if (res.isEmpty()) {
             throw new UsernameNotFoundException("用户名不存在!");
         }
@@ -103,11 +103,10 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         if (StringUtils.isEmpty(username)) {
             throw new UsernameNotFoundException("用户名不可以为空!");
         }
-        Result<UserDto> res = upmsUserClientService.findInfo2(username);
+        Result<UserDto> res = upmsUserClientService.findInfoByUsername(username);
         if (res.isEmpty()) {
             throw new UsernameNotFoundException("用户名不存在!");
         }
-//        log.info("SysUserServiceImpl......... {}", sysUser);
         UserDto user = res.get();
 
         UserVo userVo = new UserVo();
@@ -192,7 +191,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         /*
          * 获取当前用户的租户
          */
-        Result<TenantDto> res5 = upmsUserClientService.findTenantsByUserId(user.getUsername());
+        Result<TenantDto> res5 = upmsUserClientService.findTenantsByUsername(user.getUsername());
         if (!res5.isEmpty()) {
             userPermissionVo.setTenantList(res5.getRows());
         }
@@ -200,7 +199,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         /*
          * 获取当前用户的所有角色
          */
-        Result<RoleDto> res2 = upmsUserClientService.findRolesByUserId2(user.getUserId());
+        Result<RoleDto> res2 = upmsUserClientService.findRolesByUsername(user.getUsername());
 //        log.info("get user roles: {}", JSON.toJSONString(res2));
         if (res2.isEmpty()) {
             return userPermissionVo;

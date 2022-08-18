@@ -35,18 +35,18 @@ import java.security.Principal;
 @Api("用户信息")
 @Slf4j
 public class UserController {
-
+    
     private final Logger logger = LoggerFactory.getLogger(getClass());
-
+    
     @Autowired
     IUserService userService;
-
+    
     @Autowired
     private GatewayNotifySender gatewayNotifySender;
-
+    
     @Autowired
     private TokenTool tokenTool;
-
+    
     /**
      * 资源服务器提供的受保护接口
      *
@@ -58,7 +58,7 @@ public class UserController {
         logger.debug("授权用户信息: {}", principal);
         return principal;
     }
-
+    
     /**
      * 用户授权信息
      *
@@ -70,11 +70,11 @@ public class UserController {
     public Result<UserVo> info(@RequestHeader(Constants.X_TOKEN) String token) {
         return ResultUtils.wrapFail(() -> {
             String username = userService.validate(token);
-            AssertUtils.isEmpty(username,PubError.INVALID, "访问令牌已失效!");
+            AssertUtils.isEmpty(username, PubError.INVALID, "访问令牌已失效!");
             return userService.findUserInfo(username);
         });
     }
-
+    
     /**
      * 获取用户菜单与权限
      *
@@ -82,15 +82,16 @@ public class UserController {
      */
     @ApiOperation(value = "访问令牌获取用户授权", notes = "访问令牌获取,返回用户授权信息")
     @PostMapping("/permissions")
-    public Result<UserPermissionVo> permissions(@RequestHeader(Constants.X_TOKEN) String token, @RequestBody UserInfo user) {
+    public Result<UserPermissionVo> permissions(@RequestHeader(Constants.X_TOKEN) String token,
+            @RequestBody UserInfo user) {
         return ResultUtils.wrapFail(() -> {
             String username = userService.validate(token);
             if (CommonUtils.isEmpty(username)) {
                 ExceptionUtils._throw(PubError.INVALID, "访问令牌已失效!");
             }
             user.setUsername(username);
-            UserVo userVo = userService.findUserInfo(username);
-            user.setUserId(userVo.getId());
+//            UserVo userVo = userService.findUserInfo(username);
+//            user.setUserId(userVo.getUserId());
             boolean refresh = tokenTool.refreshUserRole(username, user.getRoleId());
             if (refresh) {
                 try {
@@ -102,5 +103,5 @@ public class UserController {
             return userService.findPermission(user);
         });
     }
-
+    
 }

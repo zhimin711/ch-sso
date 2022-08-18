@@ -255,7 +255,7 @@ public class TokenTool {
         AssertUtils.isNull(claims, PubError.INVALID, "Refresh Token 无效");
         AssertUtils.isTrue(DateUtils.current().after(refreshTokenCache.getExpired()), PubError.EXPIRED, "TOKEN 已过期");
         String username = claims.getSubject();
-        Long userId = claims.get("userId", Long.class);
+        String userId = claims.get("userId", String.class);
         Long roleId = claims.get("roleId", Long.class);
         Long tenantId = claims.get("tenantId", Long.class);
 
