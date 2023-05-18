@@ -203,7 +203,7 @@ public abstract class AbstractCaptchaService implements CaptchaService {
             return true;
         } catch (Exception e) {
             logger.error("验证码坐标解析失败", e);
-            ExceptionUtils._warn(PubError.NOT_);
+            ExceptionUtils._warn(PubError.UNDEFINED);
         }
         return false;
     }

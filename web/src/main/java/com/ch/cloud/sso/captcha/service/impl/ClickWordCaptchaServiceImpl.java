@@ -107,7 +107,7 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
             value = AESUtil.aesEncrypt(captchaVO.getToken().concat("---").concat(pointJson), s.getSecretKey());
         } catch (Exception e) {
             logger.error("AES加密失败", e);
-            ExceptionUtils._throw(PubError.NOT_);
+            ExceptionUtils._throw(PubError.UNDEFINED);
         }
         String secondKey = String.format(REDIS_SECOND_CAPTCHA_KEY, value);
         CaptchaServiceFactory.getCache(cacheType).set(secondKey, captchaVO);
