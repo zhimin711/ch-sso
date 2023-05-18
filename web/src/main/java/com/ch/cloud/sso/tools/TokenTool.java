@@ -18,10 +18,8 @@ import io.jsonwebtoken.impl.TextCodec;
 import lombok.extern.log4j.Log4j2;
 import nl.basjes.parse.useragent.UserAgent;
 import nl.basjes.parse.useragent.UserAgentAnalyzer;
-import org.redisson.api.RListMultimapCache;
 import org.redisson.api.RLock;
 import org.redisson.api.RMapCache;
-import org.redisson.api.RSetCache;
 import org.redisson.api.RSetMultimapCache;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.StringCodec;
@@ -40,7 +38,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 

@@ -2,7 +2,7 @@
 
 ### 打包client模块
 ```shell
-mvn -U -pl client -am clean install -Dmaven.test.skip -Drevision=1.1.0-SNAPSHOT
+mvn -U -pl client -am clean install -Dmaven.test.skip -Drevision=1.0.0-SNAPSHOT
 ```
 
 ### 上传配置 

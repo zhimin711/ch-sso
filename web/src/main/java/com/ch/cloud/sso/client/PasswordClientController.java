@@ -1,19 +1,14 @@
-package com.ch.cloud.sso.controller;
+package com.ch.cloud.sso.client;
 
-import com.alibaba.nacos.api.annotation.NacosInjected;
-import com.alibaba.nacos.api.exception.NacosException;
-import com.alibaba.nacos.api.naming.NamingService;
-import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.ch.result.Result;
 import com.ch.result.ResultUtils;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 /**
  * desc:
@@ -23,23 +18,17 @@ import java.util.List;
  */
 @RestController
 @Log4j2
-public class KeyGenController {
-
-    @NacosInjected
-    private NamingService namingService;
+@RequestMapping("/fc/password")
+public class PasswordClientController implements SsoPasswordClient {
+    
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    //    @GetMapping("serviceInstances")
-    public List<Instance> getInstances(@RequestParam String serviceName) throws NacosException {
-        return namingService.getAllInstances(serviceName);
-    }
-
+    
     @PostMapping("encrypt")
     public Result<String> encrypt(@RequestParam String str) {
         return ResultUtils.wrapFail(() -> passwordEncoder.encode(str));
     }
-
+    
     @PostMapping("matchEncrypt")
     public Result<Boolean> matchEncrypt(@RequestParam String str, @RequestParam String encodedStr) {
         return ResultUtils.wrapFail(() -> passwordEncoder.matches(str, encodedStr));

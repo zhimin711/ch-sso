@@ -24,10 +24,6 @@ public class LogoutController {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    //    @Autowired
-//    IUserService userService;
-    //    @Autowired
-//    PasswordService passwordService;
     @Autowired
     private TokenTool tokenTool;
 

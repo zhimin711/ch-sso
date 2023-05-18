@@ -9,8 +9,8 @@
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>ch-sso-dao</artifactId>
-    <name>Chao Hua SSO Dao</name>
+    <artifactId>ch-sso-client</artifactId>
+    <name>Chao Hua SSO Client</name>
 
     <properties>
         <file_encoding>UTF-8</file_encoding>
@@ -20,11 +20,12 @@
     <dependencies>
         <dependency>
             <groupId>com.ch.cloud</groupId>
-            <artifactId>ch-sso-client</artifactId>
+            <artifactId>ch-cloud-starter-commons</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-openfeign-core</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

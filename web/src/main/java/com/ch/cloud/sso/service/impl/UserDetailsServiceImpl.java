@@ -2,6 +2,7 @@ package com.ch.cloud.sso.service.impl;
 
 import com.ch.Num;
 import com.ch.StatusS;
+import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.pojo.*;
 import com.ch.cloud.sso.security.CustomUserDetails;
 import com.ch.cloud.sso.service.IUserService;
