@@ -2,15 +2,24 @@ package com.ch.cloud.sso.service.impl;
 
 import com.ch.Num;
 import com.ch.StatusS;
+import com.ch.cloud.sso.pojo.BtnVo;
+import com.ch.cloud.sso.pojo.MenuVo;
+import com.ch.cloud.sso.pojo.RoleVo;
+import com.ch.cloud.sso.pojo.TokenVo;
 import com.ch.cloud.sso.pojo.UserInfo;
-import com.ch.cloud.sso.pojo.*;
+import com.ch.cloud.sso.pojo.UserPermissionVo;
+import com.ch.cloud.sso.pojo.UserVo;
 import com.ch.cloud.sso.security.CustomUserDetails;
 import com.ch.cloud.sso.service.IUserService;
 import com.ch.cloud.sso.tools.TokenTool;
-import com.ch.cloud.upms.client.UpmsPermissionClientService;
-import com.ch.cloud.upms.client.UpmsRoleClientService;
-import com.ch.cloud.upms.client.UpmsUserClientService;
-import com.ch.cloud.upms.dto.*;
+import com.ch.cloud.upms.client.UpmsPermissionClient;
+import com.ch.cloud.upms.client.UpmsRoleClient;
+import com.ch.cloud.upms.client.UpmsUserClient;
+import com.ch.cloud.upms.dto.LoginUserDto;
+import com.ch.cloud.upms.dto.PermissionDto;
+import com.ch.cloud.upms.dto.RoleDto;
+import com.ch.cloud.upms.dto.TenantDto;
+import com.ch.cloud.upms.dto.UserDto;
 import com.ch.e.ExceptionUtils;
 import com.ch.e.PubError;
 import com.ch.result.Result;
@@ -35,7 +44,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -49,11 +62,11 @@ import java.util.stream.Collectors;
 public class UserDetailsServiceImpl implements UserDetailsService, IUserService {
 
     @Resource
-    private UpmsUserClientService       upmsUserClientService;
+    private UpmsUserClient upmsUserClientService;
     @Resource
-    private UpmsRoleClientService       upmsRoleClientService;
+    private UpmsRoleClient upmsRoleClientService;
     @Resource
-    private UpmsPermissionClientService upmsPermissionClientService;
+    private UpmsPermissionClient upmsPermissionClientService;
 
     // 如果在WebSecurityConfigurerAdapter中，没有重新，这里就会报注入失败的异常
     @Autowired
@@ -129,7 +142,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
         vo.setRedirect(permission.getRedirect());
         vo.setSort(permission.getSort());
 //        vo.setHidden(permission.isHidden());
-        vo.setHidden(CommonUtils.isEquals(permission.getIsShow(), StatusS.DISABLED));
+        vo.setHidden(CommonUtils.isEquals(permission.getHidden(), StatusS.DISABLED));
         String pid = CommonUtils.isEquals(Num.S0, permission.getParentId()) ? permission.getId().toString() : StringUtilsV2.linkStr(",", permission.getParentId(), permission.getId().toString());
         if (/*"1".equals(permission.getType()) && */pidMap.get(pid) != null) {
             List<MenuVo> menuVos = pidMap.get(pid).stream().map(e -> assemblyMenu(e, pidMap))
