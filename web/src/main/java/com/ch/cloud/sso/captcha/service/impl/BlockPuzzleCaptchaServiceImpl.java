@@ -12,7 +12,7 @@ import com.ch.cloud.sso.captcha.util.RandomUtils;
 import com.ch.e.PubError;
 import com.ch.utils.AssertUtils;
 import com.ch.utils.CommonUtils;
-import com.ch.e.ExceptionUtils;
+import com.ch.e.ExUtils;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,11 +104,11 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
             s.setJigsawImageBase64(null);
             s.setOriginalImageBase64(null);
             logger.error("验证码坐标解析失败:" + JSON.toJSONString(s), e);
-            ExceptionUtils._throw(PubError.INVALID);
+            ExUtils.throwError(PubError.INVALID);
         }
         if (point.x - Integer.parseInt(slipOffset) > point1.x || point1.x > point.x + Integer.parseInt(slipOffset)
                 || point.y != point1.y) {
-            ExceptionUtils._throw(PubError.INVALID, RepCodeEnum.API_CAPTCHA_COORDINATE_ERROR.getDesc());
+            ExUtils.throwError(PubError.INVALID, RepCodeEnum.API_CAPTCHA_COORDINATE_ERROR.getDesc());
         }
         //校验成功，将信息存入缓存
         String value = null;
@@ -116,7 +116,7 @@ public class BlockPuzzleCaptchaServiceImpl extends AbstractCaptchaService {
             value = AESUtil.aesEncrypt(captchaVO.getToken().concat("---").concat(pointJson), s.getSecretKey());
         } catch (Exception e) {
             logger.error("AES加密失败", e);
-            ExceptionUtils._throw(PubError.INVALID);
+            ExUtils.throwError(PubError.INVALID);
         }
         String secondKey = String.format(REDIS_SECOND_CAPTCHA_KEY, value);
         CaptchaServiceFactory.getCache(cacheType).set(secondKey, s);

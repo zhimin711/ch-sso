@@ -1,8 +1,8 @@
 package com.ch.cloud.sso.utils;
 
 import com.ch.cloud.sso.pojo.SlideCaptcha;
+import com.ch.e.ExUtils;
 import com.ch.e.PubError;
-import com.ch.e.ExceptionUtils;
 import com.ch.utils.IOUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Base64Utils;
@@ -156,7 +156,7 @@ public class ImageVerifyUtil {
 
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-            ExceptionUtils._throw(PubError.UNDEFINED);
+            ExUtils.throwError(PubError.UNDEFINED);
         } finally {
             IOUtils.close(byteArrayOutputStream);
         }
@@ -296,7 +296,7 @@ public class ImageVerifyUtil {
             return imageReader.read(0, imageReadParam);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-            ExceptionUtils._throw(PubError.UNDEFINED);
+            ExUtils.throwError(PubError.UNDEFINED);
         } finally {
             IOUtils.close(imageInputStream);
         }
@@ -342,7 +342,7 @@ public class ImageVerifyUtil {
             slideCaptcha.setPuzzle(cutoutImageStr);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-            ExceptionUtils._throw(PubError.UNDEFINED);
+            ExUtils.throwError(PubError.UNDEFINED);
         } finally {
             IOUtils.close(byteArrayInputStream, byteArrayOutputStream);
         }

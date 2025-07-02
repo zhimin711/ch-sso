@@ -9,7 +9,7 @@ import com.ch.cloud.sso.captcha.util.CaffeineCacheUtil;
 import com.ch.cloud.sso.captcha.util.ImageUtils;
 import com.ch.e.PubError;
 import com.ch.utils.CommonUtils;
-import com.ch.e.ExceptionUtils;
+import com.ch.e.ExUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -191,19 +191,19 @@ public abstract class AbstractCaptchaService implements CaptchaService {
     @Override
     public boolean verification(String captchaVerification) {
         if (CommonUtils.isEmptyOr(captchaVerification)) {
-            ExceptionUtils._throw(PubError.ARGS);
+            ExUtils.throwError(PubError.ARGS);
         }
         try {
             String codeKey = String.format(REDIS_SECOND_CAPTCHA_KEY, captchaVerification);
             if (!CaptchaServiceFactory.getCache(cacheType).exists(codeKey)) {
-                ExceptionUtils._throw(PubError.ARGS, RepCodeEnum.API_CAPTCHA_INVALID.getDesc());
+                ExUtils.throwError(PubError.ARGS, RepCodeEnum.API_CAPTCHA_INVALID.getDesc());
             }
             //二次校验取值后，即刻失效
             CaptchaServiceFactory.getCache(cacheType).delete(codeKey);
             return true;
         } catch (Exception e) {
             logger.error("验证码坐标解析失败", e);
-            ExceptionUtils._warn(PubError.UNDEFINED);
+            ExUtils.throwError(PubError.UNDEFINED);
         }
         return false;
     }

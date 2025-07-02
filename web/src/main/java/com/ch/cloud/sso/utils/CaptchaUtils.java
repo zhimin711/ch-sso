@@ -2,7 +2,7 @@ package com.ch.cloud.sso.utils;
 
 import com.ch.cloud.sso.pojo.SlideCaptcha;
 import com.ch.e.PubError;
-import com.ch.e.ExceptionUtils;
+import com.ch.e.ExUtils;
 import com.ch.utils.FileUtilsV2;
 import com.google.common.collect.Lists;
 
@@ -180,7 +180,7 @@ public class CaptchaUtils {
         }
         File[] verifyImageFiles = origImageDir.listFiles();
         if (verifyImageFiles == null || verifyImageFiles.length == 0) {
-            ExceptionUtils._throw(PubError.NOT_EXISTS, "验证码图片文件不存在！");
+            ExUtils.throwError(PubError.NOT_EXISTS, "验证码图片文件不存在！");
         }
         for (File f : verifyImageFiles) {
             File vFile = new File(verifyImageDir.getPath(), f.getName());

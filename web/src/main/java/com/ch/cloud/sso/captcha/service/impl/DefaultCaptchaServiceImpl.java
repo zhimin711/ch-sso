@@ -5,9 +5,6 @@ import com.ch.cloud.sso.captcha.service.CaptchaService;
 import com.ch.e.PubError;
 import com.ch.utils.AssertUtils;
 import com.ch.utils.CommonUtils;
-import com.ch.e.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
