@@ -14,7 +14,7 @@ public interface SsoUserClient {
     
     
     @GetMapping("info")
-    Result<UserInfo> info(@RequestParam("token") String token);
+    Result<UserInfo> info(@RequestParam("username") String username);
     
     
 }

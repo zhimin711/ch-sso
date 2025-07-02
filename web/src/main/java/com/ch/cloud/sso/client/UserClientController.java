@@ -3,6 +3,7 @@ package com.ch.cloud.sso.client;
 import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.pojo.UserVo;
 import com.ch.cloud.sso.service.IUserService;
+import com.ch.e.Assert;
 import com.ch.e.PubError;
 import com.ch.result.Result;
 import com.ch.result.ResultUtils;
@@ -35,15 +36,13 @@ public class UserClientController implements SsoUserClient {
     /**
      * 用户授权信息
      *
-     * @param token 访问令牌
+     * @param username 用户名
      * @return 用户信息
      */
-    @ApiOperation(value = "访问令牌获取用户授权", notes = "访问令牌获取,返回用户授权信息")
+    @ApiOperation(value = "获取用户信息", notes = "获取用户信息")
     @GetMapping("/info")
-    public Result<UserInfo> info(@RequestParam("token") String token) {
+    public Result<UserInfo> info(@RequestParam("username") String username) {
         return ResultUtils.wrapFail(() -> {
-            String username = userService.validate(token);
-            AssertUtils.isEmpty(username, PubError.INVALID, "访问令牌已失效!");
             UserVo user = userService.findUserInfo(username);
             
             return BeanUtilsV2.clone(user, UserInfo.class);

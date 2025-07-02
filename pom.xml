@@ -118,17 +118,17 @@
         </plugin>
         </plugins>
     </build>
-
+    
     <distributionManagement>
         <snapshotRepository>
-            <id>ch-nexus-snapshots</id>
-            <name>Nexus Snapshots Repository</name>
-            <url>http://nexus.ch.cn/repository/maven-snapshots/</url>
+            <id>rdc-snapshots</id>
+            <name>Nexus Nexus Snapshots</name>
+            <url>https://packages.aliyun.com/maven/repository/2276685-snapshot-GqNM6Y/</url>
         </snapshotRepository>
         <repository>
-            <id>ch-nexus-release</id>
-            <name>Nexus Release Repository</name>
-            <url>http://nexus.ch.cn/repository/maven-releases/</url>
+            <id>rdc-releases</id>
+            <name>Nexus Releases Repository</name>
+            <url>https://packages.aliyun.com/maven/repository/2276685-release-eXmXGV/</url>
         </repository>
     </distributionManagement>
 </project>

@@ -4,6 +4,7 @@
 /out/
 !gradle/wrapper/gradle-wrapper.jar
 
+.flattened-pom.xml
 ### STS ###
 .apt_generated
 .classpath

@@ -30,4 +30,9 @@ public class TokenCache extends UserInfo {
      *  host
      */
     private String host;
+    
+    /**
+     * 引用来源
+     */
+    private String referer;
 }

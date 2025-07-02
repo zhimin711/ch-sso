@@ -3,6 +3,8 @@ package com.ch.cloud.sso.client;
 import com.ch.Constants;
 import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.service.IUserService;
+import com.ch.e.Assert;
+import com.ch.e.PubError;
 import com.ch.result.Result;
 import com.ch.result.ResultUtils;
 import io.swagger.annotations.Api;
@@ -42,7 +44,11 @@ public class LoginClientController implements SsoLoginClient {
      */
     @GetMapping(value = "info")
     public Result<UserInfo> info(@RequestHeader(Constants.X_TOKEN) String token) {
-        return ResultUtils.wrapFail(() -> userService.extractToken(token));
+        return ResultUtils.wrapFail(() -> {
+            String username = userService.validate(token);
+            Assert.notEmpty(username, PubError.INVALID, "访问令牌已");
+            return userService.extractToken(token);
+        });
     }
     
     
