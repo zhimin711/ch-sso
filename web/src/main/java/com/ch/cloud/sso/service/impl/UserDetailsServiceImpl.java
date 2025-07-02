@@ -20,7 +20,8 @@ import com.ch.cloud.upms.dto.PermissionDto;
 import com.ch.cloud.upms.dto.RoleDto;
 import com.ch.cloud.upms.dto.TenantDto;
 import com.ch.cloud.upms.dto.UserDto;
-import com.ch.e.ExceptionUtils;
+import com.ch.e.Assert;
+import com.ch.e.ExUtils;
 import com.ch.e.PubError;
 import com.ch.result.Result;
 import com.ch.utils.CommonUtils;
@@ -155,15 +156,13 @@ public class UserDetailsServiceImpl implements UserDetailsService, IUserService 
     @Override
     public TokenVo login(String username, String password) {
         UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(username, password);
-        Authentication authentication;
+        Authentication authentication = null;
         try {
             authentication = authenticationManager.authenticate(upToken);
         } catch (BadCredentialsException e) {
-            throw ExceptionUtils.create(PubError.USERNAME_OR_PASSWORD, e);
+            ExUtils.throwError(PubError.USERNAME_OR_PASSWORD, e);
         }
-        if (authentication == null) {
-            throw ExceptionUtils.create(PubError.NOT_AUTH, "登录失败！");
-        }
+        Assert.notNull(authentication, PubError.NOT_AUTH, "登录失败！");
         SecurityContextHolder.getContext().setAuthentication(authentication);
 //        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();

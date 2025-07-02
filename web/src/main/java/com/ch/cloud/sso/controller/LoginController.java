@@ -86,8 +86,8 @@ public class LoginController {
         return ResultUtils.wrapFail(() -> tokenTool.authCode(token, refreshToken));
     }
     
-    @ApiOperation(value = "获取授权码", notes = "获取授权码")
-    @GetMapping(value = "login/access")
+    @ApiOperation(value = "根据授权码获取访问令牌", notes = "根据授权码获取访问令牌")
+    @GetMapping(value = "login/access/token")
     public Result<TokenVo> loginAccess(@RequestParam String code) {
         return ResultUtils.wrapFail(() -> tokenTool.authToken(code));
     }

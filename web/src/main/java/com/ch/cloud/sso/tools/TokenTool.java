@@ -1,5 +1,6 @@
 package com.ch.cloud.sso.tools;
 
+import com.alibaba.nacos.common.utils.IPUtil;
 import com.alibaba.nacos.common.utils.UuidUtils;
 import com.ch.cloud.sso.captcha.util.RandomUtils;
 import com.ch.cloud.sso.dto.RefreshTokenCache;
@@ -7,9 +8,16 @@ import com.ch.cloud.sso.dto.TokenCache;
 import com.ch.cloud.sso.pojo.TokenVo;
 import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.props.JwtProperties;
-import com.ch.e.ExceptionUtils;
+import com.ch.e.Assert;
+import com.ch.e.ExUtils;
 import com.ch.e.PubError;
-import com.ch.utils.*;
+import com.ch.utils.AssertUtils;
+import com.ch.utils.BeanUtilsV2;
+import com.ch.utils.CommonUtils;
+import com.ch.utils.DateUtils;
+import com.ch.utils.EncryptUtils;
+import com.ch.utils.NetUtils;
+import com.ch.utils.NumberUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -222,12 +230,12 @@ public class TokenTool {
             if (!refreshAccessToken.containsKey(cache1.getHost())) {
                 refreshAccessToken.put(cache1.getHost(), accessToken, 60, TimeUnit.SECONDS);
             }
-    
+            
             RSetMultimapCache<String, String> tokensCache = redissonClient.getSetMultimapCache(TOKEN_CACHE);
             tokensCache.put(tokenVo.getRefreshToken(), accessToken);
         } catch (Exception e) {
             log.error("refresh token error!", e);
-            ExceptionUtils._throw(PubError.INVALID, "TOKEN " + tokenVo.getToken() + " 无效");
+            ExUtils.throwError(PubError.INVALID, "TOKEN " + tokenVo.getToken() + " 无效");
         } finally {
             if (lock.isLocked()) {
                 lock.unlock();
@@ -255,14 +263,14 @@ public class TokenTool {
         RMapCache<String, RefreshTokenCache> tokenMap = redissonClient.getMapCache(REFRESH_TOKEN_CACHE,
                 JsonJacksonCodec.INSTANCE);
         RefreshTokenCache cache = tokenMap.get(token);
-        AssertUtils.isNull(cache, PubError.EXPIRED, "Refresh Token");
+        Assert.notNull(cache, PubError.EXPIRED, "Refresh Token");
         return getUserInfoFromRefreshToken(cache);
     }
     
     public UserInfo getUserInfoFromRefreshToken(RefreshTokenCache refreshTokenCache) {
         Claims claims = getClaimsFromToken(refreshTokenCache.getToken(), refreshTokenCache.getSecret());
-        AssertUtils.isNull(claims, PubError.INVALID, "Refresh Token 无效");
-        AssertUtils.isTrue(DateUtils.current().after(refreshTokenCache.getExpired()), PubError.EXPIRED, "TOKEN 已过期");
+        Assert.notNull(claims, PubError.INVALID, "Refresh Token 无效");
+        Assert.isFalse(DateUtils.current().after(refreshTokenCache.getExpired()), PubError.EXPIRED, "TOKEN 已过期");
         String username = claims.getSubject();
         String userId = claims.get("userId", String.class);
         Long roleId = claims.get("roleId", Long.class);
@@ -379,6 +387,7 @@ public class TokenTool {
         HttpServletRequest request = ((ServletRequestAttributes) reqAttr).getRequest();
         tokenCache.setHost(request.getHeader("Host"));
         tokenCache.setUserAgent(request.getHeader("User-Agent"));
+        
         String ip = getIP(request);
         tokenCache.setClientIp(ip);
         
@@ -393,16 +402,16 @@ public class TokenTool {
             log.info("header key: {}, value: {}", key, request.getHeader(key));
         }
         String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
+        if (ip == null || ip.isEmpty() || UNKNOWN.equalsIgnoreCase(ip)) {
             ip = request.getHeader("X-Original-Forwarded-For");
         }
-        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
+        if (ip == null || ip.isEmpty() || UNKNOWN.equalsIgnoreCase(ip)) {
             ip = request.getHeader("Proxy-Client-IP");
         }
-        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
+        if (ip == null || ip.isEmpty() || UNKNOWN.equalsIgnoreCase(ip)) {
             ip = request.getHeader("WL-Proxy-Client-IP");
         }
-        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
+        if (ip == null || ip.isEmpty() || UNKNOWN.equalsIgnoreCase(ip)) {
             ip = request.getHeader("X-Real-IP");
         }
         /*if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
@@ -414,7 +423,7 @@ public class TokenTool {
     public TokenVo authToken(String authCode) {
         RMapCache<String, String> authCodeMap = redissonClient.getMapCache(AUTH_TOKEN);
         String refreshToken = authCodeMap.get(authCode);
-        AssertUtils.isEmpty(refreshToken, PubError.EXPIRED, "授权码");
+        Assert.notEmpty(refreshToken, PubError.EXPIRED, "授权码");
         authCodeMap.remove(authCode);
         
         RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
@@ -435,7 +444,7 @@ public class TokenTool {
         tokenVo.setToken(accessToken);
         tokenVo.setRefreshToken(refreshToken);
         tokenVo.setExpireAt(cache2.getExpireAt());
-    
+        
         RSetMultimapCache<String, String> tokensCache = redissonClient.getSetMultimapCache(TOKEN_CACHE);
         tokensCache.put(refreshToken, accessToken);
         return tokenVo;
@@ -445,10 +454,10 @@ public class TokenTool {
     
     public String authCode(String token, String refreshToken) {
         RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
-        AssertUtils.isFalse(tokenMap.containsKey(token), PubError.EXPIRED, "token");
+        Assert.isTrue(tokenMap.containsKey(token), PubError.EXPIRED, "token");
         RMapCache<String, RefreshTokenCache> refreshTokenMap = redissonClient.getMapCache(REFRESH_TOKEN_CACHE,
                 JsonJacksonCodec.INSTANCE);
-        AssertUtils.isFalse(refreshTokenMap.containsKey(refreshToken), PubError.EXPIRED, "refresh token");
+        Assert.isTrue(refreshTokenMap.containsKey(refreshToken), PubError.EXPIRED, "refresh token");
         String code = RandomUtils.getRandomString(6);
         RMapCache<String, String> authMap = redissonClient.getMapCache(AUTH_TOKEN);
         
@@ -461,15 +470,15 @@ public class TokenTool {
                 break;
             }
         }
-        AssertUtils.isTrue(authMap.containsKey(code), PubError.RETRY, "网络繁忙，请稍后重试...");
-//        RefreshTokenCache refreshTokenCache = refreshTokenMap.get(refreshToken);
+        Assert.isFalse(authMap.containsKey(code), PubError.RETRY, "网络繁忙，请稍后重试...");
+        //        RefreshTokenCache refreshTokenCache = refreshTokenMap.get(refreshToken);
         authMap.put(code, refreshToken, 15, TimeUnit.SECONDS);
         return code;
     }
     
     public UserInfo getUserInfoFromToken(String token) {
         RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
-        AssertUtils.isFalse(tokenMap.containsKey(token), PubError.EXPIRED, "token");
+        Assert.isTrue(tokenMap.containsKey(token), PubError.EXPIRED, "token");
         TokenCache tokenCache = tokenMap.get(token);
         return BeanUtilsV2.clone(tokenCache, UserInfo.class);
     }

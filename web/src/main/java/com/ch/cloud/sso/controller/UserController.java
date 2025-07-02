@@ -7,20 +7,24 @@ import com.ch.cloud.sso.pojo.UserPermissionVo;
 import com.ch.cloud.sso.pojo.UserVo;
 import com.ch.cloud.sso.service.IUserService;
 import com.ch.cloud.sso.tools.TokenTool;
-import com.ch.e.ExceptionUtils;
+import com.ch.e.Assert;
 import com.ch.e.PubError;
 import com.ch.pojo.KeyValue;
 import com.ch.result.Result;
 import com.ch.result.ResultUtils;
-import com.ch.utils.AssertUtils;
-import com.ch.utils.CommonUtils;
+import com.ch.toolkit.ContextUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
 
@@ -60,41 +64,32 @@ public class UserController {
     }
     
     /**
-     * 用户授权信息
+     * 登录用户信息
      *
-     * @param token 访问令牌
      * @return 用户信息
      */
-    @ApiOperation(value = "访问令牌获取用户授权", notes = "访问令牌获取,返回用户授权信息")
+    @ApiOperation(value = "获取用户授权", notes = "用户授权信息")
     @GetMapping("/info")
-    public Result<UserVo> info(@RequestHeader(Constants.X_TOKEN) String token) {
-        return ResultUtils.wrapFail(() -> {
-            String username = userService.validate(token);
-            AssertUtils.isEmpty(username, PubError.INVALID, "访问令牌已失效!");
-            return userService.findUserInfo(username);
-        });
+    public Result<UserVo> info() {
+        return ResultUtils.wrapFail(() -> userService.findUserInfo(ContextUtil.getUsername()));
     }
     
     /**
-     * 获取用户菜单与权限
+     * 获取用户的角色菜单与权限
      *
-     * @return 用户菜单与权限
+     * @return 角色菜单与权限
      */
     @ApiOperation(value = "访问令牌获取用户授权", notes = "访问令牌获取,返回用户授权信息")
     @PostMapping("/permissions")
     public Result<UserPermissionVo> permissions(@RequestHeader(Constants.X_TOKEN) String token,
             @RequestBody UserInfo user) {
         return ResultUtils.wrapFail(() -> {
-            String username = userService.validate(token);
-            if (CommonUtils.isEmpty(username)) {
-                ExceptionUtils._throw(PubError.INVALID, "访问令牌已失效!");
-            }
-            user.setUsername(username);
-//            UserVo userVo = userService.findUserInfo(username);
-//            user.setUserId(userVo.getUserId());
-            boolean refresh = tokenTool.refreshUserRole(username, user.getRoleId());
+            user.setUsername(ContextUtil.getUsername());
+            // 判断用户角色是否切换角色，如果切换了角色则通知网关清除对应的用户角色缓存
+            boolean refresh = tokenTool.refreshUserRole(ContextUtil.getUsername(), user.getRoleId());
             if (refresh) {
                 try {
+                    // 通知网关清除对应的用户角色缓存
                     gatewayNotifySender.cleanNotify(new KeyValue("users", token));
                 } catch (Exception e) {
                     log.error("cleanNotify", e);
