@@ -187,22 +187,27 @@ public class TokenTool {
         RLock lock = redissonClient.getLock(LOCK_TOKEN + tokenVo.getRefreshToken());
         
         try {
+            // 尝试获取分布式锁，防止并发刷新令牌导致的问题
             boolean locked = lock.tryLock(5, TimeUnit.SECONDS);
             
             log.info("{} lock status: {}", tokenVo.getRefreshToken(), locked);
             Assert.isTrue(locked, PubError.RETRY, "网络繁忙，请稍后重试......");
             
+            // 从Redis中获取刷新令牌对应的缓存信息
             RMapCache<String, RefreshTokenCache> refreshTokenMap = redissonClient.getMapCache(REFRESH_TOKEN_CACHE,
                     JsonJacksonCodec.INSTANCE);
             RefreshTokenCache cache2 = refreshTokenMap.get(tokenVo.getRefreshToken());
             Assert.notEmpty(cache2, PubError.EXPIRED, "刷新令牌");
             
+            // 获取正在刷新的访问令牌缓存
             RMapCache<String, String> refreshAccessToken = redissonClient.getMapCache(
                     REFRESHING_TOKEN + tokenVo.getRefreshToken(), JsonJacksonCodec.INSTANCE);
             
+            // 创建新的TokenCache对象，并填充请求信息
             TokenCache cache1 = new TokenCache();
             fillRequestInfo(cache1);
             
+            // 检查是否已经存在针对当前主机的访问令牌
             RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
             if (refreshAccessToken.containsKey(cache1.getHost())) {
                 String accessToken = refreshAccessToken.get(cache1.getHost());
@@ -211,10 +216,13 @@ public class TokenTool {
                 tokenVo.setExpireAt(cache1.getExpireAt());
                 return;
             }
+            
+            // 从刷新令牌中获取用户信息并填充到新的TokenCache中
             UserInfo userInfo = getUserInfoFromRefreshToken(cache2);
             BeanUtils.copyProperties(userInfo, cache1);
             cache1.setPassword(cache2.getSecret());
             
+            // 生成新的访问令牌及其过期时间
             String accessToken = UuidUtils.generateUuid();
             Date accessExpired = new Date(System.currentTimeMillis() + jwtProperties.getTokenExpired().toMillis());
             
@@ -224,16 +232,19 @@ public class TokenTool {
             tokenVo.setToken(accessToken);
             tokenVo.setExpireAt(accessExpired.getTime());
             
+            // 缓存新生成的访问令牌，设置短暂的过期时间以避免重复生成
             if (!refreshAccessToken.containsKey(cache1.getHost())) {
                 refreshAccessToken.put(cache1.getHost(), accessToken, 60, TimeUnit.SECONDS);
             }
             
+            // 将新生成的访问令牌与刷新令牌关联起来
             RSetMultimapCache<String, String> tokensCache = redissonClient.getSetMultimapCache(TOKEN_CACHE);
             tokensCache.put(tokenVo.getRefreshToken(), accessToken);
         } catch (Exception e) {
             log.error("refresh token error!", e);
             ExUtils.throwError(PubError.INVALID, "TOKEN " + tokenVo.getToken() + " 无效");
         } finally {
+            // 确保释放分布式锁
             if (lock.isLocked()) {
                 lock.unlock();
             }

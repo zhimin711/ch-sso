@@ -49,7 +49,7 @@ public class LoginClientController implements SsoLoginClient {
     public Result<UserInfo> info(@RequestHeader(Constants.X_TOKEN) String token) {
         return ResultUtils.wrapFail(() -> {
             String username = userService.validate(token);
-            Assert.notEmpty(username, PubError.INVALID, "访问令牌已");
+            Assert.notEmpty(username, PubError.INVALID, "访问令牌已",token);
             return userService.extractToken(token);
         });
     }
