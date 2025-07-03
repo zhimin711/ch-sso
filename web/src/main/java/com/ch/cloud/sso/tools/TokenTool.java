@@ -252,7 +252,7 @@ public class TokenTool {
         if (!tokenMap.containsKey(token)) {
             return false;
         }
-        
+        // 验证密码一致
         return CommonUtils.isEquals(tokenMap.get(token).getPassword(),generateSecret(userDetails.getPassword()));
     }
     
@@ -418,30 +418,34 @@ public class TokenTool {
     }
     
     public TokenVo authToken(String authCode) {
+        // 获取授权码对应的刷新令牌
         RMapCache<String, String> authCodeMap = redissonClient.getMapCache(AUTH_TOKEN);
         String refreshToken = authCodeMap.get(authCode);
         Assert.notEmpty(refreshToken, PubError.EXPIRED, "授权码");
         authCodeMap.remove(authCode);
         
+        // 获取刷新令牌对应的用户信息
         RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
         RMapCache<String, RefreshTokenCache> refreshTokenMap = redissonClient.getMapCache(REFRESH_TOKEN_CACHE,
                 JsonJacksonCodec.INSTANCE);
         RefreshTokenCache refreshTokenCache = refreshTokenMap.get(refreshToken);
+        // 生成新令牌对应的用户信息
         UserInfo userInfo = getUserInfoFromRefreshToken(refreshTokenCache);
-        TokenCache cache2 = BeanUtilsV2.clone(userInfo, TokenCache.class);
-        fillRequestInfo(cache2);
+        TokenCache authTokenCache = BeanUtilsV2.clone(userInfo, TokenCache.class);
+        fillRequestInfo(authTokenCache);
         Date current = DateUtils.current();
+        // 生成新令牌及过期时间
         String accessToken = UuidUtils.generateUuid();
         Date accessExpired = DateUtils.addSeconds(current, (int) jwtProperties.getTokenExpired().getSeconds());
-        
-        cache2.setExpireAt(accessExpired.getTime());
-        tokenMap.put(accessToken, cache2, jwtProperties.getTokenExpired().getSeconds(), TimeUnit.SECONDS);
-        
+        authTokenCache.setExpireAt(accessExpired.getTime());
+        // 缓存新令牌及过期时间
+        tokenMap.put(accessToken, authTokenCache, jwtProperties.getTokenExpired().getSeconds(), TimeUnit.SECONDS);
+        // 生成返回令牌信息
         TokenVo tokenVo = new TokenVo();
         tokenVo.setToken(accessToken);
         tokenVo.setRefreshToken(refreshToken);
-        tokenVo.setExpireAt(cache2.getExpireAt());
-        
+        tokenVo.setExpireAt(authTokenCache.getExpireAt());
+        // 缓存新令牌对应的刷新令牌
         RSetMultimapCache<String, String> tokensCache = redissonClient.getSetMultimapCache(TOKEN_CACHE);
         tokensCache.put(refreshToken, accessToken);
         return tokenVo;
@@ -456,8 +460,8 @@ public class TokenTool {
      * @return 授权码
      */
     public String authCode(String token, String refreshToken) {
-        RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
-        Assert.isTrue(tokenMap.containsKey(token), PubError.EXPIRED, "访问令牌");
+//        RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
+//        Assert.isTrue(tokenMap.containsKey(token), PubError.EXPIRED, "访问令牌");
         RMapCache<String, RefreshTokenCache> refreshTokenMap = redissonClient.getMapCache(REFRESH_TOKEN_CACHE,
                 JsonJacksonCodec.INSTANCE);
         Assert.isTrue(refreshTokenMap.containsKey(refreshToken), PubError.EXPIRED, "刷新令牌");
