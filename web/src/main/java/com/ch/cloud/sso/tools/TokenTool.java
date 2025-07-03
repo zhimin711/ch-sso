@@ -485,4 +485,15 @@ public class TokenTool {
         TokenCache tokenCache = tokenMap.get(token);
         return BeanUtilsV2.clone(tokenCache, UserInfo.class);
     }
+    
+    public boolean renew(String token) {
+        RMapCache<String, TokenCache> tokenMap = redissonClient.getMapCache(TOKEN_CACHE, JsonJacksonCodec.INSTANCE);
+        TokenCache cache = tokenMap.get(token);
+        if (cache == null) {
+            return false;
+        }
+        // 重新设置过期时间
+        tokenMap.put(token, cache, jwtProperties.getTokenExpired().getSeconds(), TimeUnit.SECONDS);
+        return true;
+    }
 }

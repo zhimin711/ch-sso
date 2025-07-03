@@ -7,6 +7,10 @@
 Software architecture description
 
 #### Installation
+```shell
+mvn -U -pl client -am clean deploy -Dmaven.test.skip -Drevision=2.1.0-SNAPSHOT
+
+```
 
 1. xxxx
 2. xxxx
