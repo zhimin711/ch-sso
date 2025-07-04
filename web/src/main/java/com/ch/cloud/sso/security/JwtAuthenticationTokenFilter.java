@@ -1,7 +1,7 @@
 package com.ch.cloud.sso.security;
 
 import com.ch.Constants;
-import com.ch.cloud.sso.tools.TokenTool;
+import com.ch.cloud.sso.biz.tools.TokenTool;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

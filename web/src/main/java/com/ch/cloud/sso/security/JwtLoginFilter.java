@@ -2,7 +2,7 @@ package com.ch.cloud.sso.security;
 
 import com.ch.Constants;
 import com.ch.cloud.sso.pojo.UserInfo;
-import com.ch.cloud.sso.tools.TokenTool;
+import com.ch.cloud.sso.biz.tools.TokenTool;
 import com.ch.utils.CommonUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

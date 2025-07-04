@@ -1,7 +1,7 @@
 package com.ch.cloud.sso.conf;
 
 import com.ch.cloud.sso.security.JwtLoginFilter;
-import com.ch.cloud.sso.tools.TokenTool;
+import com.ch.cloud.sso.biz.tools.TokenTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

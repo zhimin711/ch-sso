@@ -1,10 +1,8 @@
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson2.JSON;
 import com.ch.cloud.sso.captcha.model.vo.CaptchaVO;
 import com.ch.cloud.sso.captcha.model.vo.PointVO;
-import com.ch.cloud.sso.tools.TokenTool;
-import com.ch.cloud.sso.utils.CaptchaUtils;
+import com.ch.cloud.sso.biz.tools.TokenTool;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

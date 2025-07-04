@@ -1,5 +1,6 @@
 package com.ch.cloud.sso.security;
 
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
@@ -12,6 +13,7 @@ import java.util.Collection;
  * @author zhimin.ma
  * @since 2021/11/1
  */
+@Getter
 public class CustomUserDetails extends org.springframework.security.core.userdetails.User {
     /**
      * 角色Id
@@ -24,7 +26,7 @@ public class CustomUserDetails extends org.springframework.security.core.userdet
     /**
      * 安全密钥
      */
-    private String secret;
+    private final String secret;
 
 
     public CustomUserDetails(String username, String password, Collection<? extends GrantedAuthority> authorities, String secret) {
@@ -38,24 +40,5 @@ public class CustomUserDetails extends org.springframework.security.core.userdet
         this.tenantId = tenantId;
         this.secret = secret;
     }
-
-    public Long getRoleId() {
-        return roleId;
-    }
-
-    public void setRoleId(Long roleId) {
-        this.roleId = roleId;
-    }
-
-    public Long getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public String getSecret() {
-        return secret;
-    }
+    
 }

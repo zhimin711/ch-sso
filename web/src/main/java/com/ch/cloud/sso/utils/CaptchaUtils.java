@@ -1,6 +1,6 @@
 package com.ch.cloud.sso.utils;
 
-import com.ch.cloud.sso.pojo.SlideCaptcha;
+import com.ch.cloud.sso.biz.pojo.SlideCaptcha;
 import com.ch.e.PubError;
 import com.ch.e.ExUtils;
 import com.ch.utils.FileUtilsV2;
