@@ -1,8 +1,7 @@
 package com.ch.cloud.sso.biz.manager.impl;
 
 import com.ch.cloud.sso.biz.manager.UserManager;
-import com.ch.cloud.sso.biz.pojo.TokenVo;
-import com.ch.cloud.sso.pojo.UserInfo;
+import com.ch.cloud.sso.biz.tools.TokenCacheTool;
 import com.ch.cloud.sso.security.CustomUserDetails;
 import com.ch.cloud.upms.client.UpmsPermissionClient;
 import com.ch.cloud.upms.client.UpmsRoleClient;
@@ -32,24 +31,27 @@ import javax.annotation.Resource;
  */
 @Service
 public class UserManagerImpl implements UserManager {
-    
+
     @Autowired
     private UserDetailsService userDetailsService;
-    
+
     @Resource
     private UpmsUserClient upmsUserClientService;
-    
+
     @Resource
     private UpmsRoleClient upmsRoleClientService;
-    
+
     @Resource
     private UpmsPermissionClient upmsPermissionClientService;
-    
+
     // 如果在WebSecurityConfigurerAdapter中，没有重新，这里就会报注入失败的异常
     @Autowired
     @Lazy
     private AuthenticationManager authenticationManager;
-    
+
+    @Autowired
+    private TokenCacheTool tokenCacheTool;
+
     @Override
     public CustomUserDetails login(String username, String password) {
         UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(username, password);
@@ -63,5 +65,15 @@ public class UserManagerImpl implements UserManager {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         return (CustomUserDetails) authentication.getPrincipal();
     }
-    
+
+    @Override
+    public String generateAuthCode(String refreshToken, String url) {
+        return tokenCacheTool.generateAuthCode(refreshToken, url);
+    }
+
+    @Override
+    public String exchangeAuthCode(String authCode) {
+        String username = tokenCacheTool.consumeAuthCode(authCode);
+        return username;
+    }
 }

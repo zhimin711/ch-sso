@@ -1,5 +1,6 @@
 package com.ch.cloud.sso.biz.client;
 
+import com.ch.cloud.sso.client.SsoPasswordClient;
 import com.ch.result.Result;
 import com.ch.result.ResultUtils;
 import lombok.extern.log4j.Log4j2;
@@ -20,15 +21,15 @@ import org.springframework.web.bind.annotation.RestController;
 @Log4j2
 @RequestMapping("/fc/password")
 public class PasswordClientController implements SsoPasswordClient {
-    
+
     @Autowired
     private PasswordEncoder passwordEncoder;
-    
+
     @PostMapping("encrypt")
     public Result<String> encrypt(@RequestParam String str) {
         return ResultUtils.wrapFail(() -> passwordEncoder.encode(str));
     }
-    
+
     @PostMapping("matchEncrypt")
     public Result<Boolean> matchEncrypt(@RequestParam String str, @RequestParam String encodedStr) {
         return ResultUtils.wrapFail(() -> passwordEncoder.matches(str, encodedStr));

@@ -83,15 +83,15 @@ public class RandomUtils {
     /**
      * 获取随机字符串
      *
-     * @param length
-     * @return
+     * @param length 随机字符串长度
+     * @return 随机字符串
      */
     public static String getRandomString(int length) {
         String str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         Random random = new Random();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < length; i++) {
-            int number = random.nextInt(62);
+            int number = random.nextInt(str.length());
             sb.append(str.charAt(number));
         }
         return sb.toString();

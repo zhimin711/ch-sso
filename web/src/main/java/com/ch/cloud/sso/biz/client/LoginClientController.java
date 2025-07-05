@@ -1,6 +1,7 @@
 package com.ch.cloud.sso.biz.client;
 
 import com.ch.Constants;
+import com.ch.cloud.sso.client.SsoLoginClient;
 import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.biz.service.IUserService;
 import com.ch.cloud.sso.biz.tools.TokenTool;
@@ -27,18 +28,18 @@ import org.springframework.web.bind.annotation.RestController;
 @Api("用户登录")
 @RequestMapping("/fc/login/token")
 public class LoginClientController implements SsoLoginClient {
-    
+
     @Autowired
     private IUserService userService;
-    
+
     @Autowired
     private TokenTool tokenTool;
-    
+
     @GetMapping(value = "validate")
     public Result<String> validate(@RequestHeader(Constants.X_TOKEN) String token) {
         return Result.success(userService.validate(token));
     }
-    
+
     /**
      * 网关获取Token包含详细信息
      *
@@ -53,7 +54,7 @@ public class LoginClientController implements SsoLoginClient {
             return userService.extractToken(token);
         });
     }
-    
+
     /**
      * 刷新 token 缓存时间（续期）
      * @param token 令牌
@@ -64,5 +65,5 @@ public class LoginClientController implements SsoLoginClient {
     public Result<Boolean> renew(@RequestHeader(Constants.X_TOKEN) String token) {
         return ResultUtils.wrap(() -> tokenTool.renew(token));
     }
-    
+
 }

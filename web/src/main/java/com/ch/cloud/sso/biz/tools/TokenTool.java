@@ -272,7 +272,7 @@ public class TokenTool {
 
     public UserInfo getUserInfoFromRefreshToken(RefreshTokenDTO refreshTokenDTO) {
         // 解析refreshToken中的claims
-        Claims claims = getClaimsFromToken(refreshTokenDTO.getToken(), refreshTokenDTO.getSecret());
+        Claims claims = getClaimsFromToken(refreshTokenDTO.getJwt(), refreshTokenDTO.getSecret());
         Assert.notNull(claims, PubError.INVALID, "Refresh Token 无效");
         // 校验refreshToken是否过期
         Assert.isFalse(DateUtils.current().after(refreshTokenDTO.getExpired()), PubError.EXPIRED, "TOKEN 已过期");

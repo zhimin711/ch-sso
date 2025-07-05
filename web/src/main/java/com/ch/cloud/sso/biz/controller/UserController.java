@@ -1,6 +1,8 @@
 package com.ch.cloud.sso.biz.controller;
 
 import com.ch.Constants;
+import com.ch.cloud.sso.biz.manager.TokenManager;
+import com.ch.cloud.sso.biz.manager.UserManager;
 import com.ch.cloud.sso.biz.mq.GatewayNotifySender;
 import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.biz.pojo.UserPermissionVo;
@@ -17,12 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
@@ -37,18 +34,24 @@ import java.security.Principal;
 @Api("用户信息")
 @Slf4j
 public class UserController {
-    
+
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    
+
     @Autowired
     IUserService userService;
-    
+
     @Autowired
     private GatewayNotifySender gatewayNotifySender;
-    
+
     @Autowired
     private TokenTool tokenTool;
-    
+
+    @Autowired
+    private TokenManager tokenManager;
+
+    @Autowired
+    private UserManager userManager;
+
     /**
      * 资源服务器提供的受保护接口
      *
@@ -60,7 +63,7 @@ public class UserController {
         logger.debug("授权用户信息: {}", principal);
         return principal;
     }
-    
+
     /**
      * 登录用户信息
      *
@@ -71,7 +74,7 @@ public class UserController {
     public Result<UserVo> info() {
         return ResultUtils.wrapFail(() -> userService.findUserInfo(ContextUtil.getUsername()));
     }
-    
+
     /**
      * 获取用户的角色菜单与权限
      *
@@ -80,7 +83,7 @@ public class UserController {
     @ApiOperation(value = "访问令牌获取用户授权", notes = "访问令牌获取,返回用户授权信息")
     @PostMapping("/permissions")
     public Result<UserPermissionVo> permissions(@RequestHeader(Constants.X_TOKEN) String token,
-            @RequestBody UserInfo user) {
+                                                @RequestBody UserInfo user) {
         return ResultUtils.wrapFail(() -> {
             user.setUsername(ContextUtil.getUsername());
             // 判断用户角色是否切换角色，如果切换了角色则通知网关清除对应的用户角色缓存
@@ -96,5 +99,17 @@ public class UserController {
             return userService.findPermission(user);
         });
     }
-    
+
+
+    @ApiOperation(value = "获取授权码", notes = "获取授权码")
+    @GetMapping(value = "/auth-code")
+    public Result<String> authCode(@RequestHeader(Constants.X_TOKEN) String token,
+                                   @RequestHeader(Constants.X_REFRESH_TOKEN) String refreshToken,
+                                   @RequestParam String url) {
+        return ResultUtils.wrapFail(() -> {
+            tokenManager.validateToken(token);
+            return userManager.generateAuthCode(ContextUtil.getUsername(), url);
+        });
+    }
+
 }

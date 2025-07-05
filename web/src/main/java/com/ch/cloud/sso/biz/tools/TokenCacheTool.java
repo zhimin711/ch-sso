@@ -1,8 +1,11 @@
 package com.ch.cloud.sso.biz.tools;
 
 import com.alibaba.fastjson2.JSON;
+import com.ch.cloud.sso.captcha.util.RandomUtils;
 import com.ch.cloud.sso.dto.RefreshTokenDTO;
 import com.ch.cloud.sso.dto.TokenDTO;
+import com.ch.e.Assert;
+import com.ch.e.PubError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -35,19 +38,19 @@ public class TokenCacheTool {
     public static final String TOKEN_CACHE_PREFIX = "sso:token:";
     public static final String TOKEN_USER_PREFIX = "sso:token_user:";
     public static final String USER_TOKEN_PREFIX = "sso:user_token:";
-    
+
     public static final String REFRESH_TOKEN_CACHE_PREFIX = "sso:refresh_token:";
     public static final String REFRESH_TOKEN_USER_PREFIX = "sso:refresh_token_user:";
     public static final String USER_REFRESH_TOKEN_PREFIX = "sso:user_refresh_token:";
-    
+
     public static final String REFRESH_TOKEN_ACCESS_PREFIX = "sso:refresh_token_access:";
-    
+
     // 多平台Token管理相关前缀
     public static final String USER_PLATFORM_TOKENS_PREFIX = "sso:user_platform_tokens:";
     public static final String PLATFORM_USER_TOKENS_PREFIX = "sso:platform_user_tokens:";
     public static final String AUTH_CODE_PREFIX = "sso:auth_code:";
     public static final String USER_AUTH_CODES_PREFIX = "sso:user_auth_codes:";
-    
+
     // 平台标识常量
     public static final String PLATFORM_AUTH = "auth";      // 用户权限管理平台
     public static final String PLATFORM_API = "api";        // 接口管理平台
@@ -56,7 +59,7 @@ public class TokenCacheTool {
      * 保存访问Token与用户信息映射（支持多平台）
      *
      * @param token      访问Token
-     * @param tokenDTO Token缓存信息
+     * @param tokenDTO   Token缓存信息
      * @param expireTime 过期时间（秒）
      */
     public void saveAccessToken(String token, TokenDTO tokenDTO, long expireTime) {
@@ -69,7 +72,7 @@ public class TokenCacheTool {
             redisTemplate.opsForValue().set(tokenKey, tokenDTO, expireTime, TimeUnit.SECONDS);
             // 保存Token与用户的映射关系
             stringRedisTemplate.opsForValue().set(tokenUserKey, tokenDTO.getUsername(), expireTime, TimeUnit.SECONDS);
-            
+
             // 保存用户与Token的映射关系,多平台登录用集合保存
 //            stringRedisTemplate.opsForValue().set(userKey, token, expireTime, TimeUnit.SECONDS);
             stringRedisTemplate.opsForSet().add(userKey, token);
@@ -86,31 +89,25 @@ public class TokenCacheTool {
     /**
      * 保存刷新Token与用户信息映射
      *
-     * @param accessToken      刷新Token
-     * @param refreshToken      刷新Token
+     * @param refreshToken    刷新Token
      * @param refreshTokenDTO 刷新Token缓存信息
-     * @param expireTime        过期时间（秒）
+     * @param expireTime      过期时间（秒）
      */
-    public void saveRefreshToken(String accessToken, String refreshToken, RefreshTokenDTO refreshTokenDTO, long expireTime) {
+    public void saveRefreshToken(String refreshToken, RefreshTokenDTO refreshTokenDTO, long expireTime) {
         try {
             String refreshTokenKey = REFRESH_TOKEN_CACHE_PREFIX + refreshToken;
             String refreshTokenUserKey = REFRESH_TOKEN_USER_PREFIX + refreshToken;
-            String refreshTokenAccessKey = REFRESH_TOKEN_ACCESS_PREFIX + refreshToken;
             String userRefreshKey = USER_REFRESH_TOKEN_PREFIX + refreshTokenDTO.getUsername();
 
             // 保存刷新Token详细信息
             redisTemplate.opsForValue().set(refreshTokenKey, refreshTokenDTO, expireTime, TimeUnit.SECONDS);
-            
+
             // 保存刷新Token与用户的映射关系
             stringRedisTemplate.opsForValue().set(refreshTokenUserKey, refreshTokenDTO.getUsername(), expireTime, TimeUnit.SECONDS);
-            
+
             // 保存用户与刷新Token的映射关系
             stringRedisTemplate.opsForValue().set(userRefreshKey, refreshToken, expireTime, TimeUnit.SECONDS);
-            
-            // 保存刷新Token与访问Token的映射关系
-            stringRedisTemplate.opsForSet().add(refreshTokenAccessKey, accessToken);
-            stringRedisTemplate.expire(refreshTokenAccessKey, expireTime, TimeUnit.SECONDS);
-            
+
             log.debug("保存刷新Token成功: {}, 用户: {}, 过期时间: {}秒", refreshToken, refreshTokenDTO.getUsername(), expireTime);
         } catch (Exception e) {
             log.error("保存刷新Token失败: {}", refreshToken, e);
@@ -118,36 +115,38 @@ public class TokenCacheTool {
         }
     }
 
+    public void saveRefreshTokenAccess(String refreshToken, String accessToken, long expireTime) {
+        try {
+            String refreshTokenAccessKey = REFRESH_TOKEN_ACCESS_PREFIX + refreshToken;
+
+            // 保存刷新Token与访问Token的映射关系
+            stringRedisTemplate.opsForValue().set(refreshTokenAccessKey, accessToken, expireTime, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.error("保存刷新Token与访问Token映射关系失败: {}", refreshToken, e);
+        }
+    }
+
     /**
      * 生成授权码
      *
      * @param username 用户名
-     * @param sourcePlatform 源平台
-     * @param targetPlatform 目标平台
-     * @param expireTime 过期时间（秒）
      * @return 授权码
      */
-    public String generateAuthCode(String username, String sourcePlatform, String targetPlatform, long expireTime) {
+    public String generateAuthCode(String username, String url) {
         try {
-            String authCode = generateRandomCode(8);
+            String authCode = RandomUtils.getRandomString(8);
             String authCodeKey = AUTH_CODE_PREFIX + authCode;
             String userAuthCodesKey = USER_AUTH_CODES_PREFIX + username;
-            
-            // 构造授权码信息
-            Map<String, Object> authCodeInfo = new HashMap<>();
-            authCodeInfo.put("username", username);
-            authCodeInfo.put("sourcePlatform", sourcePlatform);
-            authCodeInfo.put("targetPlatform", targetPlatform);
-            authCodeInfo.put("createTime", System.currentTimeMillis());
-            
+
             // 保存授权码
-            redisTemplate.opsForValue().set(authCodeKey, authCodeInfo, expireTime, TimeUnit.SECONDS);
-            
+            stringRedisTemplate.opsForValue().set(authCodeKey, username, 60, TimeUnit.SECONDS);
+
             // 保存用户授权码列表
-            stringRedisTemplate.opsForSet().add(userAuthCodesKey, authCode);
-            stringRedisTemplate.expire(userAuthCodesKey, expireTime, TimeUnit.SECONDS);
-            
-            log.debug("生成授权码成功: {}, 用户: {}, 源平台: {}, 目标平台: {}", authCode, username, sourcePlatform, targetPlatform);
+//            stringRedisTemplate.opsForSet().add(userAuthCodesKey, authCode);
+            stringRedisTemplate.opsForHash().put(userAuthCodesKey, authCode, url);
+            stringRedisTemplate.expire(userAuthCodesKey, 60, TimeUnit.SECONDS);
+
+            log.debug("生成授权码成功: {}, 用户: {}, 目标平台: {}", authCode, username, url);
             return authCode;
         } catch (Exception e) {
             log.error("生成授权码失败: {}", username, e);
@@ -166,7 +165,7 @@ public class TokenCacheTool {
         try {
             String authCodeKey = AUTH_CODE_PREFIX + authCode;
             Object value = redisTemplate.opsForValue().get(authCodeKey);
-            
+
             if (value instanceof Map) {
                 return (Map<String, Object>) value;
             } else if (value instanceof String) {
@@ -185,21 +184,20 @@ public class TokenCacheTool {
      * @param authCode 授权码
      * @return 授权码信息
      */
-    public Map<String, Object> consumeAuthCode(String authCode) {
+    public String consumeAuthCode(String authCode) {
         try {
-            Map<String, Object> authCodeInfo = validateAuthCode(authCode);
-            if (authCodeInfo != null) {
-                String authCodeKey = AUTH_CODE_PREFIX + authCode;
-                String username = (String) authCodeInfo.get("username");
-                String userAuthCodesKey = USER_AUTH_CODES_PREFIX + username;
-                
-                // 删除授权码
-                redisTemplate.delete(authCodeKey);
-                stringRedisTemplate.opsForSet().remove(userAuthCodesKey, authCode);
-                
-                log.debug("使用授权码成功: {}, 用户: {}", authCode, username);
-            }
-            return authCodeInfo;
+            String authCodeKey = AUTH_CODE_PREFIX + authCode;
+            String username = stringRedisTemplate.opsForValue().getAndDelete(authCodeKey);
+            Assert.notEmpty(username, PubError.INVALID, "授权码无效或已过期");
+
+            // 删除授权码
+            String userAuthCodesKey = USER_AUTH_CODES_PREFIX + username;
+            stringRedisTemplate.opsForSet().remove(userAuthCodesKey, authCode);
+            String url = (String) stringRedisTemplate.opsForHash().get(userAuthCodesKey, authCode);
+            stringRedisTemplate.opsForHash().delete(userAuthCodesKey, authCode);
+
+            log.debug("使用授权码成功: {}, 用户: {}", authCode, username);
+            return username;
         } catch (Exception e) {
             log.error("使用授权码失败: {}", authCode, e);
             return null;
@@ -282,19 +280,19 @@ public class TokenCacheTool {
     public Map<String, String> getUserAllPlatformTokens(String username) {
         try {
             Map<String, String> platformTokens = new HashMap<>();
-            
+
             // 获取权限管理平台Token
             String authToken = getAccessTokenByUsernameAndPlatform(username, PLATFORM_AUTH);
             if (authToken != null) {
                 platformTokens.put(PLATFORM_AUTH, authToken);
             }
-            
+
             // 获取接口管理平台Token
             String apiToken = getAccessTokenByUsernameAndPlatform(username, PLATFORM_API);
             if (apiToken != null) {
                 platformTokens.put(PLATFORM_API, apiToken);
             }
-            
+
             return platformTokens;
         } catch (Exception e) {
             log.error("获取用户所有平台Token失败: {}", username, e);
@@ -305,10 +303,10 @@ public class TokenCacheTool {
     /**
      * 同步用户Token到其他平台
      *
-     * @param username 用户名
+     * @param username       用户名
      * @param sourcePlatform 源平台
      * @param targetPlatform 目标平台
-     * @param expireTime 过期时间（秒）
+     * @param expireTime     过期时间（秒）
      * @return 是否同步成功
      */
     public boolean syncUserTokenToPlatform(String username, String sourcePlatform, String targetPlatform, long expireTime) {
@@ -319,9 +317,9 @@ public class TokenCacheTool {
                 log.warn("源平台Token不存在: {}, {}", username, sourcePlatform);
                 return false;
             }
-            
+
             // 生成目标平台的Token
-            String targetToken = generateRandomCode(32);
+            String targetToken = RandomUtils.getRandomString(32);
             TokenDTO targetTokenDTO = new TokenDTO();
             targetTokenDTO.setUsername(sourceTokenDTO.getUsername());
             targetTokenDTO.setUserId(sourceTokenDTO.getUserId());
@@ -329,10 +327,10 @@ public class TokenCacheTool {
             targetTokenDTO.setTenantId(sourceTokenDTO.getTenantId());
             targetTokenDTO.setExpireAt(System.currentTimeMillis() + expireTime * 1000);
             targetTokenDTO.setPassword(sourceTokenDTO.getPassword());
-            
+
             // 保存目标平台Token
             saveAccessToken(targetToken, targetTokenDTO, expireTime);
-            
+
             log.debug("同步用户Token成功: {}, 源平台: {}, 目标平台: {}", username, sourcePlatform, targetPlatform);
             return true;
         } catch (Exception e) {
@@ -341,18 +339,6 @@ public class TokenCacheTool {
         }
     }
 
-    /**
-     * 生成随机授权码
-     */
-    private String generateRandomCode(int length) {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            int index = (int) (Math.random() * chars.length());
-            sb.append(chars.charAt(index));
-        }
-        return sb.toString();
-    }
 
     /**
      * 根据访问Token获取用户信息
@@ -674,4 +660,4 @@ public class TokenCacheTool {
             log.error("清理过期的Token失败", e);
         }
     }
-} 
+}

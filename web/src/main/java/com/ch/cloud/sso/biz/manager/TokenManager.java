@@ -39,12 +39,12 @@ public interface TokenManager {
     TokenVo refreshToken(String refreshToken);
 
     /**
-     * 续期刷新Token
+     * 续期Token
      *
-     * @param refreshToken 刷新Token
+     * @param token Token
      * @return 是否续期成功
      */
-    boolean renewRefreshToken(String refreshToken);
+    boolean renewToken(String token);
 
     /**
      * 获取用户信息
@@ -67,4 +67,6 @@ public interface TokenManager {
      * @param username 用户名
      */
     void deleteUserTokens(String username);
+
+    TokenVo auth(String username);
 }

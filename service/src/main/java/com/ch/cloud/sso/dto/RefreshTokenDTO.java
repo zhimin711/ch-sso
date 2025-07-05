@@ -17,12 +17,12 @@ import java.util.Date;
 public class RefreshTokenDTO {
 
     /**
-     * jwt token
+     * jwt
      */
-    private String token;
+    private String jwt;
 
     /**
-     * jwt token secret
+     * jwt secret
      */
     private String secret;
 
@@ -37,15 +37,15 @@ public class RefreshTokenDTO {
     private Date expired;
 
 
-    public RefreshTokenDTO(String token, String secret, String username, Date expired) {
-        this.token = token;
+    public RefreshTokenDTO(String jwt, String secret, String username, Date expired) {
+        this.jwt = jwt;
         this.secret = secret;
         this.username = username;
         this.expired = expired;
     }
 
-    public static RefreshTokenDTO build(String token, String secret, String code, Date expired) {
-        return new RefreshTokenDTO(token, secret, code, expired);
+    public static RefreshTokenDTO build(String jwt, String secret, String code, Date expired) {
+        return new RefreshTokenDTO(jwt, secret, code, expired);
     }
 
 }

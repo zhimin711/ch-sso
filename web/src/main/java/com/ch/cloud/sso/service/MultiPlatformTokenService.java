@@ -41,7 +41,7 @@ public class MultiPlatformTokenService {
         }
 
         // 生成授权码，有效期5分钟
-        return tokenCacheTool.generateAuthCode(username, sourcePlatform, targetPlatform, 300);
+        return tokenCacheTool.generateAuthCode(username, targetPlatform);
     }
 
     /**
@@ -153,15 +153,15 @@ public class MultiPlatformTokenService {
      */
     public Map<String, Boolean> validateUserAllPlatformTokens(String username) {
         Map<String, Boolean> platformStatus = new HashMap<>();
-        
+
         // 检查权限管理平台Token
         String authToken = tokenCacheTool.getAccessTokenByUsernameAndPlatform(username, TokenCacheTool.PLATFORM_AUTH);
         platformStatus.put(TokenCacheTool.PLATFORM_AUTH, authToken != null && tokenCacheTool.hasAccessToken(authToken));
-        
+
         // 检查接口管理平台Token
         String apiToken = tokenCacheTool.getAccessTokenByUsernameAndPlatform(username, TokenCacheTool.PLATFORM_API);
         platformStatus.put(TokenCacheTool.PLATFORM_API, apiToken != null && tokenCacheTool.hasAccessToken(apiToken));
-        
+
         return platformStatus;
     }
 
@@ -173,15 +173,15 @@ public class MultiPlatformTokenService {
      */
     public Map<String, Object> getUserCrossPlatformInfo(String username) {
         Map<String, Object> result = new HashMap<>();
-        
+
         // 获取所有平台Token
         Map<String, String> platformTokens = tokenCacheTool.getUserAllPlatformTokens(username);
         result.put("platformTokens", platformTokens);
-        
+
         // 获取Token状态
         Map<String, Boolean> platformStatus = validateUserAllPlatformTokens(username);
         result.put("platformStatus", platformStatus);
-        
+
         // 获取用户基本信息（从权限管理平台获取）
         String authToken = platformTokens.get(TokenCacheTool.PLATFORM_AUTH);
         if (authToken != null) {
@@ -195,7 +195,7 @@ public class MultiPlatformTokenService {
                 result.put("userInfo", userInfo);
             }
         }
-        
+
         return result;
     }
 
@@ -208,13 +208,13 @@ public class MultiPlatformTokenService {
         try {
             // 删除权限管理平台Token
             tokenCacheTool.deleteUserPlatformTokens(username, TokenCacheTool.PLATFORM_AUTH);
-            
+
             // 删除接口管理平台Token
             tokenCacheTool.deleteUserPlatformTokens(username, TokenCacheTool.PLATFORM_API);
-            
+
             // 删除用户所有Token（兼容旧版本）
             tokenCacheTool.deleteUserTokens(username);
-            
+
             log.info("清理用户所有平台Token成功: {}", username);
         } catch (Exception e) {
             log.error("清理用户所有平台Token失败: {}", username, e);
@@ -252,4 +252,4 @@ public class MultiPlatformTokenService {
             return false;
         }
     }
-} 
+}

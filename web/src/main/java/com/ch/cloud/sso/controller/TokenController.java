@@ -88,7 +88,7 @@ public class TokenController {
     @ApiOperation("续期刷新Token")
     public Result<Boolean> renewRefreshToken(@RequestParam String refreshToken) {
         try {
-            boolean success = tokenManager.renewRefreshToken(refreshToken);
+            boolean success = tokenManager.renewToken(refreshToken);
             if (success) {
                 return Result.success(true);
             } else {
@@ -216,4 +216,4 @@ public class TokenController {
             return Result.error(PubError.INVALID,"获取刷新Token失败: " + e.getMessage());
         }
     }
-} 
+}

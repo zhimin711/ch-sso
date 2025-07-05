@@ -1,5 +1,6 @@
 package com.ch.cloud.sso.biz.client;
 
+import com.ch.cloud.sso.client.SsoUserClient;
 import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.biz.pojo.UserVo;
 import com.ch.cloud.sso.biz.service.IUserService;
@@ -26,10 +27,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Api("用户信息")
 @Slf4j
 public class UserClientController implements SsoUserClient {
-    
+
     @Autowired
     IUserService userService;
-    
+
     /**
      * 用户授权信息
      *
@@ -41,10 +42,10 @@ public class UserClientController implements SsoUserClient {
     public Result<UserInfo> info(@RequestParam("username") String username) {
         return ResultUtils.wrapFail(() -> {
             UserVo user = userService.findUserInfo(username);
-            
+
             return BeanUtilsV2.clone(user, UserInfo.class);
         });
     }
-    
-    
+
+
 }

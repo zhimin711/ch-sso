@@ -6,6 +6,7 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.TextCodec;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -16,8 +17,9 @@ import java.util.UUID;
  * @author 01370603
  * @since 2019/5/28
  */
+@Slf4j
 public class JwtUtil {
-    
+
     public static String generateSecret(String password) {
         // 对密码进行Base64编码
         return TextCodec.BASE64.encode(password);
@@ -30,10 +32,30 @@ public class JwtUtil {
      * @param secret  签名密钥
      * @return 令牌
      */
-    public static String generateToken(Map<String, Object> claims, Date expired, String secret) {
+    public static String generate(Map<String, Object> claims, Date expired, String secret) {
         // 构建JWT对象，设置自定义声明、过期时间和签名密钥
         return Jwts.builder().setClaims(claims).setExpiration(expired).signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
+    }
+
+    /**
+     * 从令牌中获取数据声明
+     *
+     * @param jwt  令牌
+     * @param secret 密钥
+     * @return 数据声明
+     */
+    public static Claims parseClaims(String jwt, String secret) {
+        Claims claims;
+        try {
+            // 解析token，获取其中的claims信息
+            claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(jwt).getBody();
+        } catch (Exception e) {
+            // 解析失败，记录日志
+            log.error("jwt: {} is invalid!", jwt, e);
+            claims = null;
+        }
+        return claims;
     }
     /**
      * 用户登录成功后生成Jwt
