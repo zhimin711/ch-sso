@@ -110,13 +110,13 @@ public class JwtUtil {
 
 
     /**
-     * Token的解密
+     * jwt的解密
      *
-     * @param token 加密后的token
+     * @param jwt 加密后的token
      * @param user  用户的对象
      * @return
      */
-    public static Claims parseJWT(String token, UserVo user) {
+    public static Claims parseJWT(String jwt, UserVo user) {
         //签名秘钥，和生成的签名的秘钥一模一样
         String key = user.getPassword();
 
@@ -125,7 +125,7 @@ public class JwtUtil {
                 //设置签名的秘钥
                 .setSigningKey(key)
                 //设置需要解析的jwt
-                .parseClaimsJws(token).getBody();
+                .parseClaimsJws(jwt).getBody();
         return claims;
     }
 
