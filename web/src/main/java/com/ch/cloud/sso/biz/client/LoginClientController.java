@@ -1,10 +1,10 @@
 package com.ch.cloud.sso.biz.client;
 
 import com.ch.Constants;
+import com.ch.cloud.sso.biz.manager.TokenManager;
+import com.ch.cloud.sso.biz.service.IUserService;
 import com.ch.cloud.sso.client.SsoLoginClient;
 import com.ch.cloud.sso.pojo.UserInfo;
-import com.ch.cloud.sso.biz.service.IUserService;
-import com.ch.cloud.sso.biz.tools.TokenTool;
 import com.ch.e.Assert;
 import com.ch.e.PubError;
 import com.ch.result.Result;
@@ -33,7 +33,7 @@ public class LoginClientController implements SsoLoginClient {
     private IUserService userService;
 
     @Autowired
-    private TokenTool tokenTool;
+    private TokenManager tokenManager;
 
     @GetMapping(value = "validate")
     public Result<String> validate(@RequestHeader(Constants.X_TOKEN) String token) {
@@ -49,9 +49,11 @@ public class LoginClientController implements SsoLoginClient {
     @GetMapping(value = "info")
     public Result<UserInfo> info(@RequestHeader(Constants.X_TOKEN) String token) {
         return ResultUtils.wrapFail(() -> {
-            String username = userService.validate(token);
-            Assert.notEmpty(username, PubError.INVALID, "访问令牌已",token);
-            return userService.extractToken(token);
+            
+            boolean isValid = tokenManager.validateToken(token);
+//            String username = userService.validate(token);
+            Assert.isTrue(isValid, PubError.INVALID, "访问令牌已",token);
+            return tokenManager.getUserInfo(token);
         });
     }
 
@@ -63,7 +65,7 @@ public class LoginClientController implements SsoLoginClient {
     @GetMapping("renew")
     @Override
     public Result<Boolean> renew(@RequestHeader(Constants.X_TOKEN) String token) {
-        return ResultUtils.wrap(() -> tokenTool.renew(token));
+        return ResultUtils.wrap(() -> tokenManager.renewToken(token));
     }
 
 }

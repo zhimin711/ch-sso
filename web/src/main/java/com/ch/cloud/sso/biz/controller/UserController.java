@@ -104,7 +104,6 @@ public class UserController {
     @ApiOperation(value = "获取授权码", notes = "获取授权码")
     @GetMapping(value = "/auth-code")
     public Result<String> authCode(@RequestHeader(Constants.X_TOKEN) String token,
-                                   @RequestHeader(Constants.X_REFRESH_TOKEN) String refreshToken,
                                    @RequestParam String url) {
         return ResultUtils.wrapFail(() -> {
             tokenManager.validateToken(token);
