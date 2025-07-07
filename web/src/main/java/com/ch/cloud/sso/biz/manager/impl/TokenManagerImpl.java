@@ -16,12 +16,17 @@ import com.ch.utils.DateUtils;
 import com.ch.utils.EncryptUtils;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import static com.ch.cloud.sso.biz.tools.TokenTool.LOCK_TOKEN;
 
 /**
  * <p>
@@ -40,6 +45,9 @@ public class TokenManagerImpl implements TokenManager {
     
     @Autowired
     private TokenCacheTool tokenCacheTool;
+    
+    @Autowired
+    private RedissonClient redissonClient;
     
     /**
      * 生成Token
@@ -113,41 +121,57 @@ public class TokenManagerImpl implements TokenManager {
      */
     @Override
     public TokenVo refreshToken(String refreshToken) {
-        // 获取刷新Token缓存信息
-        RefreshTokenDTO refreshTokenDTO = tokenCacheTool.getRefreshTokenCache(refreshToken);
-        Assert.notNull(refreshTokenDTO, PubError.INVALID, "刷新Token", refreshToken);
         
-        // 验证刷新Token是否过期
-        if (refreshTokenDTO.getExpired().before(new Date())) {
-            log.warn("刷新Token已过期: {}", refreshToken);
-            return null;
+        // 获取分布式锁，防止并发刷新
+        RLock lock = redissonClient.getLock(LOCK_TOKEN + refreshToken);
+        try {
+            
+            boolean locked = lock.tryLock(5, TimeUnit.SECONDS);
+            log.info("{} lock status: {}", refreshToken, locked);
+            Assert.isTrue(locked, PubError.RETRY, "网络繁忙，请稍后重试......");
+            // 获取刷新Token缓存信息
+            RefreshTokenDTO refreshTokenDTO = tokenCacheTool.getRefreshTokenCache(refreshToken);
+            Assert.notNull(refreshTokenDTO, PubError.INVALID, "刷新Token", refreshToken);
+            
+            // 验证刷新Token是否过期
+            if (refreshTokenDTO.getExpired().before(new Date())) {
+                log.warn("刷新Token已过期: {}", refreshToken);
+                return null;
+            }
+            tokenCacheTool.getAccessTokenByUsername(refreshTokenDTO.getUsername());
+            
+            Claims claims = JwtUtil.parseClaims(refreshTokenDTO.getJwt(), refreshTokenDTO.getSecret());
+            
+            // 生成访问token和刷新token
+            String accessToken = UuidUtils.generateUuid();
+            Date accessExpired = DateUtils.addSeconds(DateUtils.current(),
+                    (int) jwtProperties.getTokenExpired().getSeconds());
+            // 克隆用户信息到TokenCache对象
+            TokenDTO tokenDTO = new TokenDTO();
+            tokenDTO.setUsername(claims.getSubject());
+            if (claims.containsKey("userId")) {
+                tokenDTO.setUserId((String) claims.get("userId"));
+            }
+            if (claims.containsKey("roleId")) {
+                tokenDTO.setRoleId((Long) claims.get("roleId"));
+            }
+            if (claims.containsKey("tenantId")) {
+                tokenDTO.setTenantId((Long) claims.get("tenantId"));
+            }
+            
+            tokenDTO.setExpireAt(accessExpired.getTime());
+            tokenDTO.setPassword(refreshTokenDTO.getSecret());
+            // 使用TokenRedisUtil保存访问Token
+            tokenCacheTool.saveAccessToken(accessToken, tokenDTO, jwtProperties.getTokenExpired().getSeconds());
+            
+            // 生成新的Token
+            return new TokenVo(accessToken, refreshToken, accessExpired.getTime());
+        } catch (Exception e) {
+            log.error("刷新Token异常: {}", e.getMessage());
+        } finally {
+            lock.unlock();
         }
-        Claims claims = JwtUtil.parseClaims(refreshTokenDTO.getJwt(), refreshTokenDTO.getSecret());
-        
-        // 生成访问token和刷新token
-        String accessToken = UuidUtils.generateUuid();
-        Date accessExpired = DateUtils.addSeconds(DateUtils.current(),
-                (int) jwtProperties.getTokenExpired().getSeconds());
-        // 克隆用户信息到TokenCache对象
-        TokenDTO tokenDTO = new TokenDTO();
-        tokenDTO.setUsername(claims.getSubject());
-        if (claims.containsKey("userId")) {
-            tokenDTO.setUserId((String) claims.get("userId"));
-        }
-        if (claims.containsKey("roleId")) {
-            tokenDTO.setRoleId((Long) claims.get("roleId"));
-        }
-        if (claims.containsKey("tenantId")) {
-            tokenDTO.setTenantId((Long) claims.get("tenantId"));
-        }
-        
-        tokenDTO.setExpireAt(accessExpired.getTime());
-        tokenDTO.setPassword(refreshTokenDTO.getSecret());
-        // 使用TokenRedisUtil保存访问Token
-        tokenCacheTool.saveAccessToken(accessToken, tokenDTO, jwtProperties.getTokenExpired().getSeconds());
-        
-        // 生成新的Token
-        return new TokenVo(accessToken, refreshToken, accessExpired.getTime());
+        return null;
     }
     
     /**
