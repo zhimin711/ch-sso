@@ -3,12 +3,17 @@ package com.ch.cloud.api.controller.auth;
 import cn.hutool.core.bean.BeanUtil;
 import com.ch.cloud.api.annotation.HasPermission;
 import com.ch.cloud.api.domain.ApiGroup;
+import com.ch.cloud.api.dto.ApiGroupAddDTO;
 import com.ch.cloud.api.dto.ApiGroupDTO;
+import com.ch.cloud.api.dto.ApiGroupEditDTO;
 import com.ch.cloud.api.enums.GroupType;
 import com.ch.cloud.api.manager.ApiGroupManager;
 import com.ch.cloud.api.pojo.GroupPath;
 import com.ch.cloud.api.service.IApiGroupService;
 import com.ch.cloud.api.service.IApiPathService;
+import com.ch.cloud.api.utils.ApiUtil;
+import com.ch.e.Assert;
+import com.ch.e.PubError;
 import com.ch.result.Result;
 import com.ch.result.ResultUtils;
 import com.ch.toolkit.ContextUtil;
@@ -32,21 +37,21 @@ import java.util.List;
 @RequestMapping("/api/group")
 @Tag(name = "api-group-controller", description = "接口分组")
 public class ApiGroupController {
-    
+
     @Autowired
     private IApiGroupService apiGroupService;
-    
+
     @Autowired
     private IApiPathService apiPathService;
-    
+
     @Autowired
     private ApiGroupManager apiGroupManage;
-    
+
     @Operation(summary = "分页查询", description = "分页查询接口分组")
     @GetMapping(value = {"tree"})
     @HasPermission(value = "group:tree")
     public Result<GroupPath> tree(@CookieValue Long projectId, @RequestParam GroupType type,
-            @RequestParam(required = false, defaultValue = "false") Boolean withApi) {
+                                  @RequestParam(required = false, defaultValue = "false") Boolean withApi) {
         return ResultUtils.wrap(() -> {
             List<ApiGroup> apiGroups = Lists.newArrayList();
             switch (type) {
@@ -66,35 +71,51 @@ public class ApiGroupController {
             return Lists.newArrayList();
         });
     }
-    
+
     @Operation(summary = "添加", description = "添加接口分组")
     @PostMapping
     @HasPermission("group:add")
-    public Result<Boolean> add(@Validated @RequestBody ApiGroupDTO record, @CookieValue Long projectId) {
+    public Result<Boolean> add(@Validated @RequestBody ApiGroupAddDTO record, @CookieValue Long projectId) {
         record.setProjectId(projectId);
         if (CommonUtils.isEmpty(record.getParentId())) {
             record.setParentId(0L);
         }
         return ResultUtils.wrapFail(() -> {
+            boolean exists = apiGroupService.lambdaQuery().eq(ApiGroup::getType, record.getType())
+                    .eq(ApiGroup::getName, record.getName())
+                    .eq(ApiGroup::getProjectId, projectId).exists();
+            Assert.isFalse(exists, PubError.EXISTS, record.getName());
             ApiGroup apiGroup = BeanUtil.copyProperties(record, ApiGroup.class);
-            apiGroup.setCode(apiGroup.getName());
+            apiGroup.setAlias(apiGroup.getName());
             return apiGroupService.save(apiGroup);
         });
     }
-    
+
     @Operation(summary = "修改", description = "修改接口分组")
     @PutMapping({"{id:[0-9]+}"})
     @HasPermission("group:edit")
-    public Result<Boolean> edit(@PathVariable Long id, @RequestBody ApiGroupDTO record) {
+    public Result<Boolean> edit(@PathVariable Long id, @RequestBody ApiGroupEditDTO record, @CookieValue Long projectId) {
         return ResultUtils.wrapFail(
-                () -> apiGroupService.lambdaUpdate().eq(ApiGroup::getId, id)
-                        .set(ApiGroup::getCode, record.getName())
-                        .set(ApiGroup::getName, record.getName())
-                        .set(ApiGroup::getDescription, record.getDescription())
-                        .set(CommonUtils.isNotEmpty(record.getParentId()), ApiGroup::getParentId, record.getParentId())
-                        .update());
+                () -> {
+                    boolean exists = apiGroupService.lambdaQuery()
+                            .eq(ApiGroup::getProjectId, projectId)
+                            .eq(ApiGroup::getType, record.getType())
+                            .eq(ApiGroup::getName, record.getName())
+                            .exists();
+                    Assert.isFalse(exists, PubError.EXISTS, record.getName());
+                    ApiGroup apiGroup = apiGroupService.getById(id);
+                    Assert.notNull(apiGroup, PubError.NOT_EXISTS, id);
+                    Assert.isFalse(CommonUtils.isEquals(apiGroup.getName(), ApiUtil.API_GROUP_DEFAULT),PubError.NOT_ALLOWED,"默认分组修改");
+                    GroupType groupType = GroupType.fromCode(record.getType());
+                    return apiGroupService.lambdaUpdate().eq(ApiGroup::getId, id)
+                            .set(ApiGroup::getAlias, record.getName())
+                            .set(groupType == GroupType.CUSTOM, ApiGroup::getName, record.getName())
+                            .set(groupType == GroupType.CUSTOM, ApiGroup::getDescription, record.getDescription())
+                            .set(CommonUtils.isNotEmpty(record.getParentId()), ApiGroup::getParentId, record.getParentId())
+                            .update();
+                });
     }
-    
+
     @Operation(summary = "删除", description = "删除接口分组")
     @DeleteMapping({"{id:[0-9]+}"})
     @HasPermission("group:del")

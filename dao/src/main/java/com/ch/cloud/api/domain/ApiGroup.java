@@ -39,11 +39,11 @@ public class ApiGroup extends BaseEntity {
     /**
      * 名称
      */
-    @Schema(description = "代码")
+    @Schema(description = "别名")
     @TableField("code")
     @NotBlank
-    private String code;
-    
+    private String alias;
+
     @Schema(description = "名称")
     @TableField("name")
     @NotBlank
@@ -55,12 +55,12 @@ public class ApiGroup extends BaseEntity {
     @Schema(description = "描述")
     @TableField("description")
     private String description;
-    
+
     @Schema(description = "排序")
     @TableField("sort")
     @OrderBy
     private Integer sort;
-    
+
     @Schema(description = "类型：1.接口分组 2.标签分组 3.自定义分组")
     @TableField("type")
     private String type;
