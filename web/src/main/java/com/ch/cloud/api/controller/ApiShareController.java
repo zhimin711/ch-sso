@@ -1,20 +1,20 @@
 package com.ch.cloud.api.controller;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.ch.cloud.api.domain.ApiGroup;
 import com.ch.cloud.api.domain.ApiPath;
 import com.ch.cloud.api.domain.ApiProject;
 import com.ch.cloud.api.dto.ApiGroupPathDetailDTO;
 import com.ch.cloud.api.dto.ApiResourceDTO;
+import com.ch.cloud.api.dto.EnvDTO;
 import com.ch.cloud.api.manager.ApiGroupManager;
 import com.ch.cloud.api.manager.ApiShareManager;
 import com.ch.cloud.api.pojo.GroupPath;
 import com.ch.cloud.api.service.IApiGroupService;
 import com.ch.cloud.api.service.IApiPathService;
 import com.ch.cloud.api.service.IApiProjectService;
+import com.ch.cloud.api.utils.ApiUtil;
 import com.ch.e.Assert;
 import com.ch.e.PubError;
 import com.ch.result.Result;
@@ -57,7 +57,7 @@ public class ApiShareController {
 
     @Autowired
     private ApiShareManager apiShareManager;
-    
+
     @Autowired
     private IApiProjectService apiProjectService;
 
@@ -87,7 +87,7 @@ public class ApiShareController {
             Assert.isTrue(has, PubError.NOT_EXISTS, "分享资源");
             ApiPath apiPath = apiPathService.getById(pathId);
             ApiGroupPathDetailDTO dto = new ApiGroupPathDetailDTO();
-            
+
             BeanUtils.copyProperties(apiPath, dto);
             if (CommonUtils.isNotEmpty(apiPath.getMethod())) {
                 dto.setMethod(apiPath.getMethod().toUpperCase());
@@ -102,19 +102,30 @@ public class ApiShareController {
                 dto.setRequestBody(JSON.parseObject(apiPath.getBody()));
             }
             ApiProject project = apiProjectService.getByProjectId(apiPath.getProjectId());
-            buildEnvList(project);
+            List<EnvDTO> list = buildEnvList(project);
+            dto.setEnvList(list);
             return dto;
         });
     }
-    
-    private static void buildEnvList(ApiProject project) {
-        if(JSON.isValidObject(project.getEnv())){
-            return;
+
+    private static List<EnvDTO> buildEnvList(ApiProject project) {
+        if (JSON.isValidObject(project.getEnv())) {
+            return Lists.newArrayList();
         }
         JSONObject envJson = JSON.parseObject(project.getEnv());
-        if(!envJson.containsKey("envList")){
-            return;
+        if (!envJson.containsKey("envList")) {
+            return Lists.newArrayList();
         }
-        JSONArray envList = envJson.getJSONArray("envList");
+        List<EnvDTO> envList = envJson.getList("envList", EnvDTO.class);
+        JSONObject envPrefix = envJson.containsKey("envPrefix") ? envJson.getJSONObject("envPrefix") : new JSONObject();
+        envList.forEach(env -> {
+            env.setDomain(ApiUtil.handleDomain(env.getDomain()));
+            String basePath = ApiUtil.handlePrefix(envPrefix.getString("envPrefix_" + env.getDomain()));
+            if (CommonUtils.isEmpty(basePath)) {
+                basePath += ApiUtil.handlePrefix(project.getBasePath());
+            }
+            env.setPrefix(basePath);
+        });
+        return envList;
     }
 }

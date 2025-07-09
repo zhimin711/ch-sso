@@ -27,4 +27,7 @@ public class ApiGroupPathDetailDTO extends ApiPathDTO {
 
     @Schema(description = "自定义分组ID")
     private List<Long> customGroupIds;
+
+    @Schema(description = "环境列表")
+    private List<EnvDTO> envList;
 }
