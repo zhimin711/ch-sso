@@ -10,7 +10,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 /**
  * @author Zhimin.Ma
  */
-@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
+@SpringBootApplication(scanBasePackages = {"com.ch.cloud.sso", "com.ch.cloud.api"})
 @EnableDiscoveryClient
 @EnableFeignClients("com.ch.cloud")
 public class SsoApplication {

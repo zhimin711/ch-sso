@@ -13,15 +13,19 @@ import com.ch.e.Assert;
 import com.ch.e.PubError;
 import com.ch.result.Result;
 import com.ch.result.ResultUtils;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
-import springfox.documentation.annotations.ApiIgnore;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
@@ -39,7 +43,7 @@ import java.util.List;
  */
 @RestController
 @Slf4j
-@Api("用户登录")
+@Tag(name = "用户登录", description = "用户登录相关接口")
 public class LoginController {
 
     @Autowired
@@ -53,7 +57,6 @@ public class LoginController {
 
     //
     @GetMapping("login")
-    @ApiIgnore
     public ModelAndView index(HttpServletRequest request) {
         return new ModelAndView("login");
     }
@@ -65,7 +68,7 @@ public class LoginController {
      *
      * @return access_token
      */
-    @ApiOperation(value = "获取用户访问令牌", notes = "基于密码模式登录,无需签名,返回access_token")
+    @Operation(summary = "获取用户访问令牌", description = "基于密码模式登录,无需签名,返回access_token")
     @PostMapping(value = "login/access", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Result<TokenVo> loginAccess(@RequestBody LoginDto user) {
 
@@ -89,7 +92,7 @@ public class LoginController {
         });
     }
 
-    @ApiOperation(value = "根据授权码获取访问令牌", notes = "根据授权码获取访问令牌")
+    @Operation(summary = "根据授权码获取访问令牌", description = "根据授权码获取访问令牌")
     @GetMapping(value = "login/auth-code")
     public Result<TokenVo> loginAccess(@RequestParam String code) {
         return ResultUtils.wrapFail(() -> {
@@ -98,7 +101,7 @@ public class LoginController {
         });
     }
 
-    @ApiOperation(value = "刷新访问令牌", notes = "刷新访问令牌")
+    @Operation(summary = "刷新访问令牌", description = "刷新访问令牌")
     @GetMapping(value = "login/token/refresh")
     public Result<TokenVo> refresh(@RequestHeader(Constants.X_TOKEN) String token,
             @RequestHeader(Constants.X_REFRESH_TOKEN) String refreshToken) {

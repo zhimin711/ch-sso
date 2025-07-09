@@ -2,8 +2,7 @@ package com.ch.cloud.sso.biz.pojo;
 
 import com.ch.cloud.upms.dto.UserDto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema; // 修改: 替换为 Swagger 3.0 的 Schema 注解
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,14 +14,14 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-@ApiModel(value = "用户及权限信息", description = "")
+@Schema(description = "用户及权限信息") // 修改: 替换 ApiModel 为 Schema
 @JsonIgnoreProperties({"password"})
 public class UserVo extends UserDto {
 
-    @ApiModelProperty(hidden = true)
+    @Schema(hidden = true) // 修改: 替换 ApiModelProperty 为 Schema
     private String password;
-    @ApiModelProperty(hidden = true)
-    private String token;
 
+    @Schema(hidden = true) // 修改: 替换 ApiModelProperty 为 Schema
+    private String token;
 
 }

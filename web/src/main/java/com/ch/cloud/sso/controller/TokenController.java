@@ -6,8 +6,8 @@ import com.ch.cloud.sso.biz.tools.TokenCacheTool;
 import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.e.PubError;
 import com.ch.result.Result;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation; // 修改: 替换 ApiOperation 为 Operation
+import io.swagger.v3.oas.annotations.tags.Tag; // 修改: 替换 Api 为 Tag
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/token")
-@Api(tags = "Token管理")
+@Tag(name = "Token管理", description = "Token相关接口") // 修改: 替换 Api 为 Tag，并添加 description
 @Slf4j
 public class TokenController {
 
@@ -35,7 +35,7 @@ public class TokenController {
      * 生成Token
      */
     @PostMapping("/generate")
-    @ApiOperation("生成Token")
+    @Operation(summary = "生成Token", description = "生成访问令牌") // 修改: 替换 ApiOperation 为 Operation，并添加 summary 和 description
     public Result<TokenVo> generateToken(@RequestBody UserInfo userInfo,
                                         @RequestParam String secret) {
         try {
@@ -51,7 +51,7 @@ public class TokenController {
      * 验证Token
      */
     @GetMapping("/validate")
-    @ApiOperation("验证Token")
+    @Operation(summary = "验证Token", description = "验证访问令牌的有效性") // 修改: 替换 ApiOperation 为 Operation，并添加 summary 和 description
     public Result<Boolean> validateToken(@RequestParam String token) {
         try {
             boolean isValid = tokenManager.validateToken(token);
@@ -66,7 +66,7 @@ public class TokenController {
      * 刷新Token
      */
     @PostMapping("/refresh")
-    @ApiOperation("刷新Token")
+    @Operation(summary = "刷新Token", description = "刷新访问令牌") // 修改: 替换 ApiOperation 为 Operation，并添加 summary 和 description
     public Result<TokenVo> refreshToken(@RequestParam String refreshToken) {
         try {
             TokenVo tokenVo = tokenManager.refreshToken(refreshToken);
@@ -85,7 +85,7 @@ public class TokenController {
      * 续期刷新Token
      */
     @PostMapping("/renew")
-    @ApiOperation("续期刷新Token")
+    @Operation(summary = "续期刷新Token", description = "续期刷新访问令牌") // 修改: 替换 ApiOperation 为 Operation，并添加 summary 和 description
     public Result<Boolean> renewRefreshToken(@RequestParam String refreshToken) {
         try {
             boolean success = tokenManager.renewToken(refreshToken);
@@ -104,7 +104,7 @@ public class TokenController {
      * 获取用户信息
      */
     @GetMapping("/user-info")
-    @ApiOperation("获取用户信息")
+    @Operation(summary = "获取用户信息", description = "通过Token获取用户信息") // 修改: 替换 ApiOperation 为 Operation，并添加 summary 和 description
     public Result<UserInfo> getUserInfo(@RequestParam String token) {
         try {
             UserInfo userInfo = tokenManager.getUserInfo(token);
@@ -123,7 +123,7 @@ public class TokenController {
      * 删除Token
      */
     @DeleteMapping("/delete")
-    @ApiOperation("删除Token")
+    @Operation(summary = "删除Token", description = "删除指定的访问令牌") // 修改: 替换 ApiOperation 为 Operation，并添加 summary 和 description
     public Result<Void> deleteToken(@RequestParam String token) {
         try {
             tokenManager.deleteToken(token);
@@ -138,7 +138,7 @@ public class TokenController {
      * 删除用户的所有Token
      */
     @DeleteMapping("/delete-user-tokens")
-    @ApiOperation("删除用户的所有Token")
+    @Operation(summary = "删除用户的所有Token", description = "删除指定用户的全部访问令牌") // 修改: 替换 ApiOperation 为 Operation，并添加 summary 和 description
     public Result<Void> deleteUserTokens(@RequestParam String username) {
         try {
             tokenManager.deleteUserTokens(username);
@@ -153,7 +153,7 @@ public class TokenController {
      * 获取Token过期时间
      */
     @GetMapping("/expire-time")
-    @ApiOperation("获取Token过期时间")
+    @Operation(summary = "获取Token过期时间", description = "获取访问令牌的剩余有效时间") // 修改: 替换 ApiOperation 为 Operation，并添加 summary 和 description
     public Result<Long> getTokenExpireTime(@RequestParam String token) {
         try {
             long expireTime = tokenCacheTool.getAccessTokenExpireTime(token);
@@ -168,7 +168,7 @@ public class TokenController {
      * 获取刷新Token过期时间
      */
     @GetMapping("/refresh-expire-time")
-    @ApiOperation("获取刷新Token过期时间")
+    @Operation(summary = "获取刷新Token过期时间", description = "获取刷新令牌的剩余有效时间") // 修改: 替换 ApiOperation 为 Operation，并添加 summary 和 description
     public Result<Long> getRefreshTokenExpireTime(@RequestParam String refreshToken) {
         try {
             long expireTime = tokenCacheTool.getRefreshTokenExpireTime(refreshToken);
@@ -183,7 +183,7 @@ public class TokenController {
      * 根据用户名获取访问Token
      */
     @GetMapping("/access-token")
-    @ApiOperation("根据用户名获取访问Token")
+    @Operation(summary = "根据用户名获取访问Token", description = "通过用户名获取用户的访问令牌") // 修改: 替换 ApiOperation 为 Operation，并添加 summary 和 description
     public Result<String> getAccessTokenByUsername(@RequestParam String username) {
         try {
             String token = tokenCacheTool.getAccessTokenByUsername(username);
@@ -202,7 +202,7 @@ public class TokenController {
      * 根据用户名获取刷新Token
      */
     @GetMapping("/refresh-token")
-    @ApiOperation("根据用户名获取刷新Token")
+    @Operation(summary = "根据用户名获取刷新Token", description = "通过用户名获取用户的刷新令牌") // 修改: 替换 ApiOperation 为 Operation，并添加 summary 和 description
     public Result<String> getRefreshTokenByUsername(@RequestParam String username) {
         try {
             String refreshToken = tokenCacheTool.getRefreshTokenByUsername(username);

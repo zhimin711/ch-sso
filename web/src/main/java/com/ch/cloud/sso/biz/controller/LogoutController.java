@@ -6,6 +6,7 @@ import com.ch.cloud.sso.biz.tools.TokenTool;
 import com.ch.e.PubError;
 import com.ch.result.Result;
 import com.ch.utils.CommonUtils;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
  * @since 2018/12/21 10:40 PM
  */
 @RestController
+@Tag(name = "用户注销", description = "用户注销相关接口")
 public class LogoutController {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());

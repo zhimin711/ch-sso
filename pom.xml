@@ -17,7 +17,7 @@
         <module>service</module>
         <module>web</module>
     </modules>
-
+    
     <properties>
         <revision>1.0.0-SNAPSHOT</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -28,10 +28,13 @@
         <file_encoding>UTF-8</file_encoding>
         <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
         
-        <ch.cloud.version>2.0.2-SNAPSHOT</ch.cloud.version>
+        <mapstruct.version>1.5.2.Final</mapstruct.version>
+        <lombok.version>1.18.20</lombok.version>
+        
+        <ch.cloud.version>2.0.2.1-SNAPSHOT</ch.cloud.version>
         <ch.upms.version>1.1.1-SNAPSHOT</ch.upms.version>
     </properties>
-
+    
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -40,7 +43,7 @@
             <scope>compile</scope>
         </dependency>
     </dependencies>
-
+    
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -79,7 +82,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
+    
     <build>
         <plugins>
             <plugin>
@@ -90,6 +93,18 @@
                     <source>${java_source_version}</source>
                     <target>${java_target_version}</target>
                     <encoding>${file_encoding}</encoding>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin> <plugin>
             <groupId>org.codehaus.mojo</groupId>

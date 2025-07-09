@@ -13,8 +13,9 @@ import com.ch.pojo.KeyValue;
 import com.ch.result.Result;
 import com.ch.result.ResultUtils;
 import com.ch.toolkit.ContextUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,7 @@ import java.security.Principal;
  */
 @RestController
 @RequestMapping("/user")
-@Api("用户信息")
+@Tag(name = "用户信息", description = "用户信息相关接口")
 @Slf4j
 public class UserController {
 
@@ -64,23 +65,13 @@ public class UserController {
         return principal;
     }
 
-    /**
-     * 登录用户信息
-     *
-     * @return 用户信息
-     */
-    @ApiOperation(value = "获取用户授权", notes = "用户授权信息")
+    @Operation(summary = "获取用户授权", description = "用户授权信息")
     @GetMapping("/info")
     public Result<UserVo> info() {
         return ResultUtils.wrapFail(() -> userService.findUserInfo(ContextUtil.getUsername()));
     }
 
-    /**
-     * 获取用户的角色菜单与权限
-     *
-     * @return 角色菜单与权限
-     */
-    @ApiOperation(value = "访问令牌获取用户授权", notes = "访问令牌获取,返回用户授权信息")
+    @Operation(summary = "访问令牌获取用户授权", description = "访问令牌获取,返回用户授权信息")
     @PostMapping("/permissions")
     public Result<UserPermissionVo> permissions(@RequestHeader(Constants.X_TOKEN) String token,
                                                 @RequestBody UserInfo user) {
@@ -101,7 +92,7 @@ public class UserController {
     }
 
 
-    @ApiOperation(value = "获取授权码", notes = "获取授权码")
+    @Operation(summary = "获取授权码", description = "获取授权码")
     @GetMapping(value = "/auth-code")
     public Result<String> authCode(@RequestHeader(Constants.X_TOKEN) String token,
                                    @RequestParam String url) {
