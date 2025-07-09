@@ -1,7 +1,7 @@
 nacos:
   config:
-    namespace: cloud-dev
-    server-addr: 192.168.150.203:8848
+    #    namespace: cloud-dev
+    server-addr: 192.168.150.252:8848
 spring:
   application:
     name: ch-sso
@@ -17,7 +17,7 @@ spring:
         namespace: ${nacos.config.namespace:}
         shared-configs:
           -
-            dataId: ch-sso.yml
+            dataId: ${spring.application.name}.yml
             refresh: true
             group: ${spring.application.name}
 

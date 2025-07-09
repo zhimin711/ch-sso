@@ -2,6 +2,21 @@ server:
   port: 7000
 
 spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.150.254:3306/ch_devops?characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: admin
+    password: 123456
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 15
+      auto-commit: true
+      idle-timeout: 30000
+      pool-name: DatebookHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
   thymeleaf:
     cache: false
   redis:
@@ -19,7 +34,7 @@ spring:
     ### 连接超时时间（毫秒）
     timeout: 60000
     ### Redis数据库索引(默认为0)
-    host: 192.168.150.206
+    host: 192.168.150.254
     port: 6379
     password: admin123
     database: 1
@@ -74,6 +89,20 @@ rocketmq:
     send-message-timeout: 300000
     group: ch-sso
 
-springfox:
-  documentation:
+springdoc:
+  swagger-ui:
     enabled: true
+  #    path: /swagger-ui/index.html  # 默认路径，可自定义
+  api-docs:
+    path: /v3/api-docs      # OpenAPI JSON 端点
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      id-type: auto
