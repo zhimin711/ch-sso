@@ -23,32 +23,33 @@ import java.lang.reflect.Method;
 @Aspect
 @Component
 public class ApiOperationLogAspect {
-    
+
     @Autowired
     private IApiOperationLogService apiOperationLogService;
-    
+
     @Autowired
     private HttpServletRequest request;
-    
+
     @Pointcut(
             "(@within(org.springframework.web.bind.annotation.RestController) || @within(org.springframework.stereotype.Controller)) && "
                     + "(@annotation(org.springframework.web.bind.annotation.PostMapping) || "
                     + "@annotation(org.springframework.web.bind.annotation.PutMapping) || "
-                    + "@annotation(org.springframework.web.bind.annotation.DeleteMapping))")
+                    + "@annotation(org.springframework.web.bind.annotation.DeleteMapping)) && "
+                    + "@annotation(com.ch.cloud.api.annotation.HasPermission)")
     public void operationLogPointcut() {
     }
-    
+
     @AfterReturning(pointcut = "operationLogPointcut()", returning = "result")
     public void afterOperation(JoinPoint joinPoint, Object result) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
-        
+
         String operationType = getOperationType(method);
         String module = joinPoint.getTarget().getClass().getSimpleName();
         String username = ContextUtil.getUsername();
         String userId = ContextUtil.getUserId();
         String ip = request.getRemoteAddr();
-        
+
         // 从 Cookie 获取 projectId
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -59,13 +60,13 @@ public class ApiOperationLogAspect {
                 }
             }
         }
-        
-        
+
+
         String operationContent = method.getName() + " " + java.util.Arrays.toString(joinPoint.getArgs());
-        
+
         apiOperationLogService.saveLog(userId, username, module, operationType, operationContent, ip);
     }
-    
+
     private String getOperationType(Method method) {
         HasPermission permission = method.getAnnotation(HasPermission.class);
         if (permission != null) {
@@ -82,4 +83,4 @@ public class ApiOperationLogAspect {
         }
         return "操作";
     }
-} 
+}
