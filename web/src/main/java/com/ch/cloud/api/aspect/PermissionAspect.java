@@ -68,9 +68,9 @@ public class PermissionAspect {
 
         Assert.isTrue(CommonUtils.isNumeric(projectIdStr), PubError.NOT_EXISTS, "未获取到项目信息");
         Long projectId = Long.parseLong(projectIdStr);
-        ApiProjectRoleDTO roleDTO = apiProjectService.findByUserIdAndProjectId(ContextUtil.getUserId(), projectId);
+        ApiProjectRoleDTO roleDTO = apiProjectService.findByUserIdAndProjectId(ContextUtil.getUsername(), projectId);
         if (roleDTO == null || !CommonUtils.isEquals(roleDTO.getRole(),roleCode)) {
-            List<RoleType> projectRoles = upmsUserClient.listProjectRoles(ContextUtil.getUserId(), projectId, roleCode);
+            List<RoleType> projectRoles = upmsUserClient.listProjectRoles(ContextUtil.getUsername(), projectId, roleCode);
             Assert.notEmpty(projectRoles, PubError.NOT_ALLOWED, roleCode);
         }
         Assert.isFalse(RoleType.isVisitor(roleCode) && roleDTO == null, PubError.NOT_ALLOWED, roleCode, "未授权访问");

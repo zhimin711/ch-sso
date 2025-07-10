@@ -13,7 +13,7 @@ import lombok.Data;
 @Data
 public class ApiProjectRoleDTO {
     
-    private Long userId;
+    private String userId;
     
     private Long projectId;
     

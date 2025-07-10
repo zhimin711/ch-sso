@@ -84,9 +84,9 @@ public class ApiProjectController {
     @GetMapping(value = "permissions")
     public List<ApiPermissionDTO> getPermissions(@RequestParam Long projectId, @RequestParam String roleCode) {
         ProjectRoleType roleType = ProjectRoleType.fromName(roleCode);
-        ApiProjectRoleDTO roleDTO = apiProjectService.findByUserIdAndProjectId(ContextUtil.getUserId(), projectId);
+        ApiProjectRoleDTO roleDTO = apiProjectService.findByUserIdAndProjectId(ContextUtil.getUsername(), projectId);
         if (roleDTO == null || !CommonUtils.isEquals(roleDTO.getRole(), roleType.name())) {
-            List<RoleType> projectRoles = upmsUserClient.listProjectRoles(ContextUtil.getUserId(), projectId, roleCode);
+            List<RoleType> projectRoles = upmsUserClient.listProjectRoles(ContextUtil.getUsername(), projectId, roleCode);
             Assert.notEmpty(projectRoles, PubError.NOT_ALLOWED, roleCode);
         }
         Assert.isFalse(RoleType.isVisitor(roleCode) && roleDTO == null, PubError.NOT_ALLOWED, roleCode, "授权访问");
