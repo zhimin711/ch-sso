@@ -12,6 +12,7 @@ CREATE TABLE `bt_api_project` (
   `description` VARCHAR(255) DEFAULT NULL COMMENT '描述',
   `env` text DEFAULT NULL COMMENT '环境配置JSON格式',
   `global_config` text DEFAULT NULL COMMENT '环境配置JSON格式',
+  `result_wrap` json default null comment '封装结果'
   `STATUS` CHAR(1) NOT NULL DEFAULT '0' COMMENT '状态：0.失效 1.生效',
   `deleted` TINYINT(1) NULL COMMENT '是否删除',
   `CREATE_AT` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

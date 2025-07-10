@@ -59,6 +59,7 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
         if (CommonUtils.isEmpty(apiGroups)) {
             return Lists.newArrayList();
         }
+        
         // 构建分组树
         Map<Long, List<GroupPath>> groupMap = apiGroups.stream().map(e -> {
             GroupPath dto = BeanUtil.copyProperties(e, GroupPath.class);
