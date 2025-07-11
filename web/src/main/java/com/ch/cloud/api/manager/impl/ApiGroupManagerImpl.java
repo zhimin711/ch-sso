@@ -460,12 +460,17 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
         Assert.notNull(apiGroup, PubError.NOT_EXISTS, id);
         Assert.isFalse(CommonUtils.isEquals(apiGroup.getName(), ApiUtil.API_GROUP_DEFAULT), PubError.NOT_ALLOWED,
                 "默认分组删除");
-        
         boolean ok = apiGroupService.removeById(id);
+        
+        GroupType groupType = GroupType.fromCode(apiGroup.getType());
         List<Long> ids = apiGroupService.listPathIdsByGroupId(id);
         if (CommonUtils.isNotEmpty(ids)) {
-            apiPathService.removeByIds(ids);
+            //删除绑定的接口关系
             ids.forEach(e -> apiGroupService.removeGroupPath(id, e));
+            //只有模块分组才删除其下的接口
+            if (groupType == GroupType.MODULE) {
+                apiPathService.removeByIds(ids);
+            }
         }
         return ok;
     }
