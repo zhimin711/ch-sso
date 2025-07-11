@@ -10,6 +10,9 @@ import com.ch.cloud.sso.pojo.UserInfo;
 import com.ch.cloud.sso.props.JwtProperties;
 import com.ch.cloud.sso.utils.JwtUtil;
 import com.ch.e.Assert;
+import com.ch.e.ErrorException;
+import com.ch.e.IError;
+import com.ch.e.IException;
 import com.ch.e.PubError;
 import com.ch.utils.BeanUtilsV2;
 import com.ch.utils.DateUtils;
@@ -166,8 +169,11 @@ public class TokenManagerImpl implements TokenManager {
             
             // 生成新的Token
             return new TokenVo(accessToken, refreshToken, accessExpired.getTime());
+        } catch (ErrorException e) {
+            log.error("刷新Token异常: {}", refreshToken, e);
+            throw e;
         } catch (Exception e) {
-            log.error("刷新Token异常: {}", e.getMessage());
+            log.error("刷新Token异常: {}", refreshToken, e);
         } finally {
             lock.unlock();
         }
