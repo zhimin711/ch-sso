@@ -1,18 +1,17 @@
 package com.ch.cloud.api.controller.client;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ch.cloud.api.client.ApiGroupClient;
 import com.ch.cloud.api.domain.ApiGroup;
-import com.ch.cloud.api.domain.ApiOperationLog;
 import com.ch.cloud.api.domain.ApiPath;
+import com.ch.cloud.api.domain.ApiProject;
 import com.ch.cloud.api.pojo.GroupPath;
 import com.ch.cloud.api.service.IApiGroupService;
-import com.ch.cloud.api.service.IApiOperationLogService;
 import com.ch.cloud.api.service.IApiPathService;
+import com.ch.cloud.api.service.IApiProjectService;
 import com.ch.result.Result;
 import com.ch.result.ResultUtils;
+import com.ch.utils.CommonUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +37,9 @@ public class ApiGroupClientController implements ApiGroupClient {
     @Autowired
     private IApiPathService apiPathService;
 
+    @Autowired
+    private IApiProjectService apiProjectService;
+
     @Operation(summary = "查询模块列表", description = "查询模块列表")
     @GetMapping("/modules")
     @Override
@@ -55,6 +57,16 @@ public class ApiGroupClientController implements ApiGroupClient {
         return ResultUtils.wrap(() -> {
             List<Long> pathIds = apiGroupService.listPathIdsByGroupId(moduleId);
             List<ApiPath> apiPaths = apiPathService.listByIds(pathIds);
+            if (apiPaths.isEmpty()) {
+                return null;
+            }
+            ApiProject project = apiProjectService.getByProjectId(apiPaths.get(0).getProjectId());
+            if (CommonUtils.isNotEmpty(project.getBasePath())) {
+                apiPaths.forEach(apiPath -> {
+
+                    apiPath.setPath(project.getBasePath() + apiPath.getPath());
+                });
+            }
             return BeanUtil.copyToList(apiPaths, GroupPath.class);
         });
     }
