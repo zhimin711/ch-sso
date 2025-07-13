@@ -44,22 +44,22 @@ import java.util.stream.Collectors;
  */
 @Service
 public class ApiGroupManagerImpl implements ApiGroupManager {
-    
+
     @Autowired
     private IApiGroupService apiGroupService;
-    
+
     @Autowired
     private IApiPathService apiPathService;
-    
+
     @Autowired
     private IApiSchemaService apiSchemaService;
-    
+
     @Override
     public List<GroupPath> convertTree(List<ApiGroup> apiGroups, Boolean withApi) {
         if (CommonUtils.isEmpty(apiGroups)) {
             return Lists.newArrayList();
         }
-        
+
         // 构建分组树
         Map<Long, List<GroupPath>> groupMap = apiGroups.stream().map(e -> {
             GroupPath dto = BeanUtil.copyProperties(e, GroupPath.class);
@@ -69,7 +69,7 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
             return dto;
         }).collect(Collectors.groupingBy(GroupPath::getParentId));
         List<Long> groupIds = apiGroups.stream().map(ApiGroup::getId).collect(Collectors.toList());
-        
+
         List<ApiGroupPathDTO> groupPathList =
                 withApi ? apiGroupService.listPathIdsByGroupIds(groupIds) : Lists.newArrayList();
         Map<Long, List<ApiGroupPathDTO>> groupPathMap = groupPathList.stream()
@@ -86,10 +86,10 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
                 }
             });
         });
-        
+
         return groupMap.get(0L);
     }
-    
+
     private List<GroupPath> convertPathList(String groupKey, List<Long> pathIds) {
         if (CommonUtils.isEmpty(pathIds)) {
             return null;
@@ -106,7 +106,7 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
             return dto;
         }).collect(Collectors.toList());
     }
-    
+
     @Override
     public void parseDocTags(Long projectId, JSONObject apiDocJson) {
         if (!apiDocJson.containsKey("tags")) {
@@ -127,12 +127,12 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
         } else {
             Map<String, ApiGroup> groupMap = groups.stream()
                     .collect(Collectors.toMap(ApiGroup::getName, Function.identity()));
-            
+
             list.forEach(group -> {
                 ApiGroup apiGroup = groupMap.get(group.getName());
-                
+
                 GroupType groupType = GroupType.fromCode(group.getType());
-                
+
                 if (groupType == GroupType.MODULE) {
                     if (!CommonUtils.isEquals(group.getDescription(), apiGroup.getDescription())) {
                         group.setDescription(apiGroup.getDescription());
@@ -144,7 +144,7 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
                     group.setSort(sort.addAndGet(1));
                     updateList.add(group);
                 }
-                
+
                 groupMap.remove(group.getName());
             });
             if (CommonUtils.isNotEmpty(groupMap)) {
@@ -176,7 +176,7 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
             apiGroupService.updateBatchById(updateList);
         }
     }
-    
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void parsePathAndTag(Long projectId, JSONObject obj) {
@@ -190,7 +190,7 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
         Set<String> paths = pathObjs.keySet();
         for (String path : paths) {
             JSONObject methodObjs = pathObjs.getJSONObject(path);
-            
+
             Set<String> methods = methodObjs.keySet();
             for (String method : methods) {
                 JSONObject apiObj = methodObjs.getJSONObject(method);
@@ -211,7 +211,7 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
                         apiPath.setName(apiObj.getString("operationId"));
                     }
                 }
-                
+
                 if (apiObj.containsKey("consumes")) {
                     apiPath.setConsumes(apiObj.getJSONArray("consumes").toString());
                 }
@@ -240,7 +240,7 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
                     String jsonSchema = ApiSchemaConverter.parseResponses2JsonSchema(responses, schemaMap);
                     apiPath.setResponses(jsonSchema);
                 }
-                
+
                 apiPath.setImportAt(DateUtils.current());
                 if (!exists) {
                     apiPath.setIsImport(true);
@@ -308,7 +308,7 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
                     GroupType groupType = GroupType.fromCode(group.getType());
                     return groupType == GroupType.TAG;
                 }).collect(Collectors.toMap(ApiGroup::getName, ApiGroup::getId));
-                
+
                 ApiPath finalPath = apiPath;
                 newTags.forEach(e -> {
                     if (!tagGroupIdMap.containsKey(e)) {
@@ -326,12 +326,12 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
                             apiGroupService.addGroupPath(groupId, finalPath.getId());
                         }
                     }
-                    
+
                 });
             }
         }
     }
-    
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void parseDocDefinitions(Long projectId, JSONObject apiDocJson) {
@@ -348,18 +348,18 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
                 schema = new ApiSchema();
                 schema.setProjectId(projectId);
                 schema.setDefKey(key);
-                
+
                 schema.setCreateBy(ContextUtil.getUserId());
                 schema.setCreateAt(DateUtils.current());
             }
-            
+
             schema.setType(definitionObj.getString("type"));
             schema.setTitle(definitionObj.getString("title"));
             schema.setDescription(definitionObj.getString("description"));
             if (CommonUtils.isEmpty(schema.getTitle()) && CommonUtils.isNotEmpty(schema.getDescription())) {
                 schema.setTitle(schema.getDescription());
             }
-            
+
             if (definitionObj.containsKey("required")) {
                 schema.setRequired(definitionObj.getJSONArray("required").toString());
             }
@@ -373,7 +373,7 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
             }
         }
     }
-    
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void parseDocSchemas(Long projectId, JSONObject apiDocJson) {
@@ -416,7 +416,7 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
             }
         }
     }
-    
+
     @Override
     public boolean createDefaultGroup(Long projectId) {
         ApiGroup group = new ApiGroup();
@@ -425,10 +425,11 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
         group.setType(GroupType.MODULE.getCode());
         group.setName(ApiUtil.API_GROUP_DEFAULT);
         group.setDescription("默认");
+        group.setAlias("默认");
         group.setSort(0);
         return apiGroupService.save(group);
     }
-    
+
     @Override
     public List<GroupPath> convertTree(List<ApiGroup> apiGroups, Map<Long, ApiResourceDTO> resourceMap) {
         if (CommonUtils.isEmpty(apiGroups)) {
@@ -452,7 +453,7 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
         });
         return groupMap.get(0L);
     }
-    
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean delete(Long id) {
@@ -461,7 +462,7 @@ public class ApiGroupManagerImpl implements ApiGroupManager {
         Assert.isFalse(CommonUtils.isEquals(apiGroup.getName(), ApiUtil.API_GROUP_DEFAULT), PubError.NOT_ALLOWED,
                 "默认分组删除");
         boolean ok = apiGroupService.removeById(id);
-        
+
         GroupType groupType = GroupType.fromCode(apiGroup.getType());
         List<Long> ids = apiGroupService.listPathIdsByGroupId(id);
         if (CommonUtils.isNotEmpty(ids)) {
