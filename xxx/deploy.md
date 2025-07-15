@@ -130,3 +130,78 @@ Jenkins.instance.getItemByFullName(jobName).builds.findAll {
   it.delete()
 }
 ```
+
+```groovy
+pipeline {
+    agent any  // 在主节点或任意可用节点执行
+
+    environment {
+        APP_NAME = "ch-sso"
+        APP_VERSION = "1.0.0-SNAPSHOT"
+        IMG_NAMESPACE = "ch"
+        DOCKER_API = ""
+        //DOCKER_API = "-H tcp://192.168.0.253:2375"
+        HUB_ADDR = "registry.cn-hangzhou.aliyuncs.com"
+        K8S_URL = "https://192.168.0.252:8443"
+        
+        JAVA_HOME = "${tool 'JDK8'}"
+        PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
+    }
+
+    parameters {
+        gitParameter name: 'BRANCH', type: 'PT_BRANCH', defaultValue: 'master', branchFilter: 'origin/(.*)'
+    }
+
+    tools {
+        maven 'M3' // Jenkins 全局配置的 Maven 工具（名称为 M3）
+        jdk 'JDK8'
+    }
+
+    stages {
+        stage('Checkout Project') {
+            steps {
+                echo "1. Clone Project"
+                git credentialsId: 'CHGitee', url: 'https://gitee.com/ch-cloud/ch-sso.git/', branch: "${params.BRANCH}"
+            }
+        }
+
+        stage('Build Project') {
+            steps {
+                echo "2. Build Project"
+                sh 'mvn -s /var/jenkins_home/settings.xml clean package -U -Dmaven.test.skip'
+                // sh 'cp ../apache-skywalking-java-agent-8.11.0.tgz web/target'
+            }
+        }
+
+        stage('Build Image') {
+            steps {
+                echo "3. Build Docker Image"
+                sh "docker build -t ${APP_NAME}:${APP_VERSION} -f web/src/main/docker/Dockerfile web/target"
+                sh "docker tag ${APP_NAME}:${APP_VERSION} ${HUB_ADDR}/${IMG_NAMESPACE}/${APP_NAME}:${APP_VERSION}"
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                echo "4. Push Docker Image"
+                withCredentials([usernamePassword(credentialsId: 'ali-repo', usernameVariable: 'dockerUser', passwordVariable: 'dockerPassword')]) {
+                    sh "docker login -u ${dockerUser} -p ${dockerPassword} ${HUB_ADDR}"
+                    sh "docker push ${HUB_ADDR}/${IMG_NAMESPACE}/${APP_NAME}:${APP_VERSION}"
+                    sh "docker rmi ${HUB_ADDR}/${IMG_NAMESPACE}/${APP_NAME}:${APP_VERSION} ${APP_NAME}:${APP_VERSION}"
+                }
+            }
+        }
+
+    }
+
+    post {
+        success {
+            echo '✅ Pipeline executed successfully.'
+        }
+        failure {
+            echo '❌ Pipeline failed.'
+        }
+    }
+}
+
+```

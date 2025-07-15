@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>com.ch.cloud</groupId>
         <artifactId>ch-cloud</artifactId>
@@ -17,9 +17,9 @@
         <module>service</module>
         <module>web</module>
     </modules>
-    
+
     <properties>
-        <revision>1.0.0-SNAPSHOT</revision>
+        <revision>2.1.0-SNAPSHOT</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.test.skip>true</maven.test.skip>
         <downloadSources>true</downloadSources>
@@ -27,14 +27,14 @@
         <java_target_version>1.8</java_target_version>
         <file_encoding>UTF-8</file_encoding>
         <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
-        
+
         <mapstruct.version>1.5.2.Final</mapstruct.version>
         <lombok.version>1.18.20</lombok.version>
-        
+
         <ch.cloud.version>2.1.0-SNAPSHOT</ch.cloud.version>
         <ch.upms.version>1.1.1-SNAPSHOT</ch.upms.version>
     </properties>
-    
+
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -43,7 +43,7 @@
             <scope>compile</scope>
         </dependency>
     </dependencies>
-    
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -82,7 +82,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    
+
     <build>
         <plugins>
             <plugin>
@@ -133,7 +133,7 @@
         </plugin>
         </plugins>
     </build>
-    
+
     <distributionManagement>
         <snapshotRepository>
             <id>rdc-snapshots</id>
