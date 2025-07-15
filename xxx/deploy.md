@@ -138,12 +138,11 @@ pipeline {
     environment {
         APP_NAME = "ch-sso"
         APP_VERSION = "1.0.0-SNAPSHOT"
-        IMG_NAMESPACE = "ch"
-        DOCKER_API = ""
+        IMG_NAMESPACE = "ch-cloud"
         //DOCKER_API = "-H tcp://192.168.0.253:2375"
         HUB_ADDR = "registry.cn-hangzhou.aliyuncs.com"
         K8S_URL = "https://192.168.0.252:8443"
-        
+
         JAVA_HOME = "${tool 'JDK8'}"
         PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
     }
@@ -168,7 +167,7 @@ pipeline {
         stage('Build Project') {
             steps {
                 echo "2. Build Project"
-                sh 'mvn -s /var/jenkins_home/settings.xml clean package -U -Dmaven.test.skip'
+                sh 'mvn -s /var/jenkins_home/settings.xml clean package -U -Dmaven.test.skip -Dmaven.javadoc.skip=true'
                 // sh 'cp ../apache-skywalking-java-agent-8.11.0.tgz web/target'
             }
         }
@@ -191,8 +190,8 @@ pipeline {
         stage('Build Image') {
             steps {
                 echo "3. Build Docker Image"
-                sh "docker build -t ${APP_NAME}:${APP_VERSION} -f web/src/main/docker/Dockerfile web/target"
-                sh "docker tag ${APP_NAME}:${APP_VERSION} ${HUB_ADDR}/${IMG_NAMESPACE}/${APP_NAME}:${APP_VERSION}"
+                sh "docker build -t ${APP_NAME}:${env.APP_VERSION} -f web/src/main/docker/Dockerfile web/target"
+                sh "docker tag ${APP_NAME}:${env.APP_VERSION} ${HUB_ADDR}/${IMG_NAMESPACE}/${APP_NAME}:${env.APP_VERSION}"
             }
         }
 
@@ -200,9 +199,13 @@ pipeline {
             steps {
                 echo "4. Push Docker Image"
                 withCredentials([usernamePassword(credentialsId: 'ali-repo', usernameVariable: 'dockerUser', passwordVariable: 'dockerPassword')]) {
-                    sh "docker login -u ${dockerUser} -p ${dockerPassword} ${HUB_ADDR}"
-                    sh "docker push ${HUB_ADDR}/${IMG_NAMESPACE}/${APP_NAME}:${APP_VERSION}"
-                    sh "docker rmi ${HUB_ADDR}/${IMG_NAMESPACE}/${APP_NAME}:${APP_VERSION} ${APP_NAME}:${APP_VERSION}"
+                    // sh "docker login -u ${dockerUser} -p ${dockerPassword} ${HUB_ADDR}"
+                    sh """
+                        echo "${dockerPassword}" | docker login -u "${dockerUser}" --password-stdin ${HUB_ADDR}
+                    """
+
+                    sh "docker push ${HUB_ADDR}/${IMG_NAMESPACE}/${APP_NAME}:${env.APP_VERSION}"
+                    sh "docker rmi ${HUB_ADDR}/${IMG_NAMESPACE}/${APP_NAME}:${env.APP_VERSION} ${APP_NAME}:${env.APP_VERSION}"
                 }
             }
         }
@@ -218,5 +221,4 @@ pipeline {
         }
     }
 }
-
 ```
