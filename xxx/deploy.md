@@ -173,6 +173,21 @@ pipeline {
             }
         }
 
+        stage('Extract revision from POM') {
+            steps {
+                script {
+                    def revision = sh(
+                            script: "mvn help:evaluate -Dexpression=revision -q -DforceStdout",
+                            returnStdout: true
+                    ).trim()
+                    echo "Revision is ${revision}"
+
+                    // 设置为环境变量（可选）
+                    env.APP_VERSION = revision
+                }
+            }
+        }
+
         stage('Build Image') {
             steps {
                 echo "3. Build Docker Image"
