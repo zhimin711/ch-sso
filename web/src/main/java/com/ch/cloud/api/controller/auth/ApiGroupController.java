@@ -42,9 +42,6 @@ public class ApiGroupController {
     private IApiGroupService apiGroupService;
 
     @Autowired
-    private IApiPathService apiPathService;
-
-    @Autowired
     private ApiGroupManager apiGroupManage;
 
     @Operation(summary = "分页查询", description = "分页查询接口分组")
