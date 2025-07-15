@@ -133,16 +133,12 @@ Jenkins.instance.getItemByFullName(jobName).builds.findAll {
 
 ```groovy
 pipeline {
-    agent any  // 在主节点或任意可用节点执行
+    agent any
 
     environment {
         APP_NAME = "ch-sso"
-        APP_VERSION = "1.0.0-SNAPSHOT"
         IMG_NAMESPACE = "ch-cloud"
-        //DOCKER_API = "-H tcp://192.168.0.253:2375"
         HUB_ADDR = "registry.cn-hangzhou.aliyuncs.com"
-        K8S_URL = "https://192.168.0.252:8443"
-
         JAVA_HOME = "${tool 'JDK8'}"
         PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
     }
@@ -152,7 +148,7 @@ pipeline {
     }
 
     tools {
-        maven 'M3' // Jenkins 全局配置的 Maven 工具（名称为 M3）
+        maven 'M3'
         jdk 'JDK8'
     }
 
@@ -168,48 +164,45 @@ pipeline {
             steps {
                 echo "2. Build Project"
                 sh 'mvn -s /var/jenkins_home/settings.xml clean package -U -Dmaven.test.skip -Dmaven.javadoc.skip=true'
-                // sh 'cp ../apache-skywalking-java-agent-8.11.0.tgz web/target'
             }
         }
 
         stage('Extract revision from POM') {
             steps {
                 script {
-                    def revision = sh(
+                    REVISION = sh(
                             script: "mvn help:evaluate -Dexpression=revision -q -DforceStdout",
                             returnStdout: true
                     ).trim()
-                    echo "Revision is ${revision}"
-
-                    // 设置为环境变量（可选）
-                    env.APP_VERSION = revision
+                    echo "Revision is ${REVISION}"
                 }
             }
         }
 
         stage('Build Image') {
             steps {
-                echo "3. Build Docker Image"
-                sh "docker build -t ${APP_NAME}:${env.APP_VERSION} -f web/src/main/docker/Dockerfile web/target"
-                sh "docker tag ${APP_NAME}:${env.APP_VERSION} ${HUB_ADDR}/${IMG_NAMESPACE}/${APP_NAME}:${env.APP_VERSION}"
+                script {
+                    echo "3. Build Docker Image"
+                    sh "docker build -t ${APP_NAME}:${REVISION} -f web/src/main/docker/Dockerfile web/target"
+                    sh "docker tag ${APP_NAME}:${REVISION} ${HUB_ADDR}/${IMG_NAMESPACE}/${APP_NAME}:${REVISION}"
+                }
             }
         }
 
         stage('Push Image') {
             steps {
-                echo "4. Push Docker Image"
-                withCredentials([usernamePassword(credentialsId: 'ali-repo', usernameVariable: 'dockerUser', passwordVariable: 'dockerPassword')]) {
-                    // sh "docker login -u ${dockerUser} -p ${dockerPassword} ${HUB_ADDR}"
-                    sh """
-                        echo "${dockerPassword}" | docker login -u "${dockerUser}" --password-stdin ${HUB_ADDR}
-                    """
-
-                    sh "docker push ${HUB_ADDR}/${IMG_NAMESPACE}/${APP_NAME}:${env.APP_VERSION}"
-                    sh "docker rmi ${HUB_ADDR}/${IMG_NAMESPACE}/${APP_NAME}:${env.APP_VERSION} ${APP_NAME}:${env.APP_VERSION}"
+                script {
+                    echo "4. Push Docker Image"
+                    withCredentials([usernamePassword(credentialsId: 'ali-repo', usernameVariable: 'dockerUser', passwordVariable: 'dockerPassword')]) {
+                        sh """
+                            echo "${dockerPassword}" | docker login -u "${dockerUser}" --password-stdin ${HUB_ADDR}
+                        """
+                        sh "docker push ${HUB_ADDR}/${IMG_NAMESPACE}/${APP_NAME}:${REVISION}"
+                        sh "docker rmi ${HUB_ADDR}/${IMG_NAMESPACE}/${APP_NAME}:${REVISION} ${APP_NAME}:${REVISION}"
+                    }
                 }
             }
         }
-
     }
 
     post {
@@ -221,4 +214,5 @@ pipeline {
         }
     }
 }
+
 ```
