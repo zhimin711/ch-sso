@@ -1,10 +1,13 @@
 package com.ch.cloud.api.manager.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.ch.cloud.api.domain.ApiShareCode;
 import com.ch.cloud.api.dto.ApiResourceDTO;
 import com.ch.cloud.api.manager.ApiShareManager;
 import com.ch.cloud.api.props.ApiAuthProperties;
+import com.ch.cloud.api.service.IApiShareCodeService;
 import com.ch.cloud.upms.client.UpmsAuthCodeClient;
 import com.ch.cloud.upms.dto.AuthCodeGenerateDTO;
 import com.ch.cloud.upms.dto.AuthCodeResourceDTO;
@@ -23,6 +26,9 @@ public class ApiShareManagerImpl implements ApiShareManager {
 
     @Autowired
     private UpmsAuthCodeClient upmsAuthCodeClient;
+    @Autowired
+    private IApiShareCodeService apiShareCodeService;
+
 
     @Autowired
     private ApiAuthProperties apiAuthProperties;
@@ -38,8 +44,14 @@ public class ApiShareManagerImpl implements ApiShareManager {
         json.put("resources", resources);
         auth.setContent(json.toJSONString());
         Result<AuthCodeVO> genResult = upmsAuthCodeClient.generate(auth);
+        String code = genResult.get().getCode();
 
-        return genResult.get().getCode();
+        ApiShareCode entity = BeanUtil.copyProperties(auth, ApiShareCode.class);
+        entity.setShareCode(code);
+        entity.setExpireTime(auth.getExpireTime());
+        entity.setUserId(auth.getAuthUser());
+        apiShareCodeService.save(entity);
+        return code;
     }
 
     @Override

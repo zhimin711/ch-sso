@@ -14,7 +14,17 @@
 * 已集群Oauth2（默认未配置）
 
 #### 软件架构
-请参见Wiki文档 [传送门](https://gitee.com/ch-cloud/wiki)
+ch-sso是基于Spring Boot + Spring Security构建的企业级单点登录系统，核心架构包括：
+- **认证授权**：基于OAuth2.0协议，支持密码模式、授权码模式
+- **Token管理**：使用JWT生成访问令牌(Access Token)和刷新令牌(Refresh Token)，Redis缓存实现令牌存储与验证
+- **服务治理**：集成Alibaba Nacos作为服务注册与配置中心
+- **安全防护**：包含验证码(AWT生成)、滑动验证、密码加密存储等安全机制
+- **集群支持**：支持分布式部署，默认提供集群化OAuth2配置(需手动开启)
+
+架构流程图：
+```
+用户 → 业务系统 → SSO认证中心 → 生成Token → 业务系统验证Token → 资源访问
+```
 
 
 #### 安装教程
@@ -89,8 +99,43 @@ gradle bootJar
 
 #### 使用说明
 
+### 核心API接口
 
-1. 请参见Wiki文档 [传送门](https://gitee.com/ch-cloud/wiki)
+#### 认证相关
+- `GET /login` - 获取登录页面
+- `POST /login/access` - 用户登录(参数: username, password, captcha)
+- `GET /login/auth-code` - 获取手机验证码
+- `GET /login/token/refresh` - 刷新令牌
+- `GET /login/captcha` - 获取图形验证码
+- `GET /login/slideCaptcha` - 获取滑动验证码
+
+#### 用户相关
+- `GET /user` - 获取用户列表
+- `GET /user/info` - 获取当前用户信息
+- `POST /user/permissions` - 获取用户权限
+- `GET /user/auth-code` - 获取用户授权码
+
+#### 令牌相关
+- `GET /api/token/validate` - 验证令牌有效性
+- `GET /api/token/user-info` - 获取令牌关联用户信息
+- `GET /api/token/refresh-token` - 获取刷新令牌
+
+#### 登出相关
+- `GET /oauth/logout` - 用户登出
+- `POST /logout/token` - 注销令牌
+
+### 调用示例
+**用户登录**:
+```bash
+curl -X POST http://localhost:7000/login/access \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"123456","captcha":"8a3d"}'
+```
+
+**验证令牌**:
+```bash
+curl -X GET http://localhost:7000/api/token/validate?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
 
 #### 参与贡献
 

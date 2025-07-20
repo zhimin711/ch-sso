@@ -8,4 +8,5 @@ public interface ApiShareManager {
     String createShareCode(List<ApiResourceDTO> resources);
 
     List<ApiResourceDTO> getResources(String shareCode);
+
 }
