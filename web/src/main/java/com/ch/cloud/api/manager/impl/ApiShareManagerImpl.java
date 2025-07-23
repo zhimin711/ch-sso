@@ -41,7 +41,7 @@ public class ApiShareManagerImpl implements ApiShareManager {
 
         JSONObject json = new JSONObject();
         json.put("permissions", apiAuthProperties.getPermissions());
-        json.put("resources", resources);
+        // json.put("resources", resources);
         auth.setContent(json.toJSONString());
         Result<AuthCodeVO> genResult = upmsAuthCodeClient.generate(auth);
         String code = genResult.get().getCode();
@@ -56,14 +56,10 @@ public class ApiShareManagerImpl implements ApiShareManager {
 
     @Override
     public List<ApiResourceDTO> getResources(String shareCode) {
-        Result<AuthCodeResourceDTO> result = upmsAuthCodeClient.getContent(shareCode);
-        if (result.isSuccess()) {
-            AuthCodeResourceDTO resourceDTO = result.get();
-
-            JSONObject jsonObject = JSON.parseObject(resourceDTO.getContent());
-            List<ApiResourceDTO> resources = jsonObject.getList("resources", ApiResourceDTO.class);
-            return resources;
+        ApiShareCode apiShareCode = apiShareCodeService.lambdaQuery().eq(ApiShareCode::getShareCode, shareCode).one();
+        if (apiShareCode == null) {
+            return Lists.newArrayList();
         }
-        return Lists.newArrayList();
+        return apiShareCode.getResources();
     }
 }
