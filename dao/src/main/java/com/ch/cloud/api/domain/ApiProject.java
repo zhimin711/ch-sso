@@ -28,6 +28,13 @@ public class ApiProject extends BaseEntity {
     private Long projectId;
 
     /**
+     * 租户空间ID
+     */
+    @Schema(description = "租户空间ID")
+    @TableField("workspace_id")
+    private Long workspaceId;
+
+    /**
      * 别名
      */
     @Schema(description = "别名")

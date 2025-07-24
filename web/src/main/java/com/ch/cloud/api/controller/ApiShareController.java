@@ -14,6 +14,7 @@ import com.ch.cloud.api.pojo.GroupPath;
 import com.ch.cloud.api.service.IApiGroupService;
 import com.ch.cloud.api.service.IApiPathService;
 import com.ch.cloud.api.service.IApiProjectService;
+import com.ch.cloud.api.service.ApiTenantManager;
 import com.ch.cloud.api.utils.ApiUtil;
 import com.ch.e.Assert;
 import com.ch.e.PubError;
@@ -60,6 +61,9 @@ public class ApiShareController {
 
     @Autowired
     private IApiProjectService apiProjectService;
+
+    @Autowired
+    private ApiTenantManager apiTenantManager;
 
     @Operation(summary = "查询分享接口树", description = "查询分享接口树")
     @GetMapping(value = {"tree"})
@@ -108,24 +112,46 @@ public class ApiShareController {
         });
     }
 
-    private static List<EnvDTO> buildEnvList(ApiProject project) {
-        if (JSON.isValidObject(project.getEnv())) {
-            return Lists.newArrayList();
-        }
-        JSONObject envJson = JSON.parseObject(project.getEnv());
-        if (!envJson.containsKey("envList")) {
-            return Lists.newArrayList();
-        }
-        List<EnvDTO> envList = envJson.getList("envList", EnvDTO.class);
-        JSONObject envPrefix = envJson.containsKey("envPrefix") ? envJson.getJSONObject("envPrefix") : new JSONObject();
-        envList.forEach(env -> {
-            env.setDomain(ApiUtil.handleDomain(env.getDomain()));
-            String basePath = ApiUtil.handlePrefix(envPrefix.getString("envPrefix_" + env.getDomain()));
-            if (CommonUtils.isEmpty(basePath)) {
-                basePath += ApiUtil.handlePrefix(project.getBasePath());
+    private List<EnvDTO> buildEnvList(ApiProject project) {
+        // 优先使用项目的env字段配置
+        if (CommonUtils.isNotEmpty(project.getEnv()) && JSON.isValidObject(project.getEnv())) {
+            JSONObject envJson = JSON.parseObject(project.getEnv());
+            if (envJson.containsKey("envList")) {
+                List<EnvDTO> envList = envJson.getList("envList", EnvDTO.class);
+                JSONObject envPrefix = envJson.containsKey("envPrefix") ? envJson.getJSONObject("envPrefix") : new JSONObject();
+                envList.forEach(env -> {
+                    env.setDomain(ApiUtil.handleDomain(env.getDomain()));
+                    String basePath = ApiUtil.handlePrefix(envPrefix.getString("envPrefix_" + env.getDomain()));
+                    if (CommonUtils.isEmpty(basePath)) {
+                        basePath += ApiUtil.handlePrefix(project.getBasePath());
+                    }
+                    env.setPrefix(basePath);
+                });
+                return envList;
             }
-            env.setPrefix(basePath);
-        });
-        return envList;
+        }
+        
+        // 如果项目没有配置，则使用租户默认配置
+        if (project.getWorkspaceId() != null) {
+            try {
+                List<com.ch.cloud.api.dto.MergedEnvConfigDTO> mergedConfigs = apiTenantManager.getProjectEnvConfigs(project.getProjectId());
+                if (mergedConfigs != null && !mergedConfigs.isEmpty()) {
+                    List<EnvDTO> envList = Lists.newArrayList();
+                    for (com.ch.cloud.api.dto.MergedEnvConfigDTO config : mergedConfigs) {
+                        EnvDTO env = new EnvDTO();
+                        env.setId(Long.valueOf(config.getEnvKey().hashCode()));
+                        env.setName(config.getName());
+                        env.setDomain(ApiUtil.handleDomain(config.getDomain()));
+                        env.setPrefix(ApiUtil.handlePrefix(config.getPrefix()));
+                        envList.add(env);
+                    }
+                    return envList;
+                }
+            } catch (Exception e) {
+                // 如果获取租户配置失败，返回空列表
+            }
+        }
+        
+        return Lists.newArrayList();
     }
 }
