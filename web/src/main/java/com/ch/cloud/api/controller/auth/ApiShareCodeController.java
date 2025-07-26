@@ -6,6 +6,7 @@ import com.ch.cloud.api.manager.ApiShareManager;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,8 +24,8 @@ public class ApiShareCodeController {
     @Operation(summary = "生成接口分享码", description = "生成接口分享码")
     @PostMapping("/generate")
     @HasPermission(value = "share:generate")
-    public String generate(@RequestBody List<ApiResourceDTO> resources) {
-        return apiShareManager.createShareCode(resources);
+    public String generate(@CookieValue Long projectId, @RequestBody List<ApiResourceDTO> resources) {
+        return apiShareManager.createShareCode(projectId, resources);
     }
 
 }

@@ -34,7 +34,7 @@ public class ApiShareManagerImpl implements ApiShareManager {
     private ApiAuthProperties apiAuthProperties;
 
     @Override
-    public String createShareCode(List<ApiResourceDTO> resources) {
+    public String createShareCode(Long projectId, List<ApiResourceDTO> resources) {
         AuthCodeGenerateDTO auth = new AuthCodeGenerateDTO();
         auth.setAuthUser(ContextUtil.getUserId());
         auth.setExpireTime(DateUtils.addDays(DateUtils.current(), apiAuthProperties.getDays()));
@@ -48,6 +48,8 @@ public class ApiShareManagerImpl implements ApiShareManager {
 
         ApiShareCode entity = BeanUtil.copyProperties(auth, ApiShareCode.class);
         entity.setShareCode(code);
+        entity.setProjectId(projectId);
+        entity.setResources(resources);
         entity.setExpireTime(auth.getExpireTime());
         entity.setUserId(auth.getAuthUser());
         apiShareCodeService.save(entity);
