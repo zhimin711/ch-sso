@@ -15,9 +15,14 @@ import lombok.Data;
 public class ApiProjectRolesDTO {
     
     private Long id;
+    
     private String code;
+    
     private String name;
-
+    
     @Schema(description = "项目角色，多个为,拼接")
     private String role;
+    
+    @Schema(description = "租户ID")
+    private Long tenantId;
 }

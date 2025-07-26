@@ -18,8 +18,9 @@ User → Business System → SSO Authentication Center → Token Generation → 
 
 #### Installation
 ```shell
-mvn -U -pl client -am clean deploy -Dmaven.test.skip -Drevision=2.1.0-SNAPSHOT
+mvn -U -pl client -am clean install -Dmaven.test.skip -Drevision=2.1.0-SNAPSHOT
 
+mvn -U -pl client -am clean deploy -Dmaven.test.skip -Drevision=2.1.0-SNAPSHOT
 ```
 
 1. xxxx
