@@ -26,8 +26,8 @@ public class ApiShareCode {
     @TableField("user_id")
     private String userId;
 
-    @TableField(value = "resources", typeHandler = Fastjson2TypeHandler.class)
-    private List<ApiResourceDTO> resources;
+    @TableField("resources")
+    private String resources;
 
     @TableField("expire_time")
     private Date expireTime;

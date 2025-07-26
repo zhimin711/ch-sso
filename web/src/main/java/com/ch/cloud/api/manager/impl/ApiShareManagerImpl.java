@@ -1,7 +1,9 @@
 package com.ch.cloud.api.manager.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.TypeReference;
 import com.ch.cloud.api.domain.ApiShareCode;
 import com.ch.cloud.api.dto.ApiResourceDTO;
 import com.ch.cloud.api.manager.ApiShareManager;
@@ -51,7 +53,7 @@ public class ApiShareManagerImpl implements ApiShareManager {
         ApiShareCode entity = BeanUtil.copyProperties(auth, ApiShareCode.class);
         entity.setShareCode(code);
         entity.setProjectId(projectId);
-        entity.setResources(resources);
+        entity.setResources(JSON.toJSONString(resources));
         entity.setExpireTime(auth.getExpireTime());
         entity.setUserId(auth.getAuthUser());
         apiShareCodeService.save(entity);
@@ -64,6 +66,19 @@ public class ApiShareManagerImpl implements ApiShareManager {
         if (apiShareCode == null) {
             return Lists.newArrayList();
         }
-        return apiShareCode.getResources();
+        
+        // 手动处理 JSON 反序列化
+        try {
+            String resourcesJson = apiShareCode.getResources();
+            if (resourcesJson == null || resourcesJson.trim().isEmpty()) {
+                return Lists.newArrayList();
+            }
+            
+            List<ApiResourceDTO> resources = JSON.parseArray(resourcesJson, ApiResourceDTO.class);
+            return resources != null ? resources : Lists.newArrayList();
+        } catch (Exception e) {
+            // 如果反序列化出错，返回空列表
+            return Lists.newArrayList();
+        }
     }
 }
