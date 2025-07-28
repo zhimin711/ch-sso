@@ -47,10 +47,10 @@ public class ApiTenantController {
     }
 
 
-    @Operation(summary = "保存或更新租户环境配置", description = "保存或更新租户环境配置")
+    @Operation(summary = "保存或更新租户配置", description = "保存或更新租户配置")
     @PostMapping("/save")
     public Result<Boolean> saveTenantConfig(@RequestBody ApiTenantDTO dto) {
         return Result.from(() -> apiTenantService.saveOrUpdateConfig(dto));
     }
 
-} 
+}

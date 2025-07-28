@@ -38,11 +38,6 @@ public class ApiTenantServiceImpl extends ServiceImpl<ApiTenantMapper, ApiTenant
         ApiTenant entity = new ApiTenant();
         BeanUtils.copyProperties(dto, entity);
 
-        // 如果没有环境配置，创建默认配置
-        if (entity.getEnv() == null) {
-            entity.setEnv(TenantConfigUtils.createDefaultEnvironments());
-        }
-
         if (dto.getId() != null) {
             // 更新
             return this.updateById(entity);
@@ -68,4 +63,4 @@ public class ApiTenantServiceImpl extends ServiceImpl<ApiTenantMapper, ApiTenant
         return TenantConfigUtils.getAllEnvironments(tenant.getEnv());
     }
 
-} 
+}

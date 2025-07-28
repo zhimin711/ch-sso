@@ -49,9 +49,4 @@ public class ApiTenantDTO {
     @Schema(description = "环境配置JSON格式")
     private Object env;
 
-    /**
-     * 状态：0.失效 1.生效
-     */
-    @Schema(description = "状态")
-    private String status;
-} 
+}
