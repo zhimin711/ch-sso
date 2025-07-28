@@ -17,12 +17,6 @@ import java.util.List;
 public class ApiTenantDTO {
 
     /**
-     * 主键
-     */
-    @Schema(description = "主键")
-    private Long id;
-
-    /**
      * 租户空间ID
      */
     @Schema(description = "租户空间ID")

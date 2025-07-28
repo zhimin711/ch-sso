@@ -6,6 +6,8 @@ import com.ch.cloud.api.dto.ApiTenantDTO;
 import com.ch.cloud.api.mapper.ApiTenantMapper;
 import com.ch.cloud.api.service.IApiTenantService;
 
+import com.ch.e.Assert;
+import com.ch.e.PubError;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +26,8 @@ public class ApiTenantServiceImpl extends ServiceImpl<ApiTenantMapper, ApiTenant
 
     @Override
     public Boolean saveOrUpdateConfig(ApiTenantDTO dto) {
-        ApiTenant tenant = new ApiTenant();
+        ApiTenant tenant = this.getByWorkspaceId(dto.getTenantId());
+        Assert.notNull(tenant, PubError.NOT_EXISTS, dto.getTenantId(), "租户不存在");
         BeanUtils.copyProperties(dto, tenant);
         return saveOrUpdate(tenant);
     }
