@@ -3,6 +3,7 @@ package com.ch.cloud.api.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ch.cloud.api.domain.ApiTenant;
 import com.ch.cloud.api.dto.ApiTenantDTO;
+import com.ch.cloud.api.dto.EnvDTO;
 
 import java.util.List;
 
@@ -15,43 +16,20 @@ import java.util.List;
 public interface IApiTenantService extends IService<ApiTenant> {
 
     /**
-     * 根据租户空间ID获取环境配置列表
+     * 根据租户空间ID获取租户环境配置
      *
      * @param workspaceId 租户空间ID
-     * @return 环境配置列表
+     * @return 租户环境配置
      */
-    List<ApiTenant> getByWorkspaceId(Long workspaceId);
+    ApiTenant getByWorkspaceId(Long workspaceId);
 
     /**
-     * 根据租户空间ID和环境标识获取环境配置
+     * 保存或更新租户环境配置
      *
-     * @param workspaceId 租户空间ID
-     * @param envKey 环境标识
-     * @return 环境配置
-     */
-    ApiTenant getByWorkspaceIdAndEnvKey(Long workspaceId, String envKey);
-
-    /**
-     * 根据租户空间ID获取默认环境配置
-     *
-     * @param workspaceId 租户空间ID
-     * @return 默认环境配置
-     */
-    ApiTenant getDefaultByWorkspaceId(Long workspaceId);
-
-    /**
-     * 保存或更新环境配置
-     *
-     * @param dto 环境配置DTO
+     * @param dto 租户环境配置DTO
      * @return 是否成功
      */
     Boolean saveOrUpdateConfig(ApiTenantDTO dto);
-
-    /**
-     * 删除环境配置
-     *
-     * @param id 配置ID
-     * @return 是否成功
-     */
-    Boolean deleteConfig(Long id);
-} 
+    
+    List<EnvDTO> getEnvironments(Long tenantId);
+}

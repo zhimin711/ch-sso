@@ -35,68 +35,37 @@ public class ApiTenant {
     private Long workspaceId;
 
     /**
-     * 环境配置名称
+     * 租户名称
      */
-    @Schema(description = "环境配置名称")
+    @Schema(description = "租户名称")
     @TableField("name")
     private String name;
 
     /**
-     * 环境标识(dev/test/prod等)
+     * 租户描述
      */
-    @Schema(description = "环境标识")
-    @TableField("env_key")
-    private String envKey;
-
-    /**
-     * 环境域名
-     */
-    @Schema(description = "环境域名")
-    @TableField("domain")
-    private String domain;
-
-    /**
-     * 请求前缀
-     */
-    @Schema(description = "请求前缀")
-    @TableField("prefix")
-    private String prefix;
-
-    /**
-     * 环境描述
-     */
-    @Schema(description = "环境描述")
+    @Schema(description = "租户描述")
     @TableField("description")
     private String description;
 
     /**
-     * 是否默认环境
-     */
-    @Schema(description = "是否默认环境")
-    @TableField("is_default")
-    private Boolean isDefault;
-
-    /**
      * 环境配置JSON格式
+     * 只包含环境列表
+     * [
+     *   {
+     *     "envKey": "dev",
+     *     "name": "开发环境",
+     *     "domain": "https://dev-api.example.com",
+     *     "prefix": "/api/v1",
+     *     "description": "开发环境配置",
+     *     "isDefault": true
+     *   }
+     * ]
      */
     @Schema(description = "环境配置JSON格式")
-    @TableField(value = "env_config", typeHandler = JacksonTypeHandler.class)
-    private Object envConfig;
-
-    /**
-     * 状态：0.失效 1.生效
-     */
-    @Schema(description = "状态")
-    @TableField("status")
-    private String status;
-
-    /**
-     * 是否删除
-     */
-    @Schema(description = "是否删除")
-    @TableField("deleted")
-    @TableLogic
-    private Boolean deleted;
+    @TableField(value = "env", typeHandler = JacksonTypeHandler.class)
+    private Object env;
+    
 
     /**
      * 创建时间

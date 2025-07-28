@@ -134,19 +134,19 @@ public class ApiShareController {
         // 如果项目没有配置，则使用租户默认配置
         if (project.getWorkspaceId() != null) {
             try {
-                List<com.ch.cloud.api.dto.MergedEnvConfigDTO> mergedConfigs = apiTenantManager.getProjectEnvConfigs(project.getProjectId());
-                if (mergedConfigs != null && !mergedConfigs.isEmpty()) {
-                    List<EnvDTO> envList = Lists.newArrayList();
-                    for (com.ch.cloud.api.dto.MergedEnvConfigDTO config : mergedConfigs) {
-                        EnvDTO env = new EnvDTO();
-                        env.setId(Long.valueOf(config.getEnvKey().hashCode()));
-                        env.setName(config.getName());
-                        env.setDomain(ApiUtil.handleDomain(config.getDomain()));
-                        env.setPrefix(ApiUtil.handlePrefix(config.getPrefix()));
-                        envList.add(env);
-                    }
-                    return envList;
-                }
+//                List<com.ch.cloud.api.dto.MergedEnvConfigDTO> mergedConfigs = apiTenantManager.getProjectEnvConfigs(project.getProjectId());
+//                if (mergedConfigs != null && !mergedConfigs.isEmpty()) {
+//                    List<EnvDTO> envList = Lists.newArrayList();
+//                    for (com.ch.cloud.api.dto.MergedEnvConfigDTO config : mergedConfigs) {
+//                        EnvDTO env = new EnvDTO();
+//                        env.setId(Long.valueOf(config.getEnvKey().hashCode()));
+//                        env.setName(config.getName());
+//                        env.setDomain(ApiUtil.handleDomain(config.getDomain()));
+//                        env.setPrefix(ApiUtil.handlePrefix(config.getPrefix()));
+//                        envList.add(env);
+//                    }
+//                    return envList;
+//                }
             } catch (Exception e) {
                 // 如果获取租户配置失败，返回空列表
             }

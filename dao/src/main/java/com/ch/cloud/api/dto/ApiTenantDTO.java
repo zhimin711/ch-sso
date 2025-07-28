@@ -30,49 +30,24 @@ public class ApiTenantDTO {
     private Long workspaceId;
 
     /**
-     * 环境配置名称
+     * 租户名称
      */
-    @Schema(description = "环境配置名称")
-    @NotBlank(message = "环境配置名称不能为空")
+    @Schema(description = "租户名称")
+    @NotBlank(message = "租户名称不能为空")
     private String name;
 
     /**
-     * 环境标识(dev/test/prod等)
+     * 租户描述
      */
-    @Schema(description = "环境标识")
-    @NotBlank(message = "环境标识不能为空")
-    private String envKey;
-
-    /**
-     * 环境域名
-     */
-    @Schema(description = "环境域名")
-    @NotBlank(message = "环境域名不能为空")
-    private String domain;
-
-    /**
-     * 请求前缀
-     */
-    @Schema(description = "请求前缀")
-    private String prefix;
-
-    /**
-     * 环境描述
-     */
-    @Schema(description = "环境描述")
+    @Schema(description = "租户描述")
     private String description;
 
     /**
-     * 是否默认环境
-     */
-    @Schema(description = "是否默认环境")
-    private Boolean isDefault;
-
-    /**
      * 环境配置JSON格式
+     * 只包含环境列表
      */
     @Schema(description = "环境配置JSON格式")
-    private Object envConfig;
+    private Object env;
 
     /**
      * 状态：0.失效 1.生效
