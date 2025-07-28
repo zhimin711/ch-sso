@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.ch.cloud.api.domain.ApiGroup;
 import com.ch.cloud.api.domain.ApiPath;
 import com.ch.cloud.api.domain.ApiProject;
+import com.ch.cloud.api.domain.ApiTenant;
 import com.ch.cloud.api.dto.ApiGroupPathDetailDTO;
 import com.ch.cloud.api.dto.ApiResourceDTO;
 import com.ch.cloud.api.dto.EnvDTO;
@@ -14,8 +15,10 @@ import com.ch.cloud.api.pojo.GroupPath;
 import com.ch.cloud.api.service.IApiGroupService;
 import com.ch.cloud.api.service.IApiPathService;
 import com.ch.cloud.api.service.IApiProjectService;
-import com.ch.cloud.api.service.ApiTenantManager;
+import com.ch.cloud.api.service.IApiTenantService;
 import com.ch.cloud.api.utils.ApiUtil;
+import com.ch.cloud.upms.client.UpmsProjectClient;
+import com.ch.cloud.upms.dto.ProjectDto;
 import com.ch.e.Assert;
 import com.ch.e.PubError;
 import com.ch.result.Result;
@@ -63,7 +66,9 @@ public class ApiShareController {
     private IApiProjectService apiProjectService;
 
     @Autowired
-    private ApiTenantManager apiTenantManager;
+    private IApiTenantService apiTenantService;
+    @Autowired
+    private UpmsProjectClient upmsProjectClient;
 
     @Operation(summary = "查询分享接口树", description = "查询分享接口树")
     @GetMapping(value = {"tree"})
@@ -130,28 +135,17 @@ public class ApiShareController {
                 return envList;
             }
         }
-        
+
         // 如果项目没有配置，则使用租户默认配置
-        if (project.getWorkspaceId() != null) {
-            try {
-//                List<com.ch.cloud.api.dto.MergedEnvConfigDTO> mergedConfigs = apiTenantManager.getProjectEnvConfigs(project.getProjectId());
-//                if (mergedConfigs != null && !mergedConfigs.isEmpty()) {
-//                    List<EnvDTO> envList = Lists.newArrayList();
-//                    for (com.ch.cloud.api.dto.MergedEnvConfigDTO config : mergedConfigs) {
-//                        EnvDTO env = new EnvDTO();
-//                        env.setId(Long.valueOf(config.getEnvKey().hashCode()));
-//                        env.setName(config.getName());
-//                        env.setDomain(ApiUtil.handleDomain(config.getDomain()));
-//                        env.setPrefix(ApiUtil.handlePrefix(config.getPrefix()));
-//                        envList.add(env);
-//                    }
-//                    return envList;
-//                }
-            } catch (Exception e) {
-                // 如果获取租户配置失败，返回空列表
+        Result<ProjectDto> result = upmsProjectClient.infoByIds(Lists.newArrayList(project.getProjectId()));
+        if (result.isSuccess()) {
+            ProjectDto info = result.get();
+            ApiTenant tenant = apiTenantService.getByWorkspaceId(info.getTenantId());
+            if (tenant != null) {
+                return tenant.getEnvList();
             }
         }
-        
+
         return Lists.newArrayList();
     }
 }

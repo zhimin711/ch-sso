@@ -4,15 +4,21 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.extension.handlers.Fastjson2TypeHandler;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.ch.cloud.api.dto.ApiResourceDTO;
 import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 接口分享码
+ * 
+ * @author zhimin.ma
+ * @since 2025-07-28
+ */
 @Data
-@TableName("api_share_code")
+@TableName(value = "api_share_code", autoResultMap = true)
 public class ApiShareCode {
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -26,8 +32,8 @@ public class ApiShareCode {
     @TableField("user_id")
     private String userId;
 
-    @TableField("resources")
-    private String resources;
+    @TableField(value = "resources", typeHandler = JacksonTypeHandler.class)
+    private List<ApiResourceDTO> resources;
 
     @TableField("expire_time")
     private Date expireTime;

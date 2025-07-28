@@ -2,11 +2,14 @@ package com.ch.cloud.api.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
+import com.ch.cloud.api.dto.EnvDTO;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 租户环境配置实体
@@ -31,8 +34,8 @@ public class ApiTenant {
      * 租户空间ID
      */
     @Schema(description = "租户空间ID")
-    @TableField("workspace_id")
-    private Long workspaceId;
+    @TableField("tenant_id")
+    private Long tenantId;
 
     /**
      * 租户名称
@@ -64,7 +67,7 @@ public class ApiTenant {
      */
     @Schema(description = "环境配置JSON格式")
     @TableField(value = "env", typeHandler = JacksonTypeHandler.class)
-    private Object env;
+    private List<EnvDTO> envList;
     
 
     /**

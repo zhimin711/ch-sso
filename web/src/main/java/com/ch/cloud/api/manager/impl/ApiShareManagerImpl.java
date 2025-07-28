@@ -53,7 +53,7 @@ public class ApiShareManagerImpl implements ApiShareManager {
         ApiShareCode entity = BeanUtil.copyProperties(auth, ApiShareCode.class);
         entity.setShareCode(code);
         entity.setProjectId(projectId);
-        entity.setResources(JSON.toJSONString(resources));
+        entity.setResources(resources);
         entity.setExpireTime(auth.getExpireTime());
         entity.setUserId(auth.getAuthUser());
         apiShareCodeService.save(entity);
@@ -66,19 +66,6 @@ public class ApiShareManagerImpl implements ApiShareManager {
         if (apiShareCode == null) {
             return Lists.newArrayList();
         }
-        
-        // 手动处理 JSON 反序列化
-        try {
-            String resourcesJson = apiShareCode.getResources();
-            if (resourcesJson == null || resourcesJson.trim().isEmpty()) {
-                return Lists.newArrayList();
-            }
-            
-            List<ApiResourceDTO> resources = JSON.parseArray(resourcesJson, ApiResourceDTO.class);
-            return resources != null ? resources : Lists.newArrayList();
-        } catch (Exception e) {
-            // 如果反序列化出错，返回空列表
-            return Lists.newArrayList();
-        }
+       return apiShareCode.getResources();
     }
 }

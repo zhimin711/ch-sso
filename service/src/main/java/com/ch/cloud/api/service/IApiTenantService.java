@@ -30,6 +30,5 @@ public interface IApiTenantService extends IService<ApiTenant> {
      * @return 是否成功
      */
     Boolean saveOrUpdateConfig(ApiTenantDTO dto);
-    
-    List<EnvDTO> getEnvironments(Long tenantId);
+
 }
