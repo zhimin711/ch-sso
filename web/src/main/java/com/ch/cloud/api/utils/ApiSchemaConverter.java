@@ -82,9 +82,19 @@ public class ApiSchemaConverter {
                         }
                         rootSchema.getProperties().forEach((key, value) -> {
                             ApiParamDTO dto = new ApiParamDTO();
-                            dto.setName(value.getTitle());
+                            // 使用key作为参数名称，这是schema中属性的名称
+                            dto.setName(key);
                             dto.setDescription(value.getDescription());
                             dto.setType(value.getType());
+                            // 设置是否必填
+                            dto.setRequired(rootSchema.getRequired() != null && rootSchema.getRequired().contains(key));
+                            // 设置格式
+                            if (value instanceof JsonSchemaStringDTO) {
+                                JsonSchemaStringDTO stringDTO = (JsonSchemaStringDTO) value;
+                                if (CommonUtils.isNotEmpty(stringDTO.getFormat())) {
+                                    dto.setFormat(stringDTO.getFormat());
+                                }
+                            }
                             paramList.add(dto);
                         });
                     });
@@ -361,5 +371,33 @@ public class ApiSchemaConverter {
             }
         }
         return jsonResponse.toString();
+    }
+
+    /**
+     * 测试方法：验证schema解析是否正确
+     * 
+     * @param schemaJson schema的JSON字符串
+     * @param schemaMap schema映射
+     * @return 解析结果
+     */
+    public static String testSchemaParsing(String schemaJson, Map<String, ApiSchema> schemaMap) {
+        try {
+            JSONObject schema = JSON.parseObject(schemaJson);
+            JsonSchemaObjectDTO result = resolveSchemaReference(schema.getString("$ref"), schemaMap, Lists.newArrayList());
+            if (result != null && result.getProperties() != null) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("解析结果：\n");
+                result.getProperties().forEach((key, value) -> {
+                    sb.append("参数名称: ").append(key)
+                      .append(", 类型: ").append(value.getType())
+                      .append(", 描述: ").append(value.getDescription())
+                      .append("\n");
+                });
+                return sb.toString();
+            }
+            return "解析失败或没有属性";
+        } catch (Exception e) {
+            return "解析异常: " + e.getMessage();
+        }
     }
 }
