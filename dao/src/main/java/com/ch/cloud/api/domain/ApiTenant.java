@@ -37,19 +37,6 @@ public class ApiTenant {
     @TableField("tenant_id")
     private Long tenantId;
 
-    /**
-     * 租户名称
-     */
-    @Schema(description = "租户名称")
-    @TableField("name")
-    private String name;
-
-    /**
-     * 租户描述
-     */
-    @Schema(description = "租户描述")
-    @TableField("description")
-    private String description;
 
     /**
      * 环境配置JSON格式

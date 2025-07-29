@@ -27,7 +27,10 @@ public class ApiTenantServiceImpl extends ServiceImpl<ApiTenantMapper, ApiTenant
     @Override
     public Boolean saveOrUpdateConfig(ApiTenantDTO dto) {
         ApiTenant tenant = this.getByWorkspaceId(dto.getTenantId());
-        Assert.notNull(tenant, PubError.NOT_EXISTS, dto.getTenantId(), "租户不存在");
+        if (tenant == null){
+            tenant = new ApiTenant();
+            tenant.setTenantId(dto.getTenantId());
+        }
         BeanUtils.copyProperties(dto, tenant);
         return saveOrUpdate(tenant);
     }

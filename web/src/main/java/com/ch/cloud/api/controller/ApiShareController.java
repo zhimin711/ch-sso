@@ -123,16 +123,19 @@ public class ApiShareController {
             JSONObject envJson = JSON.parseObject(project.getEnv());
             if (envJson.containsKey("envList")) {
                 List<EnvDTO> envList = envJson.getList("envList", EnvDTO.class);
-                JSONObject envPrefix = envJson.containsKey("envPrefix") ? envJson.getJSONObject("envPrefix") : new JSONObject();
-                envList.forEach(env -> {
-                    env.setDomain(ApiUtil.handleDomain(env.getDomain()));
-                    String basePath = ApiUtil.handlePrefix(envPrefix.getString("envPrefix_" + env.getDomain()));
-                    if (CommonUtils.isEmpty(basePath)) {
-                        basePath += ApiUtil.handlePrefix(project.getBasePath());
-                    }
-                    env.setPrefix(basePath);
-                });
-                return envList;
+                if(CommonUtils.isNotEmpty(envList)){
+                    JSONObject envPrefix = envJson.containsKey("envPrefix") ? envJson.getJSONObject("envPrefix") : new JSONObject();
+                    envList.forEach(env -> {
+                        env.setDomain(ApiUtil.handleDomain(env.getDomain()));
+                        String basePath = ApiUtil.handlePrefix(envPrefix.getString("envPrefix_" + env.getDomain()));
+                        if (CommonUtils.isEmpty(basePath)) {
+                            basePath += ApiUtil.handlePrefix(project.getBasePath());
+                        }
+                        env.setPrefix(basePath);
+                    });
+                    return envList;
+                    
+                }
             }
         }
 
