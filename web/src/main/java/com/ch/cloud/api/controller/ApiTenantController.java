@@ -47,7 +47,6 @@ public class ApiTenantController {
 
     @Operation(summary = "获取租户所有环境配置", description = "根据租户空间ID获取所有环境配置")
     @GetMapping("/{tenantId}/env")
-    @HasPermission(value = "tenant:env:list")
     public Result<List<EnvDTO>> getEnvironments(@PathVariable Long tenantId) {
         return Result.from(() -> {
             com.ch.result.Result<Boolean> adminResult = upmsTenantClient.hasAdmin(tenantId, ContextUtil.getUsername());
