@@ -42,18 +42,18 @@ import static com.ch.cloud.sso.biz.tools.TokenTool.LOCK_TOKEN;
 @Service
 @Slf4j
 public class TokenManagerImpl implements TokenManager {
-    
+
     @Autowired
     private JwtProperties jwtProperties;
-    
+
     @Autowired
     private TokenCacheTool tokenCacheTool;
-    
+
     @Autowired
     private RedissonClient redissonClient;
-    
+
     /**
-     * 生成Token
+     * 生成Token（用户登录生成，刷新TOKEN不能使用）
      *
      * @param user   用户信息
      * @param secret 密钥
@@ -62,7 +62,7 @@ public class TokenManagerImpl implements TokenManager {
     @Override
     public TokenVo generateToken(UserInfo user, String secret) {
         Date current = DateUtils.current();
-        
+
         // 构造JWT claims
         Map<String, Object> claims = new HashMap<>(5);
         claims.put("sub", user.getUsername());
@@ -70,32 +70,32 @@ public class TokenManagerImpl implements TokenManager {
         claims.put("roleId", user.getRoleId());
         claims.put("tenantId", user.getTenantId());
         claims.put("created", new Date());
-        
+
         // 计算访问token和刷新token的过期时间
         Date accessExpired = DateUtils.addSeconds(current, (int) jwtProperties.getTokenExpired().getSeconds());
         Date refreshExpired = DateUtils.addSeconds(current, (int) jwtProperties.getRefreshTokenExpired().getSeconds());
-        
+
         // 生成JWT字符串
         String jwt = JwtUtil.generate(claims, refreshExpired, secret);
-        
+
         // 生成访问token和刷新token
         String accessToken = UuidUtils.generateUuid();
         String refreshToken = EncryptUtils.md5(jwt);
-        
+
         log.info("生成Token - 当前时间: {}, 访问Token过期时间: {}", DateUtils.format(current),
                 DateUtils.format(accessExpired));
-        
+
         // 克隆用户信息到TokenCache对象
         TokenDTO tokenDTO = BeanUtilsV2.clone(user, TokenDTO.class);
         tokenDTO.setExpireAt(accessExpired.getTime());
         tokenDTO.setPassword(secret);
-        
+
         // 使用TokenRedisUtil保存访问Token
         tokenCacheTool.saveAccessToken(accessToken, tokenDTO, jwtProperties.getTokenExpired().getSeconds());
-        
+
         // 构造RefreshTokenCache对象
         RefreshTokenDTO refreshTokenDTO = RefreshTokenDTO.build(jwt, secret, user.getUsername(), refreshExpired);
-        
+
         // 使用TokenRedisUtil保存刷新Token
         tokenCacheTool.saveRefreshToken(refreshToken, refreshTokenDTO,
                 jwtProperties.getRefreshTokenExpired().getSeconds());
@@ -104,7 +104,7 @@ public class TokenManagerImpl implements TokenManager {
                 jwtProperties.getRefreshTokenExpired().getSeconds());
         return new TokenVo(accessToken, refreshToken, accessExpired.getTime());
     }
-    
+
     /**
      * 验证Token
      *
@@ -115,7 +115,7 @@ public class TokenManagerImpl implements TokenManager {
     public boolean validateToken(String token) {
         return tokenCacheTool.hasAccessToken(token);
     }
-    
+
     /**
      * 刷新Token
      *
@@ -124,27 +124,28 @@ public class TokenManagerImpl implements TokenManager {
      */
     @Override
     public TokenVo refreshToken(String refreshToken) {
-        
+
         // 获取分布式锁，防止并发刷新
         RLock lock = redissonClient.getLock(LOCK_TOKEN + refreshToken);
         try {
-            
+
             boolean locked = lock.tryLock(5, TimeUnit.SECONDS);
             log.info("{} lock status: {}", refreshToken, locked);
             Assert.isTrue(locked, PubError.RETRY, "网络繁忙，请稍后重试......");
             // 获取刷新Token缓存信息
             RefreshTokenDTO refreshTokenDTO = tokenCacheTool.getRefreshTokenCache(refreshToken);
             Assert.notNull(refreshTokenDTO, PubError.INVALID, "刷新Token", refreshToken);
-            
+
             // 验证刷新Token是否过期
             if (refreshTokenDTO.getExpired().before(new Date())) {
                 log.warn("刷新Token已过期: {}", refreshToken);
                 return null;
             }
-            tokenCacheTool.getAccessTokenByUsername(refreshTokenDTO.getUsername());
-            
+            // 旧的访问Token
+//            String accessToken = tokenCacheTool.getAccessTokenByUsername(refreshTokenDTO.getUsername());
+
             Claims claims = JwtUtil.parseClaims(refreshTokenDTO.getJwt(), refreshTokenDTO.getSecret());
-            
+
             // 生成访问token和刷新token
             String accessToken = UuidUtils.generateUuid();
             Date accessExpired = DateUtils.addSeconds(DateUtils.current(),
@@ -161,12 +162,12 @@ public class TokenManagerImpl implements TokenManager {
             if (claims.containsKey("tenantId")) {
                 tokenDTO.setTenantId((Long) claims.get("tenantId"));
             }
-            
+
             tokenDTO.setExpireAt(accessExpired.getTime());
             tokenDTO.setPassword(refreshTokenDTO.getSecret());
             // 使用TokenRedisUtil保存访问Token
             tokenCacheTool.saveAccessToken(accessToken, tokenDTO, jwtProperties.getTokenExpired().getSeconds());
-            
+
             // 生成新的Token
             return new TokenVo(accessToken, refreshToken, accessExpired.getTime());
         } catch (ErrorException e) {
@@ -179,7 +180,7 @@ public class TokenManagerImpl implements TokenManager {
         }
         return null;
     }
-    
+
     /**
      * 续期刷新Token
      *
@@ -188,9 +189,9 @@ public class TokenManagerImpl implements TokenManager {
      */
     @Override
     public boolean renewToken(String token) {
-        return tokenCacheTool.renewToken(token, jwtProperties.getTokenExpired().getSeconds());
+        return tokenCacheTool.renewAccessToken(token, jwtProperties.getTokenExpired().getSeconds());
     }
-    
+
     /**
      * 获取用户信息
      *
@@ -205,7 +206,7 @@ public class TokenManagerImpl implements TokenManager {
         }
         return null;
     }
-    
+
     /**
      * 删除Token
      *
@@ -215,7 +216,7 @@ public class TokenManagerImpl implements TokenManager {
     public void deleteToken(String token) {
         tokenCacheTool.deleteAccessToken(token);
     }
-    
+
     /**
      * 删除用户的所有Token
      *
@@ -225,14 +226,14 @@ public class TokenManagerImpl implements TokenManager {
     public void deleteUserTokens(String username) {
         tokenCacheTool.deleteUserTokens(username);
     }
-    
+
     @Override
     public TokenVo auth(String username) {
         String refreshToken = tokenCacheTool.getRefreshTokenByUsername(username);
         Assert.notEmpty(refreshToken, PubError.INVALID, "用户登录失效");
-        
+
         return refreshToken(refreshToken);
     }
-    
-    
+
+
 }

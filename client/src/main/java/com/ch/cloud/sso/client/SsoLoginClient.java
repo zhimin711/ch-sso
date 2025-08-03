@@ -13,7 +13,11 @@ public interface SsoLoginClient {
 
     @GetMapping("info")
     Result<UserInfo> info(@RequestHeader(Constants.X_TOKEN) String token);
-    
+
     @GetMapping("renew")
     Result<Boolean> renew(@RequestHeader(Constants.X_TOKEN) String token);
+
+    @GetMapping("refresh")
+    Result<String> refresh(@RequestHeader(Constants.X_TOKEN) String token,
+                            @RequestHeader(Constants.X_REFRESH_TOKEN) String refreshToken);
 }

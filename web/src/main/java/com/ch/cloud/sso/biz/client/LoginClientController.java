@@ -2,6 +2,7 @@ package com.ch.cloud.sso.biz.client;
 
 import com.ch.Constants;
 import com.ch.cloud.sso.biz.manager.TokenManager;
+import com.ch.cloud.sso.biz.pojo.TokenVo;
 import com.ch.cloud.sso.biz.service.IUserService;
 import com.ch.cloud.sso.client.SsoLoginClient;
 import com.ch.cloud.sso.pojo.UserInfo;
@@ -49,7 +50,7 @@ public class LoginClientController implements SsoLoginClient {
     @GetMapping(value = "info")
     public Result<UserInfo> info(@RequestHeader(Constants.X_TOKEN) String token) {
         return ResultUtils.wrapFail(() -> {
-            
+
             boolean isValid = tokenManager.validateToken(token);
 //            String username = userService.validate(token);
             Assert.isTrue(isValid, PubError.INVALID, "访问令牌已",token);
@@ -66,6 +67,16 @@ public class LoginClientController implements SsoLoginClient {
     @Override
     public Result<Boolean> renew(@RequestHeader(Constants.X_TOKEN) String token) {
         return ResultUtils.wrap(() -> tokenManager.renewToken(token));
+    }
+
+    @GetMapping("refresh")
+    @Override
+    public Result<String> refresh(@RequestHeader(Constants.X_TOKEN) String token,
+                                   @RequestHeader(Constants.X_REFRESH_TOKEN) String refreshToken) {
+        return ResultUtils.wrap(() -> {
+            TokenVo tokenVo = tokenManager.refreshToken(refreshToken);
+            return tokenVo.getToken();
+        });
     }
 
 }
