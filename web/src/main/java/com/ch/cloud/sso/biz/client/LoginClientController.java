@@ -38,8 +38,8 @@ public class LoginClientController implements SsoLoginClient {
 
     @GetMapping(value = "validate")
     @Override
-    public Result<String> validate(@RequestHeader(Constants.X_TOKEN) String token) {
-        return Result.success(userService.validate(token));
+    public Result<Boolean> validate(@RequestHeader(Constants.X_TOKEN) String token) {
+        return Result.success(tokenManager.validateToken(token));
     }
 
     /**

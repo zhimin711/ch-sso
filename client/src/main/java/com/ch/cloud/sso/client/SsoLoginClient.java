@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface SsoLoginClient {
 
     @GetMapping(value = "validate")
-    Result<String> validate(@RequestHeader(Constants.X_TOKEN) String token);
+    Result<Boolean> validate(@RequestHeader(Constants.X_TOKEN) String token);
 
     @GetMapping("info")
     Result<UserInfo> info(@RequestHeader(Constants.X_TOKEN) String token);
