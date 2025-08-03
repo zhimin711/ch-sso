@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "${feign.client.sso:ch-sso}", contextId = "ssoLoginClient", path = "/fc/login/token")
 public interface SsoLoginClient {
 
+    @GetMapping(value = "validate")
+    Result<String> validate(@RequestHeader(Constants.X_TOKEN) String token);
+
     @GetMapping("info")
     Result<UserInfo> info(@RequestHeader(Constants.X_TOKEN) String token);
 
