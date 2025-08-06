@@ -49,27 +49,28 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/share")
 @Tag(name = "api-share-controller", description = "接口分享服务")
 public class ApiShareController {
-
+    
     @Autowired
     private IApiGroupService apiGroupService;
-
+    
     @Autowired
     private IApiPathService apiPathService;
-
+    
     @Autowired
     private ApiGroupManager apiGroupManage;
-
+    
     @Autowired
     private ApiShareManager apiShareManager;
-
+    
     @Autowired
     private IApiProjectService apiProjectService;
-
+    
     @Autowired
     private IApiTenantService apiTenantService;
+    
     @Autowired
     private UpmsProjectClient upmsProjectClient;
-
+    
     @Operation(summary = "查询分享接口树", description = "查询分享接口树")
     @GetMapping(value = {"tree"})
     public Result<GroupPath> tree(@RequestParam String apiKey) {
@@ -86,7 +87,7 @@ public class ApiShareController {
             return Lists.newArrayList();
         });
     }
-
+    
     @Operation(summary = "查询接口详情", description = "查询接口详情")
     @GetMapping(value = {"detail"})
     public Result<ApiGroupPathDetailDTO> detail(@RequestParam String apiKey, @RequestParam Long pathId) {
@@ -96,7 +97,7 @@ public class ApiShareController {
             Assert.isTrue(has, PubError.NOT_EXISTS, "分享资源");
             ApiPath apiPath = apiPathService.getById(pathId);
             ApiGroupPathDetailDTO dto = new ApiGroupPathDetailDTO();
-
+            
             BeanUtils.copyProperties(apiPath, dto);
             if (CommonUtils.isNotEmpty(apiPath.getMethod())) {
                 dto.setMethod(apiPath.getMethod().toUpperCase());
@@ -116,15 +117,16 @@ public class ApiShareController {
             return dto;
         });
     }
-
+    
     private List<EnvDTO> buildEnvList(ApiProject project) {
         // 优先使用项目的env字段配置
         if (CommonUtils.isNotEmpty(project.getEnv()) && JSON.isValidObject(project.getEnv())) {
             JSONObject envJson = JSON.parseObject(project.getEnv());
             if (envJson.containsKey("envList")) {
                 List<EnvDTO> envList = envJson.getList("envList", EnvDTO.class);
-                if(CommonUtils.isNotEmpty(envList)){
-                    JSONObject envPrefix = envJson.containsKey("envPrefix") ? envJson.getJSONObject("envPrefix") : new JSONObject();
+                if (CommonUtils.isNotEmpty(envList)) {
+                    JSONObject envPrefix =
+                            envJson.containsKey("envPrefix") ? envJson.getJSONObject("envPrefix") : new JSONObject();
                     envList.forEach(env -> {
                         env.setDomain(ApiUtil.handleDomain(env.getDomain()));
                         String basePath = ApiUtil.handlePrefix(envPrefix.getString("envPrefix_" + env.getDomain()));
@@ -138,17 +140,20 @@ public class ApiShareController {
                 }
             }
         }
-
+        
         // 如果项目没有配置，则使用租户默认配置
         Result<ProjectDto> result = upmsProjectClient.infoByIds(Lists.newArrayList(project.getProjectId()));
         if (result.isSuccess()) {
             ProjectDto info = result.get();
             ApiTenant tenant = apiTenantService.getByWorkspaceId(info.getTenantId());
-            if (tenant != null) {
+            if (tenant != null && CommonUtils.isNotEmpty(tenant.getEnvList())) {
+                if (CommonUtils.isNotEmpty(project.getBasePath())) {
+                    tenant.getEnvList().forEach(env -> env.setPrefix(ApiUtil.handlePrefix(project.getBasePath())));
+                }
                 return tenant.getEnvList();
             }
         }
-
+        
         return Lists.newArrayList();
     }
 }

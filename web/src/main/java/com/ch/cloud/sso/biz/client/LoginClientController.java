@@ -72,7 +72,7 @@ public class LoginClientController implements SsoLoginClient {
 
     @GetMapping("refresh")
     @Override
-    public Result<String> refresh(@RequestHeader(Constants.X_TOKEN) String token,
+    public Result<String> refresh(@RequestHeader(value = Constants.X_TOKEN,required = false) String token,
                                    @RequestHeader(Constants.X_REFRESH_TOKEN) String refreshToken) {
         return ResultUtils.wrap(() -> {
             TokenVo tokenVo = tokenManager.refreshToken(refreshToken);

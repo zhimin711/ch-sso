@@ -73,8 +73,7 @@ public class UserController {
 
     @Operation(summary = "访问令牌获取用户授权", description = "访问令牌获取,返回用户授权信息")
     @PostMapping("/permissions")
-    public Result<UserPermissionVo> permissions(@RequestHeader(Constants.X_TOKEN) String token,
-                                                @RequestBody UserInfo user) {
+    public Result<UserPermissionVo> permissions( @RequestBody UserInfo user) {
         return ResultUtils.wrapFail(() -> {
             user.setUsername(ContextUtil.getUsername());
             // 判断用户角色是否切换角色，如果切换了角色则通知网关清除对应的用户角色缓存
@@ -82,7 +81,7 @@ public class UserController {
             if (refresh) {
                 try {
                     // 通知网关清除对应的用户角色缓存
-                    gatewayNotifySender.cleanNotify(new KeyValue("users", token));
+                    gatewayNotifySender.cleanNotify(new KeyValue("users", user.getUsername()));
                 } catch (Exception e) {
                     log.error("cleanNotify", e);
                 }
