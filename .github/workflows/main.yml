@@ -38,7 +38,7 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
 
       - name: Build with Maven (custom settings.xml)
-        run: mvn -s ~/.m2/settings.xml clean package -DskipTests -s settings.xml
+        run: mvn -s ~/.m2/settings.xml clean package -DskipTests
 
       - name: Set image name
         id: image_name
