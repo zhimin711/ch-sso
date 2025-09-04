@@ -36,9 +36,21 @@ jobs:
         env:
           MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+          
+      - name: Debug check env
+        run: |
+          echo "Username = $MAVEN_USERNAME"
+          echo "Password length = ${#MAVEN_PASSWORD}"
+        env:
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
 
       - name: Build with Maven (custom settings.xml)
         run: mvn -s ~/.m2/settings.xml clean package -DskipTests
+        env:
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+        
 
       - name: Set image name
         id: image_name
