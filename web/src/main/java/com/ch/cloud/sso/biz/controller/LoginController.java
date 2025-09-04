@@ -1,0 +1,149 @@
+package com.ch.cloud.sso.biz.controller;
+
+import com.ch.Constants;
+import com.ch.cloud.sso.biz.manager.TokenManager;
+import com.ch.cloud.sso.biz.manager.UserManager;
+import com.ch.cloud.sso.biz.pojo.LoginDto;
+import com.ch.cloud.sso.biz.pojo.TokenVo;
+import com.ch.cloud.sso.captcha.service.CaptchaService;
+import com.ch.cloud.sso.pojo.UserInfo;
+import com.ch.cloud.sso.security.CustomUserDetails;
+import com.ch.cloud.sso.utils.CaptchaUtils;
+import com.ch.e.Assert;
+import com.ch.e.PubError;
+import com.ch.result.Result;
+import com.ch.result.ResultUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
+
+/**
+ * desc:登录与授权服务
+ *
+ * @author zhimin
+ * @since 2018/12/21 10:40 PM
+ */
+@RestController
+@Slf4j
+@Tag(name = "用户登录", description = "用户登录相关接口")
+public class LoginController {
+
+    @Autowired
+    private TokenManager tokenManager;
+
+    @Autowired
+    private UserManager userManager;
+
+    @Autowired
+    private CaptchaService captchaService;
+
+    //
+    @GetMapping("login")
+    public ModelAndView index(HttpServletRequest request) {
+        return new ModelAndView("login");
+    }
+
+    /**
+     * 获取用户访问令牌 密码模式登录
+     * <p>
+     * //     * @param username //     * @param password
+     *
+     * @return access_token
+     */
+    @Operation(summary = "获取用户访问令牌", description = "基于密码模式登录,无需签名,返回access_token")
+    @PostMapping(value = "login/access", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Result<TokenVo> loginAccess(@RequestBody LoginDto user) {
+
+        if (StringUtils.isEmpty(user.getUsername()) || StringUtils.isEmpty(user.getPassword())) {
+            return Result.error(PubError.USERNAME_OR_PASSWORD, "用户或者密码不能为空！");
+        }
+
+        if (StringUtils.isEmpty(user.getCaptchaCode()) || !captchaService.verification(user.getCaptchaCode())) {
+            return Result.error(PubError.UNDEFINED, "验证码错误或已过期！");
+        }
+
+        return ResultUtils.wrap(() -> {
+            CustomUserDetails userDetails = userManager.login(user.getUsername(), user.getPassword());
+
+            UserInfo userInfo = new UserInfo();
+            userInfo.setUsername(userDetails.getUsername());
+            userInfo.setRoleId(userDetails.getRoleId());
+            userInfo.setTenantId(userDetails.getTenantId());
+
+            return tokenManager.generateToken(userInfo, userDetails.getSecret());
+        });
+    }
+
+    @Operation(summary = "根据授权码获取访问令牌", description = "根据授权码获取访问令牌")
+    @GetMapping(value = "login/auth-code")
+    public Result<TokenVo> loginAccess(@RequestParam String code) {
+        return ResultUtils.wrapFail(() -> {
+           String username =  userManager.exchangeAuthCode(code);
+           return tokenManager.auth(username);
+        });
+    }
+
+    @Operation(summary = "刷新访问令牌", description = "刷新访问令牌")
+    @GetMapping(value = "login/token/refresh")
+    public Result<TokenVo> refresh(@RequestHeader(Constants.X_TOKEN) String token,
+            @RequestHeader(Constants.X_REFRESH_TOKEN) String refreshToken) {
+        return ResultUtils.wrapFail(() -> {
+            Assert.notEmpty(token, PubError.NOT_LOGIN, "用户未登录!");
+            return tokenManager.refreshToken(refreshToken);
+        });
+    }
+
+
+    @GetMapping("login/captcha")
+    public List<String> getCaptcha(HttpServletRequest request, HttpServletResponse response,
+            @RequestParam String captchaKey) {
+        try {
+            int width = 200;
+            int height = 69;
+
+            BufferedImage verifyImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+            //生成对应宽高的初始图片
+            String randomText = CaptchaUtils.drawRandomText(width, height, verifyImg);
+
+            //单独的一个类方法，出于代码复用考虑，进行了封装。
+            //功能是生成验证码字符并加上噪点，干扰线，返回值为验证码字符
+            request.getSession().setAttribute("verifyCode", randomText);
+            response.setContentType("image/png");//必须设置响应内容类型为图片，否则前台不识别
+
+            OutputStream os = response.getOutputStream(); //获取文件输出流
+            ImageIO.write(verifyImg, "png", os);//输出图片流
+
+            os.flush();
+            os.close();//关闭流
+        } catch (IOException e) {
+            log.error("generate captcha error!", e);
+        }
+        return null;
+    }
+
+    @GetMapping("login/slideCaptcha")
+    public Result<?> getSlideCaptcha(HttpServletRequest request, HttpServletResponse response) {
+
+//        return ResultUtils.wrapFail(SlideCaptchaUtil::build);
+        return ResultUtils.wrapFail(CaptchaUtils::selectSlideVerificationCode);
+    }
+}

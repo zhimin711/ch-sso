@@ -1,0 +1,218 @@
+# ch-sso
+
+### 打包client模块
+```shell
+mvn -U -pl client -am clean install -Dmaven.test.skip -Drevision=2.1.0-SNAPSHOT
+
+mvn -U -pl client -am clean deploy -Dmaven.test.skip -Drevision=2.1.0-SNAPSHOT
+```
+
+### 上传配置 
+```
+scp -r src/main/docker/Dockerfile zhimin@192.168.199.194:/home/zhimin/docker/ch-sso
+scp -r build/libs/ch-sso-1.0.0-SNAPSHOT.jar zhimin@192.168.199.194:/home/zhimin/docker/ch-sso
+```
+### 打包
+```
+docker build -t ch-sso:v1 /home/zhimin/docker/ch-sso
+```
+
+### 启动
+```
+docker run --name ch-sso \
+-p 7000:7000 \
+-d ch-sso:v1 ;
+```
+```
+docker run --name ch-sso \
+--net=none \
+ -v /home/zhimin/share/logs:/mnt/share/logs  \
+ -m 512M --memory-swap -1 \
+-d ch-sso:v1 ;
+```
+### 重启 停止 删除
+```
+docker restart ch-sso;
+
+docker stop ch-sso;
+docker rm ch-sso;
+docker rmi ch-sso:v1;
+
+```
+
+### 分配网络
+```
+pipework br0 ch-sso 192.168.1.20/24@192.168.1.1;
+```
+jenkins pipeline job
+```groovy
+// parameters {
+//     gitParameter branchFilter: 'origin/(.*)', defaultValue: 'master', name: 'BRANCH', type: 'PT_BRANCH'
+// }20220708142519
+def label = "jnlp-${JOB_NAME}"
+def app_name = "ch-sso"
+def img_name = "ch-sso:${DATETIME}"
+def img_namespace = "ch"
+def docker_api = "-H tcp://192.168.0.253:2375"
+// def hub_addr = "192.168.0.253:8083"
+def hub_addr = "registry.kubeoperator.io:8083"
+def k8s_url = "https://192.168.0.252:8443"
+
+podTemplate(label: label, cloud: 'kubernetes', inheritFrom: 'jenkins-slave-maven') {
+    node(label) {
+            stage('Checkout Project') {
+                echo "1.Clone Project "
+                git credentialsId: 'CHGitee2', url: 'https://gitee.com/ch-cloud/ch-sso.git/', branch: "${params.BRANCH}"
+            }
+            stage('Build project') {
+                container('maven') {
+                    // sh 'git config --global url."https://".insteadOf ssh://git@'
+                    echo "2.Build Project Deploy Package File"
+                    sh 'mvn clean package -U'
+                    sh "cp ${WORKSPACE}/../apache-skywalking-java-agent-8.11.0.tgz ${WORKSPACE}/web/target"
+                }
+            }
+            stage('Build Image') {
+                echo "3.Build Project Docker Image"
+                // sh "cd ${WORKSPACE}/web"
+                container('docker') {
+                    sh "docker ${docker_api} build -t ${img_name} -f ${WORKSPACE}/web/src/main/docker/Dockerfile ${WORKSPACE}/web/target"
+                    sh "docker ${docker_api} tag ${img_name} ${hub_addr}/${img_namespace}/${img_name}"
+                }
+
+            }
+            stage('Push Image') {
+                echo "4.Push Project Docker Image"
+                container('docker')  {
+                    withCredentials([usernamePassword(credentialsId: 'Nexus', passwordVariable: 'dockerPassword', usernameVariable: 'dockerUser')]) {
+                        sh "docker ${docker_api} login -u ${dockerUser} -p ${dockerPassword} ${hub_addr}"
+                        sh "docker ${docker_api} push ${hub_addr}/${img_namespace}/${img_name}"
+                        sh "docker ${docker_api} rmi ${hub_addr}/${img_namespace}/${img_name} ${img_name}"
+                    }
+                }
+            }
+            stage('Deploy Image') {
+                echo "5.Deploy Project Docker Image"
+                // kubernetesDeploy configs: 'xxx/k8s-deploy.yaml', kubeConfig: [path: ''], kubeconfigId: 'kubeoperator', secretName: '', ssh: [sshCredentialsId: '*', sshServer: ''], textCredentials: [certificateAuthorityData: '', clientCertificateData: '', clientKeyData: '', serverUrl: 'https://']
+                container ('docker') {
+                    script{
+                        out=sh(script:"ls ./kubectl",returnStatus:true)
+                        println "--------------"
+                        println out
+                        if(out == 0){
+                            println "file is exist"
+                        } else if(out == 1 || out == 2){
+                            println "file is not exist"
+//                        sh 'curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"'
+                            sh 'cp ../kubectl .'
+                            sh 'chmod u+x ./kubectl'
+                        } else {
+                            error("command is error,please check")
+                        }
+                    }
+                    withKubeConfig([credentialsId:'kubeMaster'
+                                    ,serverUrl: "${k8s_url}"
+                                    ,namespace: "ch"]) {
+                        sh "./kubectl set image deployment/${app_name} *=${hub_addr}/${img_namespace}/${img_name}"
+                    }
+                }
+            }
+    }
+}
+```
+```groovy
+def jobName = "ch-sso-ci"
+def maxNumber = 25    // 保留的最小编号，意味着小于该编号的构建都将被删除
+
+Jenkins.instance.getItemByFullName(jobName).builds.findAll {
+  it.number <= maxNumber
+}.each {
+  it.delete()
+}
+```
+
+```groovy
+pipeline {
+    agent any
+
+    environment {
+        APP_NAME = "ch-sso"
+        IMG_NAMESPACE = "ch-cloud"
+        HUB_ADDR = "registry.cn-hangzhou.aliyuncs.com"
+        JAVA_HOME = "${tool 'JDK8'}"
+        PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
+    }
+
+    parameters {
+        gitParameter name: 'BRANCH', type: 'PT_BRANCH', defaultValue: 'master', branchFilter: 'origin/(.*)'
+    }
+
+    tools {
+        maven 'M3'
+        jdk 'JDK8'
+    }
+
+    stages {
+        stage('Checkout Project') {
+            steps {
+                echo "1. Clone Project"
+                git credentialsId: 'CHGitee', url: 'https://gitee.com/ch-cloud/ch-sso.git/', branch: "${params.BRANCH}"
+            }
+        }
+
+        stage('Build Project') {
+            steps {
+                echo "2. Build Project"
+                sh 'mvn -s /var/jenkins_home/settings.xml clean package -U -Dmaven.test.skip -Dmaven.javadoc.skip=true'
+            }
+        }
+
+        stage('Extract revision from POM') {
+            steps {
+                script {
+                    REVISION = sh(
+                            script: "mvn help:evaluate -Dexpression=revision -q -DforceStdout",
+                            returnStdout: true
+                    ).trim()
+                    echo "Revision is ${REVISION}"
+                }
+            }
+        }
+
+        stage('Build Image') {
+            steps {
+                script {
+                    echo "3. Build Docker Image"
+                    sh "docker build -t ${APP_NAME}:${REVISION} -f web/src/main/docker/Dockerfile web/target"
+                    sh "docker tag ${APP_NAME}:${REVISION} ${HUB_ADDR}/${IMG_NAMESPACE}/${APP_NAME}:${REVISION}"
+                }
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                script {
+                    echo "4. Push Docker Image"
+                    withCredentials([usernamePassword(credentialsId: 'ali-repo', usernameVariable: 'dockerUser', passwordVariable: 'dockerPassword')]) {
+                        sh """
+                            echo "${dockerPassword}" | docker login -u "${dockerUser}" --password-stdin ${HUB_ADDR}
+                        """
+                        sh "docker push ${HUB_ADDR}/${IMG_NAMESPACE}/${APP_NAME}:${REVISION}"
+                        sh "docker rmi ${HUB_ADDR}/${IMG_NAMESPACE}/${APP_NAME}:${REVISION} ${APP_NAME}:${REVISION}"
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Pipeline executed successfully.'
+        }
+        failure {
+            echo '❌ Pipeline failed.'
+        }
+    }
+}
+
+```

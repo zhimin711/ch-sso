@@ -1,0 +1,2 @@
+com.ch.cloud.sso.captcha.cache.impl.CaptchaCacheServiceCaffeineImpl
+com.ch.cloud.sso.captcha.cache.impl.CaptchaCacheServiceRedisImpl

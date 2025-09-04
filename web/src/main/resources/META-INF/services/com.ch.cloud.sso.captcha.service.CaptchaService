@@ -1,0 +1,3 @@
+com.ch.cloud.sso.captcha.service.impl.BlockPuzzleCaptchaServiceImpl
+com.ch.cloud.sso.captcha.service.impl.ClickWordCaptchaServiceImpl
+com.ch.cloud.sso.captcha.service.impl.DefaultCaptchaServiceImpl
