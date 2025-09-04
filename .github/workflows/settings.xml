@@ -15,13 +15,13 @@
     <servers>
         <server>
             <id>rdc-releases</id>
-            <username>${env.MAVEN_USERNAME}</username>
-            <password>${env.MAVEN_PASSWORD}</password>
+            <username>${secrets.MAVEN_USERNAME}</username>
+            <password>${secrets.MAVEN_PASSWORD}</password>
         </server>
         <server>
             <id>rdc-snapshots</id>
-            <username>${env.MAVEN_USERNAME}</username>
-            <password>${env.MAVEN_PASSWORD}</password>
+            <username>${secrets.MAVEN_USERNAME}</username>
+            <password>${secrets.MAVEN_PASSWORD}</password>
         </server>
     </servers>
     <profiles>
